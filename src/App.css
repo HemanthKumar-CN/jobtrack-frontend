@@ -1,0 +1,23 @@
+.sidebar-menu {
+  color: #3255f0;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Thin scrollbar */
+  border-radius: 10px; /* Rounded edges */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light grey track */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(50, 85, 240, 0.5); /* Soft blue */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(50, 85, 240, 0.8); /* Darker on hover */
+}
