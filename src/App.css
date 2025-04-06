@@ -21,3 +21,23 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(50, 85, 240, 0.8); /* Darker on hover */
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none; /* Optional: Remove default appearance */
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: none;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none; /* Optional: Remove default appearance */
+}
+
+.react-calendar__tile--highlight {
+  background: #80aaee !important; /* Tailwind's bg-blue-500 */
+  color: white !important;
+  font-weight: bold !important;
+}

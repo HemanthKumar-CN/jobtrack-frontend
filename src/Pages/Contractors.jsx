@@ -1,40 +1,38 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiSearch } from "react-icons/fi";
-import { BsChevronRight, BsChevronDown } from "react-icons/bs";
-import { truncateText } from "../Utils/truncateText";
-import { useDispatch, useSelector } from "react-redux";
-
 import { BiSolidChevronRight } from "react-icons/bi";
-import { RiDeleteBin6Line } from "react-icons/ri";
+import { truncateText } from "../Utils/truncateText";
 import { FaPen } from "react-icons/fa";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchEmployees,
-  resetEmployees,
-  softDeleteEmployee,
-} from "../redux/slices/employeeSlice";
+  deleteContractor,
+  fetchContractors,
+  resetContractors,
+} from "../redux/slices/contractorsSlice";
 import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
 
-const Employees = () => {
-  const dropdownRef = useRef(null);
+const Contractors = () => {
+  const [search, setSearch] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(null); // Track clicked row
 
   const dispatch = useDispatch();
-  const { employees, hasMore, status } = useSelector(
-    (state) => state.employees,
-  );
-
-  const [search, setSearch] = useState(""); // Using useState for search input
+  const searchRef = useRef(null);
   const [page, setPage] = useState(1);
-
   const observer = useRef();
-  const navigate = useNavigate();
-  const searchRef = useRef();
-  const listRef = useRef(null);
+  const listRef = useRef(null); // Track scroll position
+
   const showToast = useToast();
   const { openModal } = useModal();
 
-  const [selectedIndex, setSelectedIndex] = useState(null); // Track clicked row
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  const { contractors, loading, error, totalPages } = useSelector(
+    (state) => state.contractors,
+  );
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -51,15 +49,14 @@ const Employees = () => {
   }, []);
 
   const handleSearch = () => {
-    setSearch(searchRef.current.value);
-    dispatch(resetEmployees());
+    setSearch(searchRef.current?.value);
     setPage(1);
   };
 
   useEffect(() => {
-    if (hasMore) {
+    if (page <= totalPages) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
-      dispatch(fetchEmployees({ page, search })).then(() => {
+      dispatch(fetchContractors({ page, search })).then(() => {
         if (listRef.current) {
           listRef.current.scrollTop = 0; // Maintain position
         }
@@ -68,33 +65,33 @@ const Employees = () => {
   }, [dispatch, page, search]);
 
   // Intersection Observer for infinite scroll
-  const lastEmployeeRef = useCallback(
+  const lastContractorRef = useCallback(
     (node) => {
-      if (status == "loading") return;
+      if (loading) return;
       if (observer.current) observer.current.disconnect();
 
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && page < totalPages) {
           setPage((prevPage) => prevPage + 1);
         }
       });
 
       if (node) observer.current.observe(node);
     },
-    [status, page],
+    [loading, page, totalPages],
   );
 
-  const handleDeleteEmployee = async (id) => {
+  const handleDelete = async (id) => {
     try {
-      await dispatch(softDeleteEmployee(id)).unwrap();
-      showToast(`Employee deleted successfully: ${id}`, "success");
+      await dispatch(deleteContractor(id)).unwrap();
+      showToast(`Contractor deleted successfully ${id}`, "success");
     } catch (error) {
-      showToast(`Failed to delete employee: ${error}`, "error");
+      showToast(`Failed to delete Contractor: ${error}`, "error");
     }
   };
 
   return (
-    <div className="p-4 pt-0 rounded-xl ">
+    <div className="p-4 pt-0 rounded-xl">
       {/* Search Bar */}
       <div className="relative mb-4">
         <input
@@ -120,71 +117,74 @@ const Employees = () => {
         {/* Table Headers */}
         <div
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "13vw 13vw 21vw 7vw 8vw 5vw 8vw" }}
+          style={{ gridTemplateColumns: "20% 20% 15% 15% 15% 15%" }}
         >
-          <div>First Name</div>
-          <div>Last Name</div>
+          <div>Company Name</div>
           <div>Address</div>
           <div>City</div>
           <div>State</div>
-          <div>Zip</div>
-          <div>Type</div>
+          <div>Email</div>
+          <div>Phone</div>
         </div>
 
-        {/* Employee List */}
+        {/* Contractor List */}
         <div
           ref={listRef}
           className="mt-2 overflow-auto max-h-[60vh] h-[60vh] custom-scrollbar"
         >
-          {employees.map((employee, index) => {
-            const formattedAddress = `${employee.address_1}, ${employee.address_2}`;
+          {contractors?.map((contractor, index) => {
+            const address = `${contractor.address_1}, ${contractor.address_2}`;
             return (
               <div key={index} className="relative">
+                {/* Apply blur effect to everything except the selected row */}
                 {selectedIndex !== null && selectedIndex !== index && (
                   <div className="absolute inset-0  border-b-orange-800 bg-white/40 backdrop-blur-md rounded-md z-10"></div>
                 )}
+
+                {/* Row */}
                 <div
-                  ref={index === employees.length - 1 ? lastEmployeeRef : null} // Attach observer to last element
-                  className={`grid grid-cols-7 items-center p-3 rounded-md  transition relative ${
+                  ref={
+                    index === contractors.length - 1 ? lastContractorRef : null
+                  }
+                  className={`grid items-center p-3 rounded-md transition relative ${
                     index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                   } ${
                     selectedIndex === index ? "shadow-lg bg-white z-40" : "z-20"
                   }`}
-                  style={{
-                    gridTemplateColumns: "13vw 13vw 21vw 7vw 8vw 5vw 8vw",
-                  }}
+                  style={{ gridTemplateColumns: "20% 20% 15% 15% 15% 15%" }}
                 >
                   <div className="flex items-center relative">
                     <button
                       className={`p-1 cursor-pointer rounded-lg hover:bg-blue-400 hover:text-white ${
                         index % 2 === 0 ? "bg-white" : "bg-gray-200"
-                      } `}
+                      }`}
                       onClick={() =>
                         setSelectedIndex(selectedIndex === index ? null : index)
                       }
                     >
-                      <BiSolidChevronRight className="" />
+                      <BiSolidChevronRight />
                     </button>
                     <div className="ml-4">
-                      {truncateText(employee?.User?.first_name)}
+                      {truncateText(contractor.company_name)}
                     </div>
                   </div>
-                  <div>{truncateText(employee?.User?.last_name)}</div>
-                  <div>{truncateText(formattedAddress, 30)}</div>
-                  <div>{truncateText(employee.city)}</div>
-                  <div>{truncateText(employee.state)}</div>
-                  <div>{truncateText(employee.postal_code)}</div>
-                  <div>{truncateText(employee.type)}</div>
+                  <div>{truncateText(address)}</div>
+                  <div>{truncateText(contractor.city)}</div>
+                  <div>{truncateText(contractor.state)}</div>
+                  <div>{truncateText(contractor.email, 30)}</div>
+                  <div>{truncateText(contractor.phone)}</div>
                 </div>
 
                 {/* Dropdown Menu */}
                 {selectedIndex === index && (
                   <div
                     ref={dropdownRef}
-                    className="absolute left-10 top-0 bg-white shadow-lg rounded-lg w-32 z-50"
+                    className="absolute left-10 top-10 bg-white shadow-lg rounded-lg w-32 z-50"
                   >
                     <button
-                      onClick={() => navigate(`/employees/add/${employee.id}`)}
+                      onClick={() =>
+                        navigate(`/contractors/add/${contractor.id}`)
+                      }
                       className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-blue-100 rounded-t-lg"
                     >
                       <FaPen className="mr-2 text-blue-500" /> Edit
@@ -195,7 +195,7 @@ const Employees = () => {
                           title: "Delete this item?",
                           message:
                             "This action is permanent and cannot be undone.",
-                          onConfirm: () => handleDeleteEmployee(employee.id), // Call delete function inside modal
+                          onConfirm: () => handleDelete(contractor.id), // Call delete function inside modal
                           confirmText: "Delete",
                           cancelText: "Cancel",
                         })
@@ -215,4 +215,4 @@ const Employees = () => {
   );
 };
 
-export default Employees;
+export default Contractors;
