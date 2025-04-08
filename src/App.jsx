@@ -15,7 +15,7 @@ function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { auth, roleName, isLoading, error } = useSelector(
+  const { auth, roleName, checkAuthLoading, error } = useSelector(
     (state) => state.auth,
   );
 

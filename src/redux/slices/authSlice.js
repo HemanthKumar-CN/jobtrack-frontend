@@ -60,7 +60,14 @@ export const checkAuth = createAsyncThunk(
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: { auth: false, roleName: null, isLoading: false, error: null },
+  initialState: {
+    auth: false,
+    roleName: null,
+    isLoading: false,
+    error: null,
+    checkAuthLoading: null,
+    checkAuthError: null,
+  },
   reducers: {
     // logout: (state) => {
     //   state.user = null;
@@ -82,14 +89,23 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+
+      .addCase(checkAuth.pending, (state) => {
+        state.checkAuthLoading = true;
+        state.checkAuthError = null;
+      })
       .addCase(checkAuth.fulfilled, (state, action) => {
+        state.checkAuthLoading = false;
         state.auth = true;
         state.roleName = action.payload.roleName;
       })
-      .addCase(checkAuth.rejected, (state) => {
+      .addCase(checkAuth.rejected, (state, action) => {
+        state.checkAuthLoading = false;
         state.auth = false;
         state.roleName = null;
+        state.checkAuthError = action.payload;
       })
+
       .addCase(logoutUser.fulfilled, (state) => {
         state.auth = false;
         state.roleName = null;
