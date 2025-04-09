@@ -97,72 +97,82 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
           {/* Body */}
           {monthlySchedules.length > 0 ? (
             monthlySchedules.map((task, index) =>
-              task.schedules.map((schedule, scheduleIndex) => (
-                <div
-                  key={`${task.user_id}-${schedule.schedule_id}`} // Unique key for each schedule
-                  className={`grid border border-white ${
-                    index % 2 === 0 ? "bg-[#E8F1FD]" : "bg-white"
-                  }`}
-                  style={{
-                    gridTemplateColumns: "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr",
-                  }}
-                >
-                  {/* User First Name (Only shown for the first schedule of each user) */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {scheduleIndex === 0 ? task.first_name : ""}
-                  </div>
+              task.schedules.map((schedule, scheduleIndex) => {
+                const start_date = new Date(schedule.start_date);
+                const formattedStartDate = format(start_date, "d MMMM, yyyy");
 
-                  {/* User Last Name (Only shown for the first schedule of each user) */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {scheduleIndex === 0 ? task.last_name : ""}
-                  </div>
+                const end_date = new Date(schedule.end_date);
+                const formattedEndDate = format(end_date, "d MMMM, yyyy");
 
-                  {/* Location Name from Locations Table */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {schedule.location}
-                  </div>
+                return (
+                  <div
+                    key={`${task.user_id}-${schedule.schedule_id}`} // Unique key for each schedule
+                    className={`grid border border-white ${
+                      index % 2 === 0 ? "bg-[#E8F1FD]" : "bg-white"
+                    }`}
+                    style={{
+                      gridTemplateColumns: "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr",
+                    }}
+                  >
+                    {/* User First Name (Only shown for the first schedule of each user) */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {scheduleIndex === 0 ? task.first_name : ""}
+                    </div>
 
-                  {/* Event Name from Events Table */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {schedule.event_name}
-                  </div>
+                    {/* User Last Name (Only shown for the first schedule of each user) */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {scheduleIndex === 0 ? task.last_name : ""}
+                    </div>
 
-                  {/* Start Date */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {convertToLocalTime(schedule.start_time)}
-                  </div>
+                    {/* Location Name from Locations Table */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {schedule.location}
+                    </div>
 
-                  {/* End Date */}
-                  <div className="p-2 text-gray-700 border border-white">
-                    {convertToLocalTime(schedule.end_time)}
-                  </div>
+                    {/* Event Name from Events Table */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {schedule.event_name}
+                    </div>
 
-                  {/* Actions: Confirm Checkbox & Edit Button */}
-                  <div className="p-2 font-semibold text-center border border-white flex items-center justify-center space-x-2">
-                    {/* Custom Styled Checkbox */}
-                    <label className="relative cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={true} // Update logic if needed
-                        className="hidden peer"
-                      />
-                      <div className="w-6 h-6 rounded-md flex items-center justify-center">
-                        {true && (
-                          <GrCheckboxSelected
-                            className="text-[#1869BB] rounded-md"
-                            size={24}
-                          />
-                        )}
-                      </div>
-                    </label>
+                    {/* Start Date */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {formattedStartDate}{" "}
+                      <p>{convertToLocalTime(schedule.start_time)}</p>
+                    </div>
 
-                    {/* Edit Button */}
-                    <button className="p-2 border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition ml-2">
-                      <FaPen className="text-[#1869BB]" />
-                    </button>
+                    {/* End Date */}
+                    <div className="p-2 text-gray-700 border border-white">
+                      {formattedEndDate}
+                      <p>{convertToLocalTime(schedule.end_time)}</p>
+                    </div>
+
+                    {/* Actions: Confirm Checkbox & Edit Button */}
+                    <div className="p-2 font-semibold text-center border border-white flex items-center justify-center space-x-2">
+                      {/* Custom Styled Checkbox */}
+                      <label className="relative cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={true} // Update logic if needed
+                          className="hidden peer"
+                        />
+                        <div className="w-6 h-6 rounded-md flex items-center justify-center">
+                          {true && (
+                            <GrCheckboxSelected
+                              className="text-[#1869BB] rounded-md"
+                              size={24}
+                            />
+                          )}
+                        </div>
+                      </label>
+
+                      {/* Edit Button */}
+                      <button className="p-2 border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition ml-2">
+                        <FaPen className="text-[#1869BB]" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )),
+                );
+              }),
             )
           ) : (
             <div className="text-center flex items-center justify-center h-[58vh] p-4 text-gray-500">

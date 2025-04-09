@@ -17,6 +17,9 @@ import SuccessCard from "../Components/SuccessCard";
 import { useToast } from "../Components/Toast/ToastContext";
 import { convertToLocalDateTime } from "../Utils/convertToLocalDateTime";
 import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
+import { format } from "date-fns";
 
 const AddEvents = () => {
   const startDateRef = useRef(null);
@@ -212,12 +215,29 @@ const AddEvents = () => {
               >
                 <p className="text-gray-500 text-sm">Start Date</p>
                 <div className="relative mt-1 flex items-center">
-                  <input
+                  {/* <input
                     type="datetime-local"
                     ref={startDateRef}
                     value={startDate}
+                    step="1800"
                     onChange={(e) => setStartDate(e.target.value)}
                     className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
+                  /> */}
+
+                  <Flatpickr
+                    options={{
+                      enableTime: true,
+                      dateFormat: "Y-m-d H:i",
+                      time_24hr: true,
+                      minuteIncrement: 30, // Only allow 00 and 30
+                    }}
+                    placeholder="dd-mm-yyyy"
+                    value={startDate}
+                    onChange={([date]) => {
+                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      setStartDate(formatted);
+                    }}
+                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
                   />
                   <FaCalendarAlt className="absolute right-2 text-gray-500" />
                 </div>
@@ -230,13 +250,28 @@ const AddEvents = () => {
               >
                 <p className="text-gray-500 text-sm">End Date</p>
                 <div className="relative mt-1 flex items-center">
-                  <input
+                  {/* <input
                     type="datetime-local"
                     ref={endDateRef}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="w-full bg-transparent outline-none text-gray-700 cursor-pointer 
                               appearance-none -webkit-appearance-none -moz-appearance-none"
+                  /> */}
+                  <Flatpickr
+                    options={{
+                      enableTime: true,
+                      dateFormat: "Y-m-d H:i",
+                      time_24hr: true,
+                      minuteIncrement: 30, // Only allow 00 and 30
+                    }}
+                    placeholder="dd-mm-yyyy"
+                    value={endDate}
+                    onChange={([date]) => {
+                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      setEndDate(formatted);
+                    }}
+                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
                   />
                   <FaCalendarAlt className="absolute right-2 text-gray-500 pointer-events-none" />
                 </div>
@@ -290,7 +325,7 @@ const AddEvents = () => {
               onClick={handleAddEvent}
               className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
-              Next <FaArrowRight />
+              Save <FaArrowRight />
             </button>
           )}
         </div>
