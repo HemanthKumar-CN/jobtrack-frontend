@@ -20,6 +20,9 @@ import {
 } from "../redux/slices/scheduleSlice";
 import SuccessCard from "../Components/SuccessCard";
 import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
+import { format } from "date-fns";
 
 const AddTask = () => {
   const startDateRef = useRef(null);
@@ -262,7 +265,7 @@ const AddTask = () => {
               >
                 <p className="text-gray-500 text-sm">Start Date</p>
                 <div className="relative mt-1 flex items-center">
-                  <input
+                  {/* <input
                     type="datetime-local"
                     ref={startDateRef}
                     value={startDate}
@@ -270,7 +273,23 @@ const AddTask = () => {
                     max={maxDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
+                  /> */}
+                  <Flatpickr
+                    options={{
+                      enableTime: true,
+                      dateFormat: "Y-m-d H:i",
+                      time_24hr: true,
+                      minuteIncrement: 30, // Only allow 00 and 30
+                    }}
+                    placeholder="dd-mm-yyyy"
+                    value={startDate}
+                    onChange={([date]) => {
+                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      setStartDate(formatted);
+                    }}
+                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
                   />
+
                   <FaCalendarAlt className="absolute right-2 text-gray-500" />
                 </div>
               </div>
@@ -300,7 +319,7 @@ const AddTask = () => {
               >
                 <p className="text-gray-500 text-sm">End Date</p>
                 <div className="relative mt-1 flex items-center">
-                  <input
+                  {/* <input
                     type="datetime-local"
                     ref={endDateRef}
                     value={endDate}
@@ -308,7 +327,24 @@ const AddTask = () => {
                     max={maxDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="w-full bg-transparent outline-none text-gray-700 cursor-pointer"
+                  /> */}
+
+                  <Flatpickr
+                    options={{
+                      enableTime: true,
+                      dateFormat: "Y-m-d H:i",
+                      time_24hr: true,
+                      minuteIncrement: 30, // Only allow 00 and 30
+                    }}
+                    placeholder="dd-mm-yyyy"
+                    value={endDate}
+                    onChange={([date]) => {
+                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      setEndDate(formatted);
+                    }}
+                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
                   />
+
                   <FaCalendarAlt className="absolute right-2 text-gray-500" />
                 </div>
               </div>
