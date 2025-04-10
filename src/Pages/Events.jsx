@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useToast } from "../Components/Toast/ToastContext";
 import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
+import { format, parseISO } from "date-fns";
 
 const Events = () => {
   const [search, setSearch] = useState("");
@@ -64,7 +65,7 @@ const Events = () => {
         {/* Headers */}
         <div
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "25% 20% 20% 15% 20%" }}
+          style={{ gridTemplateColumns: "25% 20% 15% 15% 25%" }}
         >
           <div>Event Name</div>
           <div>Location</div>
@@ -79,27 +80,33 @@ const Events = () => {
             return (
               <div
                 key={index}
-                style={{ gridTemplateColumns: "25% 20% 20% 15% 20%" }}
+                style={{ gridTemplateColumns: "25% 20% 15% 15% 25%" }}
                 className={`grid items-center rounded-md ${
                   index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                 }`}
               >
-                <div className="border border-white p-3 py-4.5">
+                <div className=" border-white p-3 py-4.5">
                   {truncateText(event.event_name)}
                 </div>
-                <div className="border border-white p-3 py-4.5">
+                <div className="border-l-2 border-white p-3 py-4.5">
                   {truncateText(event?.Location?.name)}
                 </div>
-                <div className="border border-white p-3 py-4.5 font-semibold">
+                <div className="border-l-2 border-white p-3 py-4.5 font-semibold">
                   {truncateText(event.Contractor?.company_name)}
                 </div>
-                <div className="border border-white p-3 py-4.5 font-semibold">
-                  {formatDateTimeLocal(event.start_date)}
+                <div className="border-l-2 border-white p-3 py-4.5 font-semibold">
+                  {format(
+                    parseISO(event.start_date),
+                    "MMMM d, yyyy 'at' h:mm a",
+                  )}
                 </div>
-                <div className=" border border-white p-3 flex justify-between items-center">
-                  <span className="font-semibold">
+                <div className=" border-x-2 border-white p-3 flex justify-between items-center">
+                  <span className="font-semibold w-40">
                     {" "}
-                    {formatDateTimeLocal(event.end_date)}
+                    {format(
+                      parseISO(event.end_date),
+                      "MMMM d, yyyy 'at' h:mm a",
+                    )}
                   </span>
                   <span>
                     <button

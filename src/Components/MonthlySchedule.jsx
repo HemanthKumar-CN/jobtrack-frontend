@@ -99,10 +99,10 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
             monthlySchedules.map((task, index) =>
               task.schedules.map((schedule, scheduleIndex) => {
                 const start_date = new Date(schedule.start_date);
-                const formattedStartDate = format(start_date, "d MMMM, yyyy");
+                const formattedStartDate = format(start_date, "MMMM d, yyyy");
 
                 const end_date = new Date(schedule.end_date);
-                const formattedEndDate = format(end_date, "d MMMM, yyyy");
+                const formattedEndDate = format(end_date, "MMMM d, yyyy");
 
                 return (
                   <div
@@ -126,7 +126,7 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
 
                     {/* Location Name from Locations Table */}
                     <div className="p-2 text-gray-700 border border-white">
-                      {schedule.location}
+                      {schedule.location_name}
                     </div>
 
                     {/* Event Name from Events Table */}
