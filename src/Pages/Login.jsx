@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
-import CalendarLogo from "../assets/whiteLogo.svg";
+import CalendarLogo from "../assets/whiteLogo.png";
 import GooglePlaystore from "../assets/googlePlaystore.svg";
 import Appstore from "../assets/appStore.svg";
 import BackgroundImage from "../assets/loginBackground.svg";

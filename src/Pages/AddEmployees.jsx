@@ -138,6 +138,7 @@ const AddEmployees = () => {
         { country: "United States" },
       );
       setStates(response.data.data.states);
+      fetchCities("Illinois");
     } catch (error) {
       console.error("Error fetching states:", error);
     }
