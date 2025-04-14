@@ -1,7 +1,7 @@
 import React from "react";
 
 import { FaBell, FaBars } from "react-icons/fa";
-import grpLogo from "../assets/logoGrp.svg";
+import grpLogo from "../assets/logoGrp.png";
 import { FaSignOutAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getHeaderAndBreadcrumb } from "../Utils/getHeaderAndBreadcrumb";
@@ -30,7 +30,7 @@ const Navbar = () => {
 
       {/* Logo Section */}
       <div className="flex w-1/3 justify-between items-end ">
-        <div className="flex py-2">
+        <div className="flex ">
           <img src={grpLogo} alt="React Logo" className="w-60" />
         </div>
         <div className="text-center  w-full">

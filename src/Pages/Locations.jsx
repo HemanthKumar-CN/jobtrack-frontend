@@ -103,7 +103,7 @@ const Locations = () => {
       <div className="p-1 bg-white rounded-xl shadow-md">
         {/* Headers */}
         <div className="grid grid-cols-5 bg-gray-100 p-3 font-semibold text-gray-700 rounded-md">
-          <div>Warehouse</div>
+          <div>Location Name</div>
           <div className="ml-1">Address</div>
           <div className="ml-2">City</div>
           <div className="ml-3">State</div>
