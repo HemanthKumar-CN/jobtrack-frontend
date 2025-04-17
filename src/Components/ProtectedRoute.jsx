@@ -7,8 +7,6 @@ const ProtectedRoute = ({ children }) => {
     (state) => state.auth,
   );
 
-  console.log("checkLOading:", checkAuthLoading, "====auth:", auth);
-
   if (checkAuthLoading === null || checkAuthLoading === true) {
     return <FullScreenLoader />; // or a loading spinner
   }

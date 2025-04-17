@@ -21,7 +21,7 @@ const CustomDropdown = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedOption = options.find((opt) => opt.id === value);
+  const selectedOption = options.find((opt) => opt.id === value.id);
 
   return (
     <div className="relative bg-white rounded-xl shadow p-4" ref={wrapperRef}>
@@ -37,7 +37,7 @@ const CustomDropdown = ({
       </div>
 
       {open && (
-        <div className="absolute z-10 w-96 bg-white border border-gray-200 mt-1 rounded-md shadow max-h-48 overflow-y-auto custom-scrollbar">
+        <div className="absolute z-30 w-96 bg-white border border-gray-200 mt-1 rounded-md shadow max-h-48 overflow-y-auto custom-scrollbar">
           {options.map((opt) => (
             <div
               key={opt.id}

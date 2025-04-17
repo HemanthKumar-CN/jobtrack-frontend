@@ -5,6 +5,8 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import { fetchMetadata } from "../redux/slices/reportsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import CustomDropdown from "../Components/CustomDropdown";
+import axios from "axios";
+import { getLocationEmployeeWeeklyHours } from "../redux/slices/employeeSlice";
 
 const dummyLocationData = [
   {
@@ -45,6 +47,10 @@ const LocationScheduleReport = () => {
     (state) => state.report,
   );
 
+  const { EmployeeLocationSchedulesByWeek } = useSelector(
+    (state) => state.employees,
+  );
+
   const formatDate = (date) =>
     date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -62,6 +68,18 @@ const LocationScheduleReport = () => {
   useEffect(() => {
     dispatch(fetchMetadata());
   }, []);
+
+  useEffect(() => {
+    if (location.id && dateRange[0] && dateRange[1]) {
+      // Fetch data based on selected location and date range
+      dispatch(
+        getLocationEmployeeWeeklyHours({
+          location_id: location.id,
+          date_range: dateRange,
+        }),
+      );
+    }
+  }, [location, dateRange]);
 
   return (
     <div>
@@ -122,30 +140,37 @@ const LocationScheduleReport = () => {
 
       {/* Schedule Table */}
       <div className="bg-white rounded-xl shadow p-2">
-        <div className="grid grid-cols-5 font-semibold bg-gray-100 text-[#1869BB] p-2 rounded-md">
+        <div className="grid grid-cols-3 font-semibold bg-gray-100 text-[#1869BB] p-2 rounded-md">
+          <div>Week</div>
           <div>Employee</div>
-          <div>Shift Date</div>
-          <div>Start Time</div>
-          <div>End Time</div>
           <div>Total Hours</div>
         </div>
 
         {/* Scrollable Body */}
         <div className="overflow-auto max-h-[48vh] custom-scrollbar">
-          {filteredData.map((row, index) => (
-            <div
-              key={index}
-              className={`grid grid-cols-5 p-2 ${
-                index % 2 === 0 ? "bg-white" : "bg-[rgba(24,105,187,0.05)]"
-              }`}
-            >
-              <div>{row.employee}</div>
-              <div>{formatDate(new Date(row.date))}</div>
-              <div>{row.start}</div>
-              <div>{row.end}</div>
-              <div>{row.totalHours}</div>
-            </div>
-          ))}
+          {Object.entries(EmployeeLocationSchedulesByWeek).map(
+            ([week, employees], weekIndex) => (
+              <React.Fragment key={weekIndex}>
+                {employees.map((employee, empIndex) => (
+                  <div
+                    key={`${weekIndex}-${empIndex}`}
+                    className={`grid grid-cols-3 p-2 ${
+                      (weekIndex + empIndex) % 2 === 0
+                        ? "bg-white"
+                        : "bg-[rgba(24,105,187,0.05)]"
+                    }`}
+                  >
+                    <div className="font-semibold">
+                      {empIndex === 0 ? week : ""}
+                    </div>{" "}
+                    {/* only show week for first employee */}
+                    <div>{employee.employee_name}</div>
+                    <div>{employee.total_hours}</div>
+                  </div>
+                ))}
+              </React.Fragment>
+            ),
+          )}
         </div>
       </div>
     </div>

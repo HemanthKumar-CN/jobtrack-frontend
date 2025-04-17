@@ -6,10 +6,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Async thunk for fetching employees with pagination & search
 export const fetchEmployees = createAsyncThunk(
   "employees/fetchEmployees",
-  async ({ search = "", page = 1, limit = 10 }, { rejectWithValue }) => {
+  async (
+    { search = "", page = 1, limit = 10, status },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/employees?search=${search}&page=${page}&limit=${limit}`,
+        `${API_BASE_URL}/employees?search=${search}&page=${page}&limit=${limit}&status=${status}`,
         { withCredentials: true },
       );
       return response.data;
@@ -231,6 +234,45 @@ export const updateNotificationPreference = createAsyncThunk(
   },
 );
 
+export const fetchEmployeeSchedulesByWeek = createAsyncThunk(
+  "schedules/fetchByWeek",
+  async ({ employee_id, location_id, date_range }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/employees/employee-schedule-location-week`,
+        {
+          employee_id,
+          location_id,
+          date_range,
+        },
+        { withCredentials: true },
+      );
+      return res.data.schedules_by_week;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  },
+);
+
+export const getLocationEmployeeWeeklyHours = createAsyncThunk(
+  "locationEmployeeWeeklyHours/get",
+  async ({ location_id, date_range }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/employees/schedule-location-week`,
+        {
+          location_id,
+          date_range,
+        },
+        { withCredentials: true },
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  },
+);
+
 const employeeSlice = createSlice({
   name: "employees",
   initialState: {
@@ -258,6 +300,14 @@ const employeeSlice = createSlice({
     notificationPreference: null,
     notificationPreferenceLoading: false,
     notificationPreferenceError: null,
+
+    EmployeeSchedulesByWeek: {},
+    employeeSchedulesByWeekLoading: false,
+    employeeSchedulesByWeekError: null,
+
+    EmployeeLocationSchedulesByWeek: {},
+    employeeLocationSchedulesByWeekLoading: false,
+    employeeLocationSchedulesByWeekError: null,
   },
   reducers: {
     resetEmployees(state) {
@@ -271,6 +321,9 @@ const employeeSlice = createSlice({
       state.page = 1; // Reset pagination on new search
       state.hasMore = true;
       state.employees = []; // Clear existing employees
+    },
+    refreshEmployees(state, action) {
+      state.employees = [];
     },
   },
   extraReducers: (builder) => {
@@ -391,9 +444,39 @@ const employeeSlice = createSlice({
       .addCase(updateNotificationPreference.rejected, (state, action) => {
         state.notificationPreferenceLoading = false;
         state.notificationPreferenceError = action.payload;
+      })
+
+      .addCase(fetchEmployeeSchedulesByWeek.pending, (state) => {
+        state.employeeSchedulesByWeekLoading = true;
+        state.employeeSchedulesByWeekError = null;
+      })
+      .addCase(fetchEmployeeSchedulesByWeek.fulfilled, (state, action) => {
+        console.log(
+          action.payload,
+          "===================fetchEmployeeSchedulesByWeek",
+        );
+        state.employeeSchedulesByWeekLoading = false;
+        state.EmployeeSchedulesByWeek = action.payload;
+      })
+      .addCase(fetchEmployeeSchedulesByWeek.rejected, (state, action) => {
+        state.employeeSchedulesByWeekLoading = false;
+        state.employeeSchedulesByWeekError = action.payload;
+      })
+      .addCase(getLocationEmployeeWeeklyHours.pending, (state) => {
+        state.employeeLocationSchedulesByWeekLoading = true;
+        state.employeeLocationSchedulesByWeekError = null;
+      })
+      .addCase(getLocationEmployeeWeeklyHours.fulfilled, (state, action) => {
+        state.employeeLocationSchedulesByWeekLoading = false;
+        state.EmployeeLocationSchedulesByWeek = action.payload;
+      })
+      .addCase(getLocationEmployeeWeeklyHours.rejected, (state, action) => {
+        state.employeeLocationSchedulesByWeekLoading = false;
+        state.employeeLocationSchedulesByWeekError = action.payload;
       });
   },
 });
 
-export const { resetEmployees, setSearch } = employeeSlice.actions;
+export const { resetEmployees, setSearch, refreshEmployees } =
+  employeeSlice.actions;
 export default employeeSlice.reducer;

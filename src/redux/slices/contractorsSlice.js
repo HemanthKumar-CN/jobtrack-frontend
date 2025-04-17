@@ -113,6 +113,7 @@ const contractorsSlice = createSlice({
       state.contractors = [];
       state.page = 1;
       state.totalPages = 1;
+      state.newContractor = null;
     },
   },
   extraReducers: (builder) => {

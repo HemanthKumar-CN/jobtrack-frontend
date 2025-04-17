@@ -216,6 +216,11 @@ const locationsSlice = createSlice({
         state.updateError = null;
       })
       .addCase(editLocation.fulfilled, (state, action) => {
+        console.log(
+          state.selectedLocation,
+          action.payload,
+          "action.payload---------",
+        );
         state.updateLoading = false;
         state.selectedLocation = action.payload; // Update selected location data
       })

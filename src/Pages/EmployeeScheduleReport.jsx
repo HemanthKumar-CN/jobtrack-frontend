@@ -5,6 +5,8 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMetadata } from "../redux/slices/reportsSlice";
 import CustomDropdown from "../Components/CustomDropdown";
+import axios from "axios";
+import { fetchEmployeeSchedulesByWeek } from "../redux/slices/employeeSlice";
 
 const dummyWeeklyData = [
   {
@@ -95,6 +97,7 @@ const EmployeeScheduleReport = () => {
   const { employees, locations, loading, error } = useSelector(
     (state) => state.report,
   );
+  const { EmployeeSchedulesByWeek } = useSelector((state) => state.employees);
 
   const formatDate = (date) =>
     date.toLocaleDateString("en-US", {
@@ -107,10 +110,15 @@ const EmployeeScheduleReport = () => {
     dispatch(fetchMetadata());
   }, []);
 
-  console.log(dateRange, "?>>??????");
-
   useEffect(() => {
-    if (employeeName && location && dateRange[0] && dateRange[1]) {
+    if (employeeName.id && location.id && dateRange[0] && dateRange[1]) {
+      dispatch(
+        fetchEmployeeSchedulesByWeek({
+          employee_id: employeeName.id,
+          location_id: location.id,
+          date_range: dateRange,
+        }),
+      );
     }
   }, [employeeName, location, dateRange[0], dateRange[1]]);
 
@@ -179,20 +187,26 @@ const EmployeeScheduleReport = () => {
 
         {/* Scrollable Body */}
         <div className="overflow-auto max-h-[48vh] custom-scrollbar">
-          {dummyWeeklyData.map((row, index) => (
-            <div
-              key={index}
-              className={`grid grid-cols-3 p-2 ${
-                index % 2 === 0 ? "bg-white" : "bg-[rgba(24,105,187,0.05)]"
-              }`}
-            >
-              <div>{`${formatDate(row.weekStart)} - ${formatDate(
-                row.weekEnd,
-              )}`}</div>
-              <div>{row.hours_worked}</div>
-              <div>{row.hours_over_40}</div>
+          {Object.keys(EmployeeSchedulesByWeek).length > 0 ? (
+            Object.entries(EmployeeSchedulesByWeek).map(
+              ([weekRange, info], index) => (
+                <div
+                  key={weekRange}
+                  className={`grid grid-cols-3 p-2 ${
+                    index % 2 === 0 ? "bg-white" : "bg-[rgba(24,105,187,0.05)]"
+                  }`}
+                >
+                  <div>{weekRange}</div>
+                  <div>{info.total_hours}</div>
+                  <div>{Math.max(info.total_hours - 40, 0)}</div>
+                </div>
+              ),
+            )
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              No schedule data available for this range.
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

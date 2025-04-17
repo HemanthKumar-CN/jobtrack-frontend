@@ -227,7 +227,7 @@ const AddEvents = () => {
                   <Flatpickr
                     options={{
                       enableTime: true,
-                      dateFormat: "Y-m-d H:i",
+                      dateFormat: "d-m-Y H:i",
                       time_24hr: true,
                       minuteIncrement: 30, // Only allow 00 and 30
                     }}
@@ -261,7 +261,7 @@ const AddEvents = () => {
                   <Flatpickr
                     options={{
                       enableTime: true,
-                      dateFormat: "Y-m-d H:i",
+                      dateFormat: "d-m-Y H:i",
                       time_24hr: true,
                       minuteIncrement: 30, // Only allow 00 and 30
                     }}
@@ -318,7 +318,7 @@ const AddEvents = () => {
               onClick={handleEditEvent}
               className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
-              Edit <FaArrowRight />
+              Save <FaArrowRight />
             </button>
           ) : (
             <button

@@ -117,7 +117,7 @@ const Contractors = () => {
         {/* Table Headers */}
         <div
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "20% 20% 15% 15% 15% 15%" }}
+          style={{ gridTemplateColumns: "20% 20% 13% 12% 15% 20%" }}
         >
           <div>Company Name</div>
           <div>Address</div>
@@ -151,10 +151,10 @@ const Contractors = () => {
                   } ${
                     selectedIndex === index ? "shadow-lg bg-white z-40" : "z-20"
                   }`}
-                  style={{ gridTemplateColumns: "20% 20% 15% 15% 15% 15%" }}
+                  style={{ gridTemplateColumns: "18% 22% 13% 12% 15% 20%" }}
                 >
                   <div className="flex items-center relative">
-                    <button
+                    {/* <button
                       className={`p-1 cursor-pointer rounded-lg hover:bg-blue-400 hover:text-white ${
                         index % 2 === 0 ? "bg-white" : "bg-gray-200"
                       }`}
@@ -163,16 +163,73 @@ const Contractors = () => {
                       }
                     >
                       <BiSolidChevronRight />
-                    </button>
-                    <div className="ml-4">
+                    </button> */}
+                    <div
+                      className=" text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                      onClick={() =>
+                        navigate(`/contractors/add/${contractor.id}`)
+                      }
+                    >
                       {truncateText(contractor.company_name)}
                     </div>
                   </div>
-                  <div>{truncateText(address)}</div>
+                  <div>{truncateText(address, 25)}</div>
                   <div>{truncateText(contractor.city)}</div>
                   <div>{truncateText(contractor.state)}</div>
                   <div>{truncateText(contractor.email, 30)}</div>
-                  <div>{truncateText(contractor.phone)}</div>
+                  <div className="flex items-center py-1 justify-between">
+                    <span>{truncateText(contractor.phone)}</span>
+                    <span className="flex items-center">
+                      {/* <button
+                        onClick={() =>
+                          navigate(`/contractors/add/${contractor.id}`)
+                        }
+                        className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
+                      >
+                        <FaPen className="mr-2 text-blue-500" /> Edit
+                      </button>
+                      <button
+                        onClick={() =>
+                          openModal({
+                            title: "Delete this item?",
+                            message:
+                              "This action is permanent and cannot be undone.",
+                            onConfirm: () => handleDelete(contractor.id), // Call delete function inside modal
+                            confirmText: "Delete",
+                            cancelText: "Cancel",
+                          })
+                        }
+                        className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-red-100 rounded-b-lg"
+                      >
+                        <RiDeleteBin6Line className="mr-2 text-red-500" />{" "}
+                        Delete
+                      </button> */}
+
+                      <button
+                        onClick={() =>
+                          navigate(`/contractors/add/${contractor.id}`)
+                        }
+                        className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
+                      >
+                        <FaPen className="text-blue-600 hover:scale-110 transition" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          openModal({
+                            title: "Delete this item?",
+                            message:
+                              "This action is permanent and cannot be undone.",
+                            onConfirm: () => handleDelete(contractor.id), // Call delete function inside modal
+                            confirmText: "Delete",
+                            cancelText: "Cancel",
+                          })
+                        }
+                        className="border border-gray-300 p-2 cursor-pointer bg-white hover:bg-gray-200 rounded-lg transition"
+                      >
+                        <RiDeleteBin6Line className="text-red-600 cursor-pointer hover:scale-110 transition" />
+                      </button>
+                    </span>
+                  </div>
                 </div>
 
                 {/* Dropdown Menu */}
@@ -180,31 +237,7 @@ const Contractors = () => {
                   <div
                     ref={dropdownRef}
                     className="absolute left-10 top-10 bg-white shadow-lg rounded-lg w-32 z-50"
-                  >
-                    <button
-                      onClick={() =>
-                        navigate(`/contractors/add/${contractor.id}`)
-                      }
-                      className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-blue-100 rounded-t-lg"
-                    >
-                      <FaPen className="mr-2 text-blue-500" /> Edit
-                    </button>
-                    <button
-                      onClick={() =>
-                        openModal({
-                          title: "Delete this item?",
-                          message:
-                            "This action is permanent and cannot be undone.",
-                          onConfirm: () => handleDelete(contractor.id), // Call delete function inside modal
-                          confirmText: "Delete",
-                          cancelText: "Cancel",
-                        })
-                      }
-                      className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-red-100 rounded-b-lg"
-                    >
-                      <RiDeleteBin6Line className="mr-2 text-red-500" /> Delete
-                    </button>
-                  </div>
+                  ></div>
                 )}
               </div>
             );

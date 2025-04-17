@@ -5,6 +5,7 @@ import { convertToLocalDateTime } from "../Utils/convertToLocalDateTime";
 import { useEffect, useState } from "react";
 import OccupiedEmployeesModal from "./OccupiedEmployeesModal";
 import { useSelector } from "react-redux";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const SuccessCard = ({ title, fields, onBack, backButton, modalData }) => {
   const { newSchedule } = useSelector((state) => state.schedules);
@@ -39,7 +40,7 @@ const SuccessCard = ({ title, fields, onBack, backButton, modalData }) => {
                 >
                   {/* <p className="text-gray-500 text-sm">{field.label}</p> */}
                   <img
-                    src={`http://localhost:8080${field.value}`}
+                    src={`${IMAGE_BASE_URL}${field.value}`}
                     alt="Uploaded"
                     className="w-full max-w-[300px] h-auto object-contain mx-auto rounded-lg"
                   />

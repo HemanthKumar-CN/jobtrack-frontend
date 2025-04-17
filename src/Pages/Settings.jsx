@@ -8,6 +8,7 @@ import { getUserProfile, uploadProfilePic } from "../redux/slices/userSlice";
 import { useToast } from "../Components/Toast/ToastContext";
 import ChangePasswordModal from "../Components/Modal/ChangePasswordModal";
 import { updateNotificationPreference } from "../redux/slices/employeeSlice";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const Settings = () => {
   const [isPasswordEditable, setIsPasswordEditable] = useState(false);
@@ -102,7 +103,7 @@ const Settings = () => {
             <img
               src={
                 selectedImage || profile?.image_url
-                  ? `http://localhost:8080${profile.image_url}`
+                  ? `${IMAGE_BASE_URL}${profile.image_url}`
                   : AvatarImage
               }
               alt="Profile"

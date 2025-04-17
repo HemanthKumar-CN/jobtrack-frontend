@@ -23,6 +23,7 @@ import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
 import { format } from "date-fns";
+import { useToast } from "../Components/Toast/ToastContext";
 
 const AddTask = () => {
   const startDateRef = useRef(null);
@@ -36,6 +37,7 @@ const AddTask = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const showToast = useToast();
   const { locationsList, employees } = useSelector(
     (state) => state.dropDownList,
   );
@@ -141,16 +143,12 @@ const AddTask = () => {
   }, [newSchedule]);
 
   const handleAddNewTask = () => {
-    console.log("Task Details", {
-      startDate,
-      endDate,
-      startTime,
-      endTime,
-      taskEvent,
-      title,
-      description,
-      selectedEmployees,
-    });
+    if (!selectedEmployees.length)
+      return showToast("Please select at least one employee", "error");
+    if (!taskEvent) return showToast("Please select an event", "error");
+    if (!startDate) return showToast("Please select a start date", "error");
+    if (!endDate) return showToast("Please select an end date", "error");
+    if (!title) return showToast("Please enter a title", "error");
 
     const newScheduleData = {
       startDate,
@@ -237,7 +235,9 @@ const AddTask = () => {
                 className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
                 onClick={() => eventRef.current?.click()}
               >
-                <p className="text-gray-500 text-sm ml-0.5">Event</p>
+                <p className="text-gray-500 text-sm ml-0.5">
+                  Event <span className="text-red-500">*</span>
+                </p>
                 <select
                   ref={eventRef}
                   value={taskEvent}
@@ -263,7 +263,9 @@ const AddTask = () => {
                 className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
                 onClick={() => startDateRef.current?.showPicker()}
               >
-                <p className="text-gray-500 text-sm">Start Date</p>
+                <p className="text-gray-500 text-sm">
+                  Start Date <span className="text-red-500">*</span>
+                </p>
                 <div className="relative mt-1 flex items-center">
                   {/* <input
                     type="datetime-local"
@@ -317,7 +319,9 @@ const AddTask = () => {
                 className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
                 onClick={() => endDateRef.current?.showPicker()}
               >
-                <p className="text-gray-500 text-sm">End Date</p>
+                <p className="text-gray-500 text-sm">
+                  End Date <span className="text-red-500">*</span>
+                </p>
                 <div className="relative mt-1 flex items-center">
                   {/* <input
                     type="datetime-local"
@@ -374,7 +378,9 @@ const AddTask = () => {
               className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer mt-4"
               onClick={() => titleRef.current?.focus()}
             >
-              <p className="text-gray-500 text-sm">Title</p>
+              <p className="text-gray-500 text-sm">
+                Title <span className="text-red-500">*</span>
+              </p>
               <input
                 ref={titleRef}
                 type="text"

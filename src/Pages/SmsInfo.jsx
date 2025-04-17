@@ -7,6 +7,8 @@ const SmsInfo = () => {
     twilioEndpoint: "",
   });
 
+  const [isEditable, setIsEditable] = useState(false);
+
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
       {/* Message Box */}
@@ -31,7 +33,12 @@ const SmsInfo = () => {
           <input
             type="text"
             placeholder="Enter Twilio Account ID"
-            className="w-full rounded-md outline-none text-sm text-semibold"
+            disabled={!isEditable}
+            className={`w-full rounded-md outline-none text-sm font-semibold p-2 transition ${
+              isEditable
+                ? "bg-white text-black border border-gray-300"
+                : "bg-gray-100 text-gray-500 cursor-not-allowed"
+            }`}
             value={form.twilioId}
             onChange={(e) => setForm({ ...form, twilioId: e.target.value })}
           />
@@ -42,7 +49,12 @@ const SmsInfo = () => {
           <input
             type="password"
             placeholder="Enter Password"
-            className="w-full rounded-md outline-none text-sm text-semibold"
+            disabled={!isEditable}
+            className={`w-full rounded-md outline-none text-sm font-semibold p-2 transition ${
+              isEditable
+                ? "bg-white text-black border border-gray-300"
+                : "bg-gray-100 text-gray-500 cursor-not-allowed"
+            }`}
             value={form.twilioPassword}
             onChange={(e) =>
               setForm({ ...form, twilioPassword: e.target.value })
@@ -54,6 +66,7 @@ const SmsInfo = () => {
           <label className="block text-gray-600 mb-1.5">Twilio Endpoint</label>
           <input
             type="text"
+            disabled={!isEditable}
             placeholder="Enter here"
             className="w-full rounded-md outline-none text-sm text-semibold"
             value={form.twilioEndpoint}

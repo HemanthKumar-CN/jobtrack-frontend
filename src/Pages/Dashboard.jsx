@@ -38,7 +38,7 @@ const Dashboard = () => {
     { title: "Total Locations", count: totalLocations, color: "green" },
     { title: "Contractors", count: totalContractors, color: "purple" },
     {
-      title: "Employeers over 40 hours this week",
+      title: "Employees over 40 hours this week",
       count: overworkedEmployees.length,
       color: "pink",
     },

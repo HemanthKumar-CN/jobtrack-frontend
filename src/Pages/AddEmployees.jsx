@@ -16,6 +16,7 @@ import {
 } from "../redux/slices/employeeSlice";
 import SuccessCard from "../Components/SuccessCard";
 import { useToast } from "../Components/Toast/ToastContext";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const AddEmployees = () => {
   const firstNameRef = useRef(null);
@@ -118,6 +119,8 @@ const AddEmployees = () => {
   useEffect(() => {
     fetchStates();
   }, []);
+
+  console.log(employeeDetails, "employeeDetails", imagePreview);
 
   useEffect(() => {
     if (id) {
@@ -309,7 +312,7 @@ const AddEmployees = () => {
             {id ? "Edit this Employee" : "Add an Employee"}
           </h2>
           <p className="text-gray-500 text-center mb-4">
-            {id ? "Edit employee details" : "Enter employee details"}
+            {id ? "" : "Enter employee details"}
           </p>
 
           {/* Profile Image */}
@@ -321,12 +324,12 @@ const AddEmployees = () => {
                 src={
                   employeeDetails?.User?.image_url == imagePreview &&
                   imagePreview != null
-                    ? `http://localhost:8080${imagePreview}`
+                    ? `${IMAGE_BASE_URL}${imagePreview}`
                     : imagePreview
                     ? imagePreview
                     : "https://randomuser.me/api/portraits/lego/7.jpg"
                 }
-                alt="Profile"
+                alt=""
                 className="w-full h-full object-cover"
               />
 
@@ -594,7 +597,7 @@ const AddEmployees = () => {
               onClick={handleEditEmployee}
               className="cursor-pointer flex items-center gap-2 px-6 py-3 absolute bottom-0 right-50  bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
-              Edit Employee <FaArrowRight />
+              Save <FaArrowRight />
             </button>
           ) : (
             <button

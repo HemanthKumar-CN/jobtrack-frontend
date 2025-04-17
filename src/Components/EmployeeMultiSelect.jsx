@@ -52,6 +52,10 @@ const EmployeeMultiSelect = ({ employees, onChange }) => {
   return (
     <div className="w-full">
       {/* Multi-Select Dropdown */}
+      <label className="text-sm font-medium text-gray-700 mb-2">
+        Select Employees
+        <span className="text-red-500">*</span>
+      </label>
       <Select
         options={options}
         isMulti

@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   createContractor,
   fetchContractorById,
+  resetContractors,
   updateContractor,
 } from "../redux/slices/contractorsSlice";
 import SuccessCard from "../Components/SuccessCard";
@@ -116,7 +117,7 @@ const AddContractors = () => {
 
       setSuccessContractor(updatedNewContractor);
     }
-  }, []);
+  }, [newContractor]);
 
   useEffect(() => {
     if (id && selectedState) {
@@ -154,6 +155,8 @@ const AddContractors = () => {
 
   const handleBackToContractors = () => {
     navigate("/contractors");
+    dispatch(resetContractors());
+    setSuccessContractor(null);
   };
 
   const handleEditContractor = async () => {
@@ -176,6 +179,8 @@ const AddContractors = () => {
       showToast(`Failed to update contractor: ${error}`, "error");
     }
   };
+
+  console.log(successContractor, "successContractor===---");
 
   if (successContractor) {
     return (

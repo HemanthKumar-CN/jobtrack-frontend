@@ -13,6 +13,7 @@ import {
 import SuccessCard from "../Components/SuccessCard";
 import { RiEdit2Line } from "react-icons/ri";
 import { useToast } from "../Components/Toast/ToastContext";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const AddLocation = () => {
   const dispatch = useDispatch();
@@ -22,8 +23,6 @@ const AddLocation = () => {
 
   const { newData, creationLoading, creationError, selectedLocation } =
     useSelector((state) => state.locations);
-
-  console.log(selectedLocation, "=====", newData, "+++++++)))");
 
   const locationNameRef = useRef(null);
   const address1Ref = useRef(null);
@@ -122,13 +121,12 @@ const AddLocation = () => {
 
   useEffect(() => {
     if (id && selectedState) {
-      setSelectedCity(selectedLocation.city);
+      setSelectedCity(selectedLocation?.city);
     }
   }, [selectedState, cities]);
 
   // Fetch Cities Based on Selected State
   const fetchCities = async (stateName) => {
-    console.log(stateName, "state Name: -=====");
     try {
       setSelectedState(stateName);
       const response = await axios.post(
@@ -149,6 +147,34 @@ const AddLocation = () => {
       zip,
       file,
     });
+
+    if (!locationName.trim())
+      return showToast(
+        "Please fill required fields. Location name is required",
+        "error",
+      );
+    if (!address1.trim())
+      return showToast(
+        "Please fill required fields. Address 1 is required",
+        "error",
+      );
+    if (!selectedState.trim())
+      return showToast(
+        "Please fill required fields. State is required",
+        "error",
+      );
+    if (!selectedCity.trim())
+      return showToast(
+        "Please fill required fields. City is required",
+        "error",
+      );
+    if (!zip.trim())
+      return showToast(
+        "Please fill required fields. Zip code is required",
+        "error",
+      );
+    if (zip.length < 5)
+      return showToast("Zip code must be at least 5 digits", "error");
 
     dispatch(
       createLocation({
@@ -179,8 +205,7 @@ const AddLocation = () => {
           },
         }),
       ).unwrap();
-      dispatch(resetNewData());
-      dispatch(resetSelectedLocation());
+
       showToast("Location updated successfully", "success");
     } catch (error) {
       showToast(`Failed to update location: ${error}`, "error");
@@ -230,6 +255,8 @@ const AddLocation = () => {
                       selectedLocation?.image_url == imagePreview
                         ? `http://localhost:8080${imagePreview}`
                         : imagePreview
+                        ? imagePreview
+                        : "https://randomuser.me/api/portraits/lego/7.jpg"
                     }
                     alt="Uploaded"
                     className="w-full h-auto object-contain rounded-lg"
@@ -256,7 +283,9 @@ const AddLocation = () => {
               className="bg-[#F4F7FE] p-2 px-4 rounded-md text-gray-600 cursor-pointer"
               onClick={() => locationNameRef.current?.focus()}
             >
-              <p className="text-gray-500 text-sm">Location Name</p>
+              <p className="text-gray-500 text-sm">
+                Location Name <span className="text-red-500">*</span>{" "}
+              </p>
               <input
                 ref={locationNameRef}
                 type="text"
@@ -272,7 +301,9 @@ const AddLocation = () => {
                 className="bg-[#F4F7FE] p-2 pl-3 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => address1Ref.current?.focus()}
               >
-                <p className="text-gray-500 text-sm">Address 1</p>
+                <p className="text-gray-500 text-sm">
+                  Address 1 <span className="text-red-500">*</span>
+                </p>
                 <input
                   ref={address1Ref}
                   type="text"
@@ -304,7 +335,9 @@ const AddLocation = () => {
                 className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
                 onClick={() => stateRef.current?.click()}
               >
-                <p className="text-gray-500 text-sm pl-1">State</p>
+                <p className="text-gray-500 text-sm pl-1">
+                  State <span className="text-red-500">*</span>
+                </p>
                 <select
                   ref={stateRef}
                   value={selectedState}
@@ -324,7 +357,9 @@ const AddLocation = () => {
                 className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
                 onClick={() => cityRef.current?.click()}
               >
-                <p className="text-gray-500 text-sm pl-1">City</p>
+                <p className="text-gray-500 text-sm pl-1">
+                  City <span className="text-red-500">*</span>
+                </p>
                 <select
                   ref={cityRef}
                   value={selectedCity}
@@ -344,7 +379,9 @@ const AddLocation = () => {
                 className="bg-[#F4F7FE] p-2 pl-3 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => zipRef.current?.focus()}
               >
-                <p className="text-gray-500 text-sm">Zip</p>
+                <p className="text-gray-500 text-sm">
+                  Zip <span className="text-red-500">*</span>
+                </p>
                 <input
                   ref={zipRef}
                   type="text"
@@ -400,7 +437,7 @@ const AddLocation = () => {
               onClick={handleEditLocation}
               className="flex cursor-pointer absolute bottom-0 right-50 items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
-              Edit Location <FaArrowRight />
+              Save <FaArrowRight />
             </button>
           ) : (
             <button

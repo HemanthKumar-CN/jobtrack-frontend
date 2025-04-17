@@ -9,6 +9,7 @@ import { Loader } from "../Components/Loader";
 import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
+import { truncateText } from "../Utils/truncateText";
 
 const Locations = () => {
   const navigate = useNavigate();
@@ -127,8 +128,11 @@ const Locations = () => {
                   index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                 }`}
               >
-                <div className="border border-white p-3 py-4.5">
-                  {warehouse.name}
+                <div
+                  onClick={() => navigate(`/locations/add/${warehouse.id}`)}
+                  className="border border-white p-3 py-4.5 text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                >
+                  {truncateText(warehouse.name)}
                 </div>
                 <div className="border border-white p-3 py-4.5">
                   {formattedAddress.length > 25 ? (

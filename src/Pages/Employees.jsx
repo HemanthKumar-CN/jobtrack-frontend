@@ -15,6 +15,7 @@ import {
 import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
+import CustomDropdown from "../Components/CustomDropdown";
 
 const Employees = () => {
   const dropdownRef = useRef(null);
@@ -35,6 +36,12 @@ const Employees = () => {
   const { openModal } = useModal();
 
   const [selectedIndex, setSelectedIndex] = useState(null); // Track clicked row
+  const [selectedStatus, setSelectedStatus] = useState({
+    id: "active",
+    name: "Active",
+  }); // Track selected status
+  const [sortField, setSortField] = useState(""); // which field
+  const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -52,20 +59,35 @@ const Employees = () => {
 
   const handleSearch = () => {
     setSearch(searchRef.current.value);
+
     dispatch(resetEmployees());
     setPage(1);
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // If same field clicked, toggle the order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // If different field clicked, set new field and reset to asc
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
   useEffect(() => {
+    console.log("Fetching employees...", selectedStatus);
     if (hasMore) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
-      dispatch(fetchEmployees({ page, search })).then(() => {
+      dispatch(
+        fetchEmployees({ page, search, status: selectedStatus.id }),
+      ).then(() => {
         if (listRef.current) {
           listRef.current.scrollTop = 0; // Maintain position
         }
       });
     }
-  }, [dispatch, page, search]);
+  }, [dispatch, page, search, selectedStatus]);
 
   // Intersection Observer for infinite scroll
   const lastEmployeeRef = useCallback(
@@ -93,10 +115,17 @@ const Employees = () => {
     }
   };
 
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
+    // Optional: Trigger filtering or API call immediately here if you want.
+    dispatch(resetEmployees());
+    setPage(1);
+  };
+
   return (
     <div className="p-4 pt-0 rounded-xl ">
       {/* Search Bar */}
-      <div className="relative mb-4">
+      {/* <div className="relative mb-4">
         <input
           type="text"
           placeholder="Search"
@@ -114,21 +143,193 @@ const Employees = () => {
             text-gray-500 transition-all duration-200 hover:text-blue-600 hover:scale-110"
           size={18}
         />
+      </div> */}
+
+      <div className="flex items-center gap-4 mb-4">
+        {/* Search Box */}
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search"
+            ref={searchRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+            className="w-full p-3 pr-10 border bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <FiSearch
+            onClick={handleSearch}
+            className="absolute right-3 top-1/2 cursor-pointer transform -translate-y-1/2 
+        text-gray-500 transition-all duration-200 hover:text-blue-600 hover:scale-110"
+            size={18}
+          />
+        </div>
+
+        {/* CustomDropdown */}
+        <div className="w-60">
+          <CustomDropdown
+            label=""
+            options={[
+              { id: "active", name: "Active" },
+              { id: "inactive", name: "Inactive" },
+              { id: "inactive-deceased", name: "Inactive-Deceased" },
+            ]}
+            value={selectedStatus}
+            onChange={handleStatusChange}
+            placeholder="Select Status"
+          />
+        </div>
       </div>
 
       <div className="p-1 bg-white rounded-xl shadow-md">
         {/* Table Headers */}
         <div
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "13vw 13vw 21vw 7vw 8vw 5vw 8vw" }}
+          style={{ gridTemplateColumns: "10vw 10vw 24vw 7vw 8vw 7vw 10vw" }}
         >
-          <div>First Name</div>
-          <div>Last Name</div>
+          {/* First Name */}
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("first_name")}
+          >
+            First Name
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "first_name" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "first_name" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
+          {/* Last Name */}
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("last_name")}
+          >
+            Last Name
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "last_name" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "last_name" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
           <div>Address</div>
-          <div>City</div>
-          <div>State</div>
-          <div>Zip</div>
-          <div>Type</div>
+
+          {/* City */}
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("city")}
+          >
+            City
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
+          {/* State */}
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("state")}
+          >
+            State
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+          <div>Status</div>
+          {/* Type */}
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("type")}
+          >
+            Type
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "type" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "type" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Employee List */}
@@ -151,11 +352,11 @@ const Employees = () => {
                     selectedIndex === index ? "shadow-lg bg-white z-40" : "z-20"
                   }`}
                   style={{
-                    gridTemplateColumns: "13vw 13vw 21vw 7vw 8vw 5vw 8vw",
+                    gridTemplateColumns: "10vw 10vw 24vw 7vw 8vw 7vw 10vw",
                   }}
                 >
                   <div className="flex items-center relative">
-                    <button
+                    {/* <button
                       className={`p-1 cursor-pointer rounded-lg hover:bg-blue-400 hover:text-white ${
                         index % 2 === 0 ? "bg-white" : "bg-gray-200"
                       } `}
@@ -164,17 +365,56 @@ const Employees = () => {
                       }
                     >
                       <BiSolidChevronRight className="" />
-                    </button>
-                    <div className="ml-4">
+                    </button> */}
+                    <div className="">
                       {truncateText(employee?.User?.first_name)}
                     </div>
                   </div>
                   <div>{truncateText(employee?.User?.last_name)}</div>
                   <div>{truncateText(formattedAddress, 30)}</div>
-                  <div>{truncateText(employee.city)}</div>
+                  <div>{truncateText(employee.city, 7)}</div>
                   <div>{truncateText(employee.state)}</div>
-                  <div>{truncateText(employee.postal_code)}</div>
-                  <div>{truncateText(employee.type)}</div>
+                  <div
+                    className={`px-3  rounded-full text-xs font-semibold w-fit
+                    ${
+                      employee.status === "active"
+                        ? "bg-green-100 text-green-800"
+                        : employee.status === "inactive"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  `}
+                  >
+                    {truncateText(employee.status)}
+                  </div>
+                  <div className="flex items-center py-1 justify-between">
+                    <span>{truncateText(employee.type)}</span>
+                    <span className="flex items-center">
+                      <button
+                        onClick={() =>
+                          navigate(`/employees/add/${employee.id}`)
+                        }
+                        className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
+                      >
+                        <FaPen className="text-blue-600 hover:scale-110 transition" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          openModal({
+                            title: "Delete this item?",
+                            message:
+                              "This action is permanent and cannot be undone.",
+                            onConfirm: () => handleDeleteEmployee(employee.id), // Call delete function inside modal
+                            confirmText: "Delete",
+                            cancelText: "Cancel",
+                          })
+                        }
+                        className="border border-gray-300 p-2 cursor-pointer bg-white hover:bg-gray-200 rounded-lg transition"
+                      >
+                        <RiDeleteBin6Line className="text-red-600 cursor-pointer hover:scale-110 transition" />
+                      </button>
+                    </span>
+                  </div>
                 </div>
 
                 {/* Dropdown Menu */}
