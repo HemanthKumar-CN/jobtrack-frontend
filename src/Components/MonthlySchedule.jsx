@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMonthlySchedule } from "../redux/slices/scheduleSlice";
 import { convertToLocalTime } from "../Utils/convertToLocalTime";
 import { useLocation, useNavigate } from "react-router-dom";
+import { lightenColor } from "../Utils/lightenColor";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const MonthlySchedule = ({ setRenderCalendar }) => {
@@ -115,11 +116,13 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
                   <div
                     key={`${task.user_id}-${schedule.schedule_id}`} // Unique key for each schedule
                     className={`grid border border-white ${
-                      index % 2 === 0 ? "bg-[#E8F1FD]" : "bg-white"
+                      // index % 2 === 0 ? "bg-[#E8F1FD]" : "bg-white"
+                      ""
                     }`}
                     style={{
                       gridTemplateColumns:
                         "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr 1fr",
+                      backgroundColor: lightenColor(schedule.colour_code, 0.6),
                     }}
                   >
                     {/* User First Name (Only shown for the first schedule of each user) */}

@@ -212,7 +212,8 @@ const Locations = () => {
         >
           {locations.map((warehouse, index) => {
             let formattedAddress =
-              warehouse?.address_1 + ", " + warehouse?.address_2;
+              warehouse?.address_1 +
+              `${warehouse?.address_2 ? ", " + warehouse?.address_2 : ""}`;
 
             return (
               <div
@@ -232,13 +233,14 @@ const Locations = () => {
                 </Tooltip>
                 <Tooltip text={formattedAddress}>
                   <div className="border border-white p-3 py-4.5">
-                    {formattedAddress.length > 25 ? (
+                    {/* {formattedAddress.length > 25 ? (
                       <span title={formattedAddress}>
                         {`${formattedAddress.substring(0, 22)}...`}
                       </span>
                     ) : (
                       formattedAddress
-                    )}
+                    )} */}
+                    {formattedAddress}
                   </div>
                 </Tooltip>
                 <div className="border border-white p-3 py-4.5">

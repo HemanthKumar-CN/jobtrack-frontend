@@ -31,7 +31,13 @@ function App() {
 
   useEffect(() => {
     if (auth) {
-      navigate(roleName === "ADMIN" ? "/dashboard" : "/mySchedule");
+      // navigate(roleName === "ADMIN" ? "/dashboard" : "/mySchedule");
+
+      // Only redirect to default dashboard if the user is at root ("/") or "/login"
+      if (location.pathname === "/" || location.pathname === "/login") {
+        navigate(roleName === "ADMIN" ? "/dashboard" : "/mySchedule");
+      }
+      // Otherwise, stay on the current route
     }
   }, [auth]);
 
