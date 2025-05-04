@@ -98,6 +98,7 @@ const Dashboard = () => {
                 >
                   {/* Circle at the top-right corner */}
                   <div
+                    style={{ backgroundColor: item.color, opacity: 0.3 }}
                     className={`absolute top-1 right-1 w-17 h-17 bg-${item.color}-300 transform translate-x-1/2 -translate-y-1/2 rounded-full`}
                   ></div>
                   <span className="font-medium text-[14px] leading-[17.07px] tracking-[0px] text-gray-400">

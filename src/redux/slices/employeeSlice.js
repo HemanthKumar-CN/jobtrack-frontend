@@ -7,12 +7,19 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const fetchEmployees = createAsyncThunk(
   "employees/fetchEmployees",
   async (
-    { search = "", page = 1, limit = 10, status },
+    {
+      search = "",
+      page = 1,
+      limit = 100,
+      status,
+      sortField = "first_name",
+      sortOrder = "asc",
+    },
     { rejectWithValue },
   ) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/employees?search=${search}&page=${page}&limit=${limit}&status=${status}`,
+        `${API_BASE_URL}/employees?search=${search}&page=${page}&limit=${limit}&status=${status}&sortField=${sortField}&sortOrder=${sortOrder}`,
         { withCredentials: true },
       );
       return response.data;
@@ -37,6 +44,7 @@ export const createEmployee = createAsyncThunk(
       formData.append("address_2", employeeData.address2);
       formData.append("postal_code", employeeData.zip);
       formData.append("date_of_birth", employeeData.Dob);
+      formData.append("status", employeeData.statusType);
       formData.append("role_id", 3);
       formData.append("city", employeeData.selectedCity);
       formData.append("state", employeeData.selectedState);

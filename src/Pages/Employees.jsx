@@ -40,7 +40,7 @@ const Employees = () => {
     id: "active",
     name: "Active",
   }); // Track selected status
-  const [sortField, setSortField] = useState(""); // which field
+  const [sortField, setSortField] = useState("first_name"); // which field
   const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
 
   // Handle click outside to close dropdown
@@ -73,6 +73,9 @@ const Employees = () => {
       setSortField(field);
       setSortOrder("asc");
     }
+
+    dispatch(resetEmployees());
+    setPage(1);
   };
 
   useEffect(() => {
@@ -80,14 +83,20 @@ const Employees = () => {
     if (hasMore) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
       dispatch(
-        fetchEmployees({ page, search, status: selectedStatus.id }),
+        fetchEmployees({
+          page,
+          search,
+          status: selectedStatus.id,
+          sortField,
+          sortOrder,
+        }),
       ).then(() => {
         if (listRef.current) {
           listRef.current.scrollTop = 0; // Maintain position
         }
       });
     }
-  }, [dispatch, page, search, selectedStatus]);
+  }, [dispatch, page, search, selectedStatus, sortField, sortOrder]);
 
   // Intersection Observer for infinite scroll
   const lastEmployeeRef = useCallback(
@@ -366,11 +375,19 @@ const Employees = () => {
                     >
                       <BiSolidChevronRight className="" />
                     </button> */}
-                    <div className="">
+                    <div
+                      className="text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                      onClick={() => navigate(`/employees/add/${employee.id}`)}
+                    >
                       {truncateText(employee?.User?.first_name)}
                     </div>
                   </div>
-                  <div>{truncateText(employee?.User?.last_name)}</div>
+                  <div
+                    className="text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                    onClick={() => navigate(`/employees/add/${employee.id}`)}
+                  >
+                    {truncateText(employee?.User?.last_name)}
+                  </div>
                   <div>{truncateText(formattedAddress, 30)}</div>
                   <div>{truncateText(employee.city, 7)}</div>
                   <div>{truncateText(employee.state)}</div>

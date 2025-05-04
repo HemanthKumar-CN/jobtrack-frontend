@@ -5,12 +5,12 @@ const Reports = () => {
   const reportsData = [
     {
       title: "Employee Schedules",
-      color: "red-200",
+      color: "red",
       link: "/reports/employee-schedules",
     },
     {
       title: "Location Schedules",
-      color: "blue-200",
+      color: "blue",
       link: "/reports/location-schedules",
     },
     // {
@@ -25,7 +25,7 @@ const Reports = () => {
     // },
     {
       title: "Total Employee Hours (week)",
-      color: "yellow-200",
+      color: "yellow",
       link: "/reports/employee-hours-week",
     },
   ];
@@ -39,6 +39,7 @@ const Reports = () => {
             className="relative bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all"
           >
             <div
+              style={{ backgroundColor: item.color, opacity: 0.3 }}
               className={`absolute top-0 right-0 w-10 h-10 bg-${item.color} rounded-bl-full`}
             ></div>
             <Link

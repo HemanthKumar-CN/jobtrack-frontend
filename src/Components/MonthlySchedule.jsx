@@ -6,11 +6,18 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getMonthlySchedule } from "../redux/slices/scheduleSlice";
 import { convertToLocalTime } from "../Utils/convertToLocalTime";
+import { useLocation, useNavigate } from "react-router-dom";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const MonthlySchedule = ({ setRenderCalendar }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const scheduleId = queryParams.get("scheduleId");
+
   const { monthlySchedules, schedulesLoading, schedulesError } = useSelector(
     (state) => state.schedules,
   );
@@ -26,6 +33,11 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
   useEffect(() => {
     dispatch(getMonthlySchedule(currentDate));
   }, [selectedMonth]);
+
+  useEffect(() => {
+    if (scheduleId) {
+    }
+  }, [scheduleId]);
 
   return (
     <div className="p-6 bg-white shadow rounded-lg">
@@ -71,18 +83,12 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
 
       {/* Schedule Table */}
       <div className="w-full border-white bg-white rounded-lg shadow-sm">
-        <div
-          className={`${
-            monthlySchedules.length > 0
-              ? "overflow-auto max-h-[65vh] custom-scrollbar"
-              : ""
-          }`}
-        >
+        <div className={`${monthlySchedules.length > 0 ? "" : ""}`}>
           {/* Header */}
           <div
             className="grid bg-gray-100 text-[#1869BB] font-semibold sticky top-0 z-10 border border-white"
             style={{
-              gridTemplateColumns: "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr 1fr",
             }}
           >
             <div className="p-2 border border-white">First Name</div>
@@ -91,6 +97,7 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
             <div className="p-2 border border-white">Event</div>
             <div className="p-2 border border-white">Start Date</div>
             <div className="p-2 border border-white">End Date</div>
+            <div className="p-2 border border-white">Time</div>
             <div className="p-2 border border-white text-center">Confirmed</div>
           </div>
 
@@ -111,7 +118,8 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
                       index % 2 === 0 ? "bg-[#E8F1FD]" : "bg-white"
                     }`}
                     style={{
-                      gridTemplateColumns: "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr",
+                      gridTemplateColumns:
+                        "1fr 1fr 1.5fr 1.5fr 1fr 1fr 1fr 1fr",
                     }}
                   >
                     {/* User First Name (Only shown for the first schedule of each user) */}
@@ -137,13 +145,18 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
                     {/* Start Date */}
                     <div className="p-2 text-gray-700 border border-white">
                       {formattedStartDate}{" "}
-                      <p>{convertToLocalTime(schedule.start_time)}</p>
                     </div>
 
                     {/* End Date */}
                     <div className="p-2 text-gray-700 border border-white">
                       {formattedEndDate}
-                      <p>{convertToLocalTime(schedule.end_time)}</p>
+                    </div>
+
+                    <div className="p-2 text-gray-700 border border-white">
+                      <p>
+                        {convertToLocalTime(schedule.start_time)} -{" "}
+                        {convertToLocalTime(schedule.end_time)}
+                      </p>
                     </div>
 
                     {/* Actions: Confirm Checkbox & Edit Button */}
@@ -166,7 +179,15 @@ const MonthlySchedule = ({ setRenderCalendar }) => {
                       </label>
 
                       {/* Edit Button */}
-                      <button className="p-2 border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition ml-2">
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/schedules/new-task?scheduleId=${schedule.schedule_id}`,
+                          )
+                        }
+                        className="p-2 border cursor-pointer border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition ml-2"
+                      >
+                        {/* {schedule.schedule_id} */}
                         <FaPen className="text-[#1869BB]" />
                       </button>
                     </div>

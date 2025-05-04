@@ -38,22 +38,29 @@ const Login = () => {
 
   return (
     <div
-      className="h-screen w-full flex justify-center items-center bg-cover bg-center"
-      style={{ backgroundImage: `url(${BackgroundImage})` }}
+      className="h-screen w-full flex justify-center items-center bg-cover bg-center bg-neutral-300"
+      // style={{ backgroundImage: `url(${BackgroundImage})` }}
     >
       <div className="flex h-3/4 w-2/3 m-auto">
         {/* Left Section */}
-        <div className="flex flex-col justify-center rounded-l-4xl w-1/2 opacity-80 bg-[#3255F0] text-white relative p-8 pl-13 ">
+        <div
+          className="flex flex-col justify-center rounded-l-4xl w-1/2
+         bg-[#3255F0] text-white relative p-8 pl-13 "
+        >
+          {/* <div
+          className="flex flex-col justify-center rounded-l-4xl w-1/2 opacity-80
+         bg-[#3255F0] text-white relative p-8 pl-13 "
+        > */}
           <h1 className="text-3xl font-bold mb-2 flex justify-between w-64">
             <img src={CalendarLogo} alt="" className="" />
           </h1>
           <div className="flex gap-4 mt-4">
-            <button className=" text-white py-2 rounded">
+            {/* <button className=" text-white py-2 rounded">
               <img src={GooglePlaystore} alt="" />
             </button>
             <button className=" text-white px-4 py-2 rounded">
               <img src={Appstore} alt="" />
-            </button>
+            </button> */}
           </div>
         </div>
 

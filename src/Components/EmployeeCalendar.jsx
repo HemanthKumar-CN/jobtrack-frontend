@@ -13,6 +13,7 @@ import {
 import EmployeeScheduleModal from "./Modal/EmployeeScheduleModal";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchEmployeeSchedules } from "../redux/slices/scheduleSlice";
+import { lightenColor } from "../Utils/lightenColor";
 
 const EmployeeCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -122,11 +123,16 @@ const EmployeeCalendar = () => {
                         setSelectedEvent(event);
                         setFormattedDate(formattedDate);
                       }} // ✅ Directly on event box
-                      className="absolute w-[90%] left-0 right-0 m-auto bg-blue-50 border-t-4 cursor-pointer border-blue-500 text-gray-800 text-sm p-2 rounded-md shadow-md flex flex-col h-full"
+                      className="absolute w-[90%] left-0 right-0 m-auto  border-t-4 cursor-pointer text-gray-800 text-sm p-2 rounded-md shadow-md flex flex-col h-full"
                       style={{
                         top: `${
                           (parseInt(event.start_time.split(":")[1]) / 60) * 100
                         }%`,
+                        backgroundColor: lightenColor(
+                          event.Event.Location.colour_code,
+                          0.6,
+                        ),
+                        borderColor: event.Event.Location.colour_code,
                         height: `${
                           (differenceInMinutes(
                             parseISO(

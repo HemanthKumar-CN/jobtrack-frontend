@@ -22,7 +22,7 @@ import SuccessCard from "../Components/SuccessCard";
 import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { useToast } from "../Components/Toast/ToastContext";
 
 const AddTask = () => {
@@ -61,7 +61,16 @@ const AddTask = () => {
 
   useEffect(() => {
     dispatch(fetchLocationsList());
-    dispatch(fetchEvents());
+    dispatch(
+      fetchEvents({ search: "", sortField: "event_name", sortOrder: "asc" }),
+    )
+      .unwrap()
+      .then(() => {
+        console.log("Events fetched successfully");
+      })
+      .catch((error) => {
+        console.error("Error fetching events:", error);
+      });
     dispatch(fetchEmployeesDropdown());
   }, [dispatch]);
 
@@ -150,24 +159,40 @@ const AddTask = () => {
     if (!endDate) return showToast("Please select an end date", "error");
     if (!title) return showToast("Please enter a title", "error");
 
+    const parseFormat = "MM/dd/yyyy - HH:mm"; // your current format
+
+    // Combine and format start
+    const combinedStart = format(
+      parse(`${startDate} ${startTime}`, "MM/dd/yyyy HH:mm", new Date()),
+      "yyyy-MM-dd'T'HH:mm",
+    );
+
+    // Combine and format end
+    const combinedEnd = format(
+      parse(`${endDate} ${endTime}`, "MM/dd/yyyy HH:mm", new Date()),
+      "yyyy-MM-dd'T'HH:mm",
+    );
+
     const newScheduleData = {
-      startDate,
-      endDate,
+      startDate: combinedStart,
+      endDate: combinedEnd,
       taskEvent,
       title,
       description,
       selectedEmployees,
     };
 
+    console.log(newScheduleData, "New Schedule Data");
+
     dispatch(createBulkSchedule(newScheduleData));
   };
-
-  console.log(scheduleFields, "?????Fields...");
 
   const handleBackToSchedules = () => {
     navigate("/schedules");
     dispatch(clearSchedule());
   };
+
+  console.log(startDate, endDate, "??????", startTime, endTime);
 
   if (newSchedule) {
     return (
@@ -195,14 +220,14 @@ const AddTask = () => {
 
           {/* Add Employees Field */}
 
-          <div className="overflow-auto max-h-[50vh] custom-scrollbar">
+          <div className="">
             <EmployeeMultiSelect
               employees={employees}
               onChange={setSelectedEmployees}
             />
 
             {/* Form Fields */}
-            <div className="grid grid-cols-2 gap-4 mt-6 ">
+            <div className="grid grid-cols-1 gap-4 mt-6 ">
               {/* Select Location */}
 
               {/* <div
@@ -258,118 +283,134 @@ const AddTask = () => {
                 </select>
               </div>
 
-              {/* Start Date */}
-              <div
-                className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
-                onClick={() => startDateRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">
-                  Start Date <span className="text-red-500">*</span>
-                </p>
-                <div className="relative mt-1 flex items-center">
-                  {/* <input
-                    type="datetime-local"
-                    ref={startDateRef}
-                    value={startDate}
-                    min={minDate}
-                    max={maxDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  /> */}
-                  <Flatpickr
-                    options={{
-                      enableTime: true,
-                      dateFormat: "Y-m-d H:i",
-                      time_24hr: true,
-                      minuteIncrement: 30, // Only allow 00 and 30
-                    }}
-                    placeholder="dd-mm-yyyy"
-                    value={startDate}
-                    onChange={([date]) => {
-                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
-                      setStartDate(formatted);
-                    }}
-                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
-                  />
+              <div className="grid grid-cols-2 gap-4 mt-6 ">
+                {/* Start Date */}
+                <div
+                  className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
+                  onClick={() => startDateRef.current?.showPicker()}
+                >
+                  <p className="text-gray-500 text-sm">
+                    Start Date <span className="text-red-500">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center">
+                    <Flatpickr
+                      options={{
+                        // enableTime: true,
+                        dateFormat: "m/d/Y",
+                        time_24hr: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      placeholder="MM/DD/YYYY"
+                      min={minDate}
+                      max={maxDate}
+                      value={startDate}
+                      onChange={([date]) => {
+                        const formatted = format(date, "MM/dd/yyyy");
+                        setStartDate(formatted);
+                      }}
+                      className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
+                    />
 
-                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                    <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                  </div>
+                </div>
+
+                {/* End Date */}
+                <div
+                  className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
+                  onClick={() => endDateRef.current?.showPicker()}
+                >
+                  <p className="text-gray-500 text-sm">
+                    End Date <span className="text-red-500">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center">
+                    <Flatpickr
+                      options={{
+                        // enableTime: true,
+                        dateFormat: "m/d/Y",
+                        time_24hr: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      min={minDate}
+                      max={maxDate}
+                      placeholder="MM/DD/YYYY"
+                      value={endDate}
+                      onChange={([date]) => {
+                        const formatted = format(date, "MM/dd/yyyy");
+                        setEndDate(formatted);
+                      }}
+                      className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
+                    />
+
+                    <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                  </div>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4 mt-6 ">
+                {/* Start Date */}
+                <div
+                  className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
+                  onClick={() => startTimeRef.current?.showPicker()}
+                >
+                  <p className="text-gray-500 text-sm">
+                    Start Time <span className="text-red-500">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center">
+                    <Flatpickr
+                      options={{
+                        enableTime: true,
+                        dateFormat: "H:i",
+                        noCalendar: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      placeholder="hh:mm"
+                      // min={minDate}
+                      // max={maxDate}
+                      value={startTime}
+                      onChange={([date]) => {
+                        const formatted = format(date, "HH:mm");
+                        setStartTime(formatted);
+                      }}
+                      className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
+                    />
 
-              {/* Start Time */}
-              {/* <div
-                className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
-                onClick={() => startTimeRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">Start Time</p>
-                <div className="relative mt-1 flex items-center">
-                  <input
-                    type="time"
-                    ref={startTimeRef}
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  />
-                  <GoClock className="absolute right-2 text-gray-500" />
+                    <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                  </div>
                 </div>
-              </div> */}
 
-              {/* End Date */}
-              <div
-                className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
-                onClick={() => endDateRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">
-                  End Date <span className="text-red-500">*</span>
-                </p>
-                <div className="relative mt-1 flex items-center">
-                  {/* <input
-                    type="datetime-local"
-                    ref={endDateRef}
-                    value={endDate}
-                    min={minDate}
-                    max={maxDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer"
-                  /> */}
+                {/* Start Time */}
 
-                  <Flatpickr
-                    options={{
-                      enableTime: true,
-                      dateFormat: "Y-m-d H:i",
-                      time_24hr: true,
-                      minuteIncrement: 30, // Only allow 00 and 30
-                    }}
-                    placeholder="dd-mm-yyyy"
-                    value={endDate}
-                    onChange={([date]) => {
-                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
-                      setEndDate(formatted);
-                    }}
-                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
-                  />
+                {/* End Date */}
+                <div
+                  className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
+                  onClick={() => endTimeRef.current?.showPicker()}
+                >
+                  <p className="text-gray-500 text-sm">
+                    End Time <span className="text-red-500">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center">
+                    <Flatpickr
+                      options={{
+                        enableTime: true,
+                        dateFormat: "H:i",
+                        noCalendar: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      // min={minDate}
+                      // max={maxDate}
+                      placeholder="hh:mm"
+                      value={endTime}
+                      onChange={([date]) => {
+                        const formatted = format(date, "HH:mm");
+                        setEndTime(formatted);
+                      }}
+                      className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
+                    />
 
-                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                    <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                  </div>
                 </div>
               </div>
-
-              {/* End Time */}
-              {/* <div
-                className="bg-[#F4F7FE] p-3 rounded-md relative cursor-pointer"
-                onClick={() => endTimeRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">End Time</p>
-                <div className="relative mt-1 flex items-center">
-                  <input
-                    type="time"
-                    ref={endTimeRef}
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  />
-                  <GoClock className="absolute right-2 text-gray-500" />
-                </div>
-              </div> */}
             </div>
 
             {/* Title Input */}

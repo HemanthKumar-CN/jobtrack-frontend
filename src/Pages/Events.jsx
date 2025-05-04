@@ -19,11 +19,14 @@ const Events = () => {
   const { openModal } = useModal();
   const showToast = useToast();
 
+  const [sortField, setSortField] = useState("event_name"); // which field
+  const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
+
   const { events } = useSelector((state) => state.events);
 
   useEffect(() => {
-    dispatch(fetchEvents(search));
-  }, [dispatch, search]);
+    dispatch(fetchEvents({ search, sortField, sortOrder }));
+  }, [dispatch, search, sortField, sortOrder]);
 
   const handleSearch = () => {
     setSearch(searchRef.current?.value);
@@ -35,6 +38,17 @@ const Events = () => {
       showToast(`Event deleted successfully ${id}`, "success");
     } catch (error) {
       showToast(`Failed to delete Event: ${error}`, "error");
+    }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // If same field clicked, toggle the order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // If different field clicked, set new field and reset to asc
+      setSortField(field);
+      setSortOrder("asc");
     }
   };
 
@@ -67,11 +81,138 @@ const Events = () => {
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
           style={{ gridTemplateColumns: "25% 20% 15% 15% 25%" }}
         >
-          <div>Event Name</div>
-          <div>Location</div>
-          <div>Contractors</div>
-          <div>Start Date</div>
-          <div>End Date</div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("event_name")}
+          >
+            Event Name
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "event_name" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "event_name" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("location")}
+          >
+            Location
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "location" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "location" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("contractor")}
+          >
+            Contractors
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "contractor" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "contractor" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("start_date")}
+          >
+            Start Date
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "start_date" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "start_date" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("end_date")}
+          >
+            End Date
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "end_date" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "end_date" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Event List */}
@@ -80,33 +221,34 @@ const Events = () => {
             return (
               <div
                 key={index}
-                style={{ gridTemplateColumns: "25% 20% 15% 15% 25%" }}
+                style={{ gridTemplateColumns: "20% 20% 15% 20% 25%" }}
                 className={`grid items-center rounded-md ${
                   index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                 }`}
               >
-                <div className=" border-white p-3 py-4.5">
+                <div
+                  onClick={() => navigate(`/events/add/${event.id}`)}
+                  className=" border-white p-3 py-4.5 text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                >
                   {truncateText(event.event_name)}
                 </div>
                 <div className="border-l-2 border-white p-3 py-4.5">
                   {truncateText(event?.Location?.name)}
                 </div>
-                <div className="border-l-2 border-white p-3 py-4.5 font-semibold">
+                <div className="border-l-2 border-white p-3 py-4.5">
                   {truncateText(event.Contractor?.company_name)}
                 </div>
-                <div className="border-l-2 border-white p-3 py-4.5 font-semibold">
+                <div className="border-l-2 border-white p-3 py-4.5">
                   {format(
                     parseISO(event.start_date),
-                    "MMMM d, yyyy 'at' h:mm a",
+                    // "MMMM d, yyyy 'at' h:mm a",
+                    "MM/dd/yyyy - h:mm a",
                   )}
                 </div>
                 <div className=" border-x-2 border-white p-3 flex justify-between items-center">
-                  <span className="font-semibold w-40">
+                  <span className="">
                     {" "}
-                    {format(
-                      parseISO(event.end_date),
-                      "MMMM d, yyyy 'at' h:mm a",
-                    )}
+                    {format(parseISO(event.end_date), "MM/dd/yyyy - h:mm a")}
                   </span>
                   <span>
                     <button

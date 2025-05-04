@@ -13,12 +13,22 @@ const SmsInfo = () => {
     <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
       {/* Message Box */}
       <div className="bg-[#F1F6FB] text-gray-700 p-3 rounded-md">
-        <p className="text-gray-500 mb-1.5">Outbound Message</p>
+        <p className="text-gray-500 mb-1.5">New Schedule Message</p>
         <p className="text-sm text-semibold">
           You are scheduled for <strong>[Event]</strong> at{" "}
           <strong>[Location]</strong> from <strong>[Start Date]</strong> -{" "}
           <strong>[End Date]</strong>, <strong>[Start Time]</strong> -{" "}
           <strong>[End Time]</strong>
+        </p>
+      </div>
+
+      <div className="bg-[#F1F6FB] text-gray-700 p-3 rounded-md mt-3">
+        <p className="text-gray-500 mb-1.5">Update Schedule Message</p>
+        <p className="text-sm text-semibold">
+          Your schedule for <strong>[Event]</strong> at{" "}
+          <strong>[Location]</strong> is updated from{" "}
+          <strong>[Start Date]</strong> - <strong>[End Date]</strong>,{" "}
+          <strong>[Start Time]</strong> - <strong>[End Time]</strong>
         </p>
       </div>
 
@@ -68,7 +78,11 @@ const SmsInfo = () => {
             type="text"
             disabled={!isEditable}
             placeholder="Enter here"
-            className="w-full rounded-md outline-none text-sm text-semibold"
+            className={`w-full rounded-md outline-none text-sm text-semibold p-2 transition ${
+              isEditable
+                ? "bg-white text-black border border-gray-300"
+                : "bg-gray-100 text-gray-500 cursor-not-allowed"
+            }`}
             value={form.twilioEndpoint}
             onChange={(e) =>
               setForm({ ...form, twilioEndpoint: e.target.value })
@@ -79,9 +93,21 @@ const SmsInfo = () => {
 
       {/* Save Button */}
       <div className="mt-6 flex justify-end">
-        <button className="bg-blue-600 text-white px-6 py-2 cursor-pointer rounded-md shadow hover:bg-blue-700">
-          Save Details
-        </button>
+        {isEditable ? (
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+            onClick={() => setIsEditable(false)}
+          >
+            Save
+          </button>
+        ) : (
+          <button
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition"
+            onClick={() => setIsEditable(true)}
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

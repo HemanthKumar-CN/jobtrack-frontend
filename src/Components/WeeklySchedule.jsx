@@ -5,6 +5,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchWeeklySchedule } from "../redux/slices/scheduleSlice";
 import { convertToLocalTime } from "../Utils/convertToLocalTime";
+import { lightenColor } from "../Utils/lightenColor";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const WeeklySchedule = ({ setRenderCalendar }) => {
@@ -92,6 +93,7 @@ const WeeklySchedule = ({ setRenderCalendar }) => {
       {/* Table Container */}
       <div className="w-full  border-white bg-white rounded-lg shadow-sm">
         {/* Scrollable Wrapper */}
+        {/* <div className="overflow-auto max-h-[65vh] h-[65vh] custom-scrollbar"> */}
         <div className="overflow-auto max-h-[65vh] h-[65vh] custom-scrollbar">
           {/* Header (Sticky) */}
           <div
@@ -120,11 +122,13 @@ const WeeklySchedule = ({ setRenderCalendar }) => {
           {weeklySchedules.map((employee, index) => (
             <div
               key={index}
-              className={`grid border border-white ${
-                index % 2 === 0
-                  ? "bg-[rgba(24,105,187,0.1)]"
-                  : "bg-[rgba(255,255,255,1)] text-black"
-              }`}
+              className={`grid border border-white 
+                ${
+                  index % 2 === 0
+                    ? "bg-[rgba(24,105,187,0.1)]"
+                    : "bg-[rgba(255,255,255,1)] text-black"
+                }
+              `}
               style={{ gridTemplateColumns: "150px 150px repeat(7, 1fr)" }}
             >
               <div className="p-2 text-[rgba(54, 53, 101, 1)]  border-gray-300">
@@ -155,7 +159,7 @@ const WeeklySchedule = ({ setRenderCalendar }) => {
                 return (
                   <div
                     key={i}
-                    className={`p-2 font-semibold text-center border border-white ${
+                    className={` font-semibold text-center border border-white ${
                       isSameMonth(day, currentDate) ? "" : ""
                       // "opacity-50 bg-gray-200"
                     }`}
@@ -165,12 +169,22 @@ const WeeklySchedule = ({ setRenderCalendar }) => {
                         {allSchedules.map((sch, idx) => (
                           <div
                             key={idx}
-                            className={`text-xs px-1 rounded-md mb-1 ${
-                              index % 2 === 0
-                                ? "bg-blue-200 text-black"
-                                : "bg-gray-200 text-black"
-                            }`}
+                            style={{
+                              backgroundColor: lightenColor(
+                                sch.colour_code,
+                                0.6,
+                              ),
+                            }}
+                            className={`text-xs px-1 p-3 rounded-md mb-1 
+                              ${
+                                // index % 2 === 0
+                                //   ? "bg-blue-200 text-black"
+                                //   : "bg-gray-200 text-black"
+                                ""
+                              }
+                                `}
                           >
+                            <div className="mb-1.5">{sch.locationName}</div>
                             {`${convertToLocalTime(
                               sch.start_time,
                             )} - ${convertToLocalTime(sch.end_time)}`}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Select from "react-select";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const EmployeeMultiSelect = ({ employees, onChange }) => {
   const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -15,8 +15,8 @@ const EmployeeMultiSelect = ({ employees, onChange }) => {
     value: emp.id,
     label: `${emp.User.first_name} ${emp.User.last_name}`,
     imageUrl: emp?.User?.image_url
-      ? `${API_BASE_URL}${emp.User.image_url}`
-      : null,
+      ? `${API_IMAGE_BASE_URL}${emp.User.image_url}`
+      : `https://avatar.iran.liara.run/username?username=${emp.User.first_name}+${emp.User.last_name}`,
   }));
 
   // Custom render for dropdown items

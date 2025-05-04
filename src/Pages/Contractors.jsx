@@ -13,10 +13,13 @@ import {
 import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "../Components/Tooltip";
 
 const Contractors = () => {
   const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(null); // Track clicked row
+  const [sortField, setSortField] = useState("company_name"); // which field
+  const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
 
   const dispatch = useDispatch();
   const searchRef = useRef(null);
@@ -56,13 +59,15 @@ const Contractors = () => {
   useEffect(() => {
     if (page <= totalPages) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
-      dispatch(fetchContractors({ page, search })).then(() => {
-        if (listRef.current) {
-          listRef.current.scrollTop = 0; // Maintain position
-        }
-      });
+      dispatch(fetchContractors({ page, search, sortField, sortOrder })).then(
+        () => {
+          if (listRef.current) {
+            listRef.current.scrollTop = 0; // Maintain position
+          }
+        },
+      );
     }
-  }, [dispatch, page, search]);
+  }, [dispatch, page, search, sortField, sortOrder]);
 
   // Intersection Observer for infinite scroll
   const lastContractorRef = useCallback(
@@ -88,6 +93,20 @@ const Contractors = () => {
     } catch (error) {
       showToast(`Failed to delete Contractor: ${error}`, "error");
     }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // If same field clicked, toggle the order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // If different field clicked, set new field and reset to asc
+      setSortField(field);
+      setSortOrder("asc");
+    }
+
+    setSearch(searchRef.current?.value);
+    setPage(1);
   };
 
   return (
@@ -119,10 +138,85 @@ const Contractors = () => {
           className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
           style={{ gridTemplateColumns: "20% 20% 13% 12% 15% 20%" }}
         >
-          <div>Company Name</div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("company_name")}
+          >
+            Company Name
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "company_name" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "company_name" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
           <div>Address</div>
-          <div>City</div>
-          <div>State</div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("city")}
+          >
+            City
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("state")}
+          >
+            State
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
           <div>Email</div>
           <div>Phone</div>
         </div>
@@ -164,19 +258,23 @@ const Contractors = () => {
                     >
                       <BiSolidChevronRight />
                     </button> */}
-                    <div
-                      className=" text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
-                      onClick={() =>
-                        navigate(`/contractors/add/${contractor.id}`)
-                      }
-                    >
-                      {truncateText(contractor.company_name)}
-                    </div>
+                    <Tooltip text={contractor.company_name}>
+                      <div
+                        className=" text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                        onClick={() =>
+                          navigate(`/contractors/details/${contractor.id}`)
+                        }
+                      >
+                        {truncateText(contractor.company_name)}
+                      </div>
+                    </Tooltip>
                   </div>
                   <div>{truncateText(address, 25)}</div>
                   <div>{truncateText(contractor.city)}</div>
                   <div>{truncateText(contractor.state)}</div>
-                  <div>{truncateText(contractor.email, 30)}</div>
+                  <Tooltip text={contractor.email}>
+                    <div>{truncateText(contractor.email, 12)}</div>
+                  </Tooltip>
                   <div className="flex items-center py-1 justify-between">
                     <span>{truncateText(contractor.phone)}</span>
                     <span className="flex items-center">
@@ -207,7 +305,7 @@ const Contractors = () => {
 
                       <button
                         onClick={() =>
-                          navigate(`/contractors/add/${contractor.id}`)
+                          navigate(`/contractors/details/${contractor.id}`)
                         }
                         className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
                       >

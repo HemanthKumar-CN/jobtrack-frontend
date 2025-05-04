@@ -21,10 +21,11 @@ export const createEvent = createAsyncThunk(
 // Async thunk to fetch all events
 export const fetchEvents = createAsyncThunk(
   "event/fetchEvents",
-  async (search = "", { rejectWithValue }) => {
+  async ({ search = "", sortField, sortOrder }, { rejectWithValue }) => {
+    console.log("Fetching events with search:", search);
     try {
       const response = await axios.get(`${API_BASE_URL}/events`, {
-        params: { search },
+        params: { search, sortField, sortOrder },
         withCredentials: true,
       });
       return response.data;

@@ -10,11 +10,15 @@ import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
 import { truncateText } from "../Utils/truncateText";
+import Tooltip from "../Components/Tooltip";
 
 const Locations = () => {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("name"); // which field
+  const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
+
   const searchRef = useRef(null);
   const [page, setPage] = useState(1);
   const observer = useRef();
@@ -40,14 +44,16 @@ const Locations = () => {
   useEffect(() => {
     if (page <= totalPages) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
-      dispatch(fetchLocations({ page, search })).then(() => {
-        if (listRef.current) {
-          listRef.current.scrollTop =
-            listRef.current.scrollHeight - prevScrollHeight; // Maintain position
-        }
-      });
+      dispatch(fetchLocations({ page, search, sortField, sortOrder })).then(
+        () => {
+          if (listRef.current) {
+            listRef.current.scrollTop =
+              listRef.current.scrollHeight - prevScrollHeight; // Maintain position
+          }
+        },
+      );
     }
-  }, [dispatch, page, search]);
+  }, [dispatch, page, search, sortField, sortOrder]);
 
   // Intersection Observer for infinite scroll
   const lastLocationRef = useCallback(
@@ -78,6 +84,19 @@ const Locations = () => {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // If same field clicked, toggle the order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // If different field clicked, set new field and reset to asc
+      setSortField(field);
+      setSortOrder("asc");
+    }
+
+    setPage(1);
+  };
+
   return (
     <div className="p-2 rounded-lg">
       {/* Search Bar */}
@@ -104,10 +123,85 @@ const Locations = () => {
       <div className="p-1 bg-white rounded-xl shadow-md">
         {/* Headers */}
         <div className="grid grid-cols-5 bg-gray-100 p-3 font-semibold text-gray-700 rounded-md">
-          <div>Location Name</div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("name")}
+          >
+            Location Name
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "name" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "name" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
           <div className="ml-1">Address</div>
-          <div className="ml-2">City</div>
-          <div className="ml-3">State</div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("city")}
+          >
+            City
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "city" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+          <div
+            className="flex items-center gap-1 cursor-pointer select-none"
+            onClick={() => handleSort("state")}
+          >
+            State
+            <div className="flex flex-col ml-1">
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "asc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▲
+              </span>
+              <span
+                className={`leading-none text-xs ${
+                  sortField === "state" && sortOrder === "desc"
+                    ? "text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                ▼
+              </span>
+            </div>
+          </div>
           <div className="ml-4">Zip</div>
         </div>
 
@@ -128,21 +222,25 @@ const Locations = () => {
                   index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                 }`}
               >
-                <div
-                  onClick={() => navigate(`/locations/add/${warehouse.id}`)}
-                  className="border border-white p-3 py-4.5 text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
-                >
-                  {truncateText(warehouse.name)}
-                </div>
-                <div className="border border-white p-3 py-4.5">
-                  {formattedAddress.length > 25 ? (
-                    <span title={formattedAddress}>
-                      {`${formattedAddress.substring(0, 22)}...`}
-                    </span>
-                  ) : (
-                    formattedAddress
-                  )}
-                </div>
+                <Tooltip text={warehouse.name}>
+                  <div
+                    onClick={() => navigate(`/locations/add/${warehouse.id}`)}
+                    className="border border-white p-3 py-4.5 text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                  >
+                    {truncateText(warehouse.name)}
+                  </div>
+                </Tooltip>
+                <Tooltip text={formattedAddress}>
+                  <div className="border border-white p-3 py-4.5">
+                    {formattedAddress.length > 25 ? (
+                      <span title={formattedAddress}>
+                        {`${formattedAddress.substring(0, 22)}...`}
+                      </span>
+                    ) : (
+                      formattedAddress
+                    )}
+                  </div>
+                </Tooltip>
                 <div className="border border-white p-3 py-4.5">
                   {warehouse.city}
                 </div>
@@ -150,7 +248,7 @@ const Locations = () => {
                   {warehouse.state}
                 </div>
                 <div className="border border-white p-3 flex justify-between items-center">
-                  <span className="font-semibold">{warehouse.postal_code}</span>
+                  <span className="">{warehouse.postal_code}</span>
                   <span>
                     <button
                       onClick={() =>

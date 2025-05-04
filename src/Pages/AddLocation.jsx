@@ -227,12 +227,10 @@ const AddLocation = () => {
         <div className="bg-white p-8 pt-4 pb-15 rounded-2xl shadow-lg w-[60vw]">
           {/* Header */}
           <h2 className="text-xl font-semibold text-center text-[#1E1E1E]">
-            {id ? "Edit location" : "Add a Location"}
+            {id ? "Locations - Edit" : "Add a Location"}
           </h2>
           <p className="text-gray-500 text-center mb-6">
-            {id
-              ? "Edit the location details"
-              : "Fill in the details to add a new location"}
+            {id ? "" : "Fill in the details to add a new location"}
           </p>
 
           {/* Form */}
@@ -330,7 +328,26 @@ const AddLocation = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
+                onClick={() => cityRef.current?.click()}
+              >
+                <p className="text-gray-500 text-sm pl-1">
+                  City <span className="text-red-500">*</span>
+                </p>
+                <select
+                  ref={cityRef}
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full text-sm bg-transparent outline-none text-gray-700 mt-1 cursor-pointer"
+                >
+                  <option>Select City</option>
+                  {cities.map((city) => (
+                    <option key={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
                 onClick={() => stateRef.current?.click()}
@@ -354,28 +371,6 @@ const AddLocation = () => {
                 </select>
               </div>
               <div
-                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
-                onClick={() => cityRef.current?.click()}
-              >
-                <p className="text-gray-500 text-sm pl-1">
-                  City <span className="text-red-500">*</span>
-                </p>
-                <select
-                  ref={cityRef}
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full text-sm bg-transparent outline-none text-gray-700 mt-1 cursor-pointer"
-                >
-                  <option>Select City</option>
-                  {cities.map((city) => (
-                    <option key={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div
                 className="bg-[#F4F7FE] p-2 pl-3 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => zipRef.current?.focus()}
               >
@@ -391,7 +386,9 @@ const AddLocation = () => {
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 gap-4">
               {id ? (
                 <></>
               ) : (

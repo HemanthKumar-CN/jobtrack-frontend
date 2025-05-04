@@ -24,6 +24,7 @@ const AddEmployees = () => {
   const lastNameRef = useRef(null);
   const address1Ref = useRef(null);
   const address2Ref = useRef(null);
+  const statusTypeRef = useRef(null);
   const cityRef = useRef(null);
   const stateRef = useRef(null);
   const zipRef = useRef(null);
@@ -44,6 +45,7 @@ const AddEmployees = () => {
   const [lastName, setLastName] = useState("");
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
+  const [statusType, setStatusType] = useState("active");
   const [zip, setZip] = useState("");
   const [file, setFile] = useState(null);
   const [emergencyContactName, setEmergencyContactName] = useState("");
@@ -90,6 +92,7 @@ const AddEmployees = () => {
       setDob(formattedDob);
       setAddress1(employeeDetails?.address_1);
       setAddress2(employeeDetails?.address_2);
+      setStatusType(employeeDetails?.status);
       setEmployeeType(employeeDetails?.type);
       setEmployeePhone(employeeDetails?.phone);
       setEmail(employeeDetails?.User?.email);
@@ -252,6 +255,11 @@ const AddEmployees = () => {
           type: "text",
         },
         {
+          label: "Employee Status",
+          value: newEmployee.employee.status,
+          type: "text",
+        },
+        {
           label: "Hiring date",
           value: newEmployee.employee.hire_date,
           type: "date",
@@ -279,6 +287,7 @@ const AddEmployees = () => {
         lastName,
         address1,
         address2,
+        statusType,
         zip,
         Dob,
         file,
@@ -311,15 +320,13 @@ const AddEmployees = () => {
           <h2 className="text-2xl font-semibold text-center text-[#1E1E1E]">
             {id ? "Edit this Employee" : "Add an Employee"}
           </h2>
-          <p className="text-gray-500 text-center mb-4">
-            {id ? "" : "Enter employee details"}
-          </p>
+          <p className="text-gray-500 text-center mb-4">{id ? "" : ""}</p>
 
           {/* Profile Image */}
 
           <div className="flex justify-center mb-4 relative">
             {/* Profile Image */}
-            <div className="w-24 h-24 rounded-full overflow-hidden  border-gray-300 relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden border  border-gray-400 relative">
               <img
                 src={
                   employeeDetails?.User?.image_url == imagePreview &&
@@ -347,8 +354,8 @@ const AddEmployees = () => {
           </div>
 
           {/* Form */}
-          <form className="space-y-4 overflow-auto max-h-[40vh] custom-scrollbar">
-            <div className="grid grid-cols-3 gap-4">
+          <form className="space-y-4 custom-scrollbar">
+            <div className="grid grid-cols-2 gap-4">
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => firstNameRef.current?.focus()}
@@ -377,23 +384,6 @@ const AddEmployees = () => {
                   placeholder="Write here"
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
-              </div>
-
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
-                onClick={() => dobRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">Date of Birth</p>
-                <div className="relative mt-1 flex items-center">
-                  <input
-                    type="date"
-                    ref={dobRef}
-                    value={Dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  />
-                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
-                </div>
               </div>
             </div>
 
@@ -425,6 +415,119 @@ const AddEmployees = () => {
                   placeholder="Write here"
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
+                onClick={() => cityRef.current?.click()}
+              >
+                <p className="text-gray-500 text-sm ml-0.5">City</p>
+                <select
+                  ref={cityRef}
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
+                >
+                  <option>Select City</option>
+                  {cities.map((city) => (
+                    <option key={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
+                onClick={() => stateRef.current?.click()}
+              >
+                <p className="text-gray-500 text-sm ml-0.5">State</p>
+                <select
+                  ref={stateRef}
+                  value={selectedState}
+                  onChange={(e) => fetchCities(e.target.value)}
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
+                >
+                  <option>Select State</option>
+
+                  {states.map((state) => (
+                    <option key={state.name} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
+                onClick={() => zipRef.current?.focus()}
+              >
+                <p className="text-gray-500 text-sm">Zip</p>
+                <input
+                  ref={zipRef}
+                  type="text"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  placeholder="Write here"
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mt-14">
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
+                onClick={() => statusTypeRef.current?.click()}
+              >
+                <p className="text-gray-500 text-sm">Status</p>
+                <select
+                  ref={statusTypeRef}
+                  value={statusType}
+                  onChange={(e) => setStatusType(e.target.value)}
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
+                >
+                  <option disabled value={""}>
+                    Select Employee Status
+                  </option>
+
+                  <option value={"active"}>Active</option>
+                  <option value={"inactive"}>Inactive</option>
+                  <option value={"inactive-deceased"}>Inactive-Deceased</option>
+                </select>
+              </div>
+
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
+                onClick={() => hireDateRef.current?.showPicker()}
+              >
+                <p className="text-gray-500 text-sm">Hiring Date</p>
+                <div className="relative mt-1 flex items-center">
+                  <input
+                    type="date"
+                    ref={hireDateRef}
+                    value={hireDate}
+                    onChange={(e) => setHireDate(e.target.value)}
+                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
+                  />
+                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                </div>
+              </div>
+
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
+                onClick={() => dobRef.current?.showPicker()}
+              >
+                <p className="text-gray-500 text-sm">Date of Birth</p>
+                <div className="relative mt-1 flex items-center">
+                  <input
+                    type="date"
+                    ref={dobRef}
+                    value={Dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
+                  />
+                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
+                </div>
               </div>
             </div>
 
@@ -480,62 +583,6 @@ const AddEmployees = () => {
 
             <div className="grid grid-cols-3 gap-4">
               <div
-                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
-                onClick={() => stateRef.current?.click()}
-              >
-                <p className="text-gray-500 text-sm ml-0.5">State</p>
-                <select
-                  ref={stateRef}
-                  value={selectedState}
-                  onChange={(e) => fetchCities(e.target.value)}
-                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
-                >
-                  <option>Select State</option>
-
-                  {states.map((state) => (
-                    <option key={state.name} value={state.name}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
-                onClick={() => cityRef.current?.click()}
-              >
-                <p className="text-gray-500 text-sm ml-0.5">City</p>
-                <select
-                  ref={cityRef}
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
-                >
-                  <option>Select City</option>
-                  {cities.map((city) => (
-                    <option key={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
-                onClick={() => zipRef.current?.focus()}
-              >
-                <p className="text-gray-500 text-sm">Zip</p>
-                <input
-                  ref={zipRef}
-                  type="text"
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  placeholder="Write here"
-                  className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div
                 className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => emergencyContactNameRef.current?.focus()}
               >
@@ -563,23 +610,6 @@ const AddEmployees = () => {
                   placeholder="Write here"
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
-              </div>
-
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
-                onClick={() => hireDateRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">Hiring Date</p>
-                <div className="relative mt-1 flex items-center">
-                  <input
-                    type="date"
-                    ref={hireDateRef}
-                    value={hireDate}
-                    onChange={(e) => setHireDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  />
-                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
-                </div>
               </div>
             </div>
           </form>

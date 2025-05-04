@@ -4,6 +4,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSchedule } from "../redux/slices/scheduleSlice";
 import { convertToLocalTime } from "../Utils/convertToLocalTime";
+import { lightenColor } from "../Utils/lightenColor";
 const DailySchedule = ({ setRenderCalendar }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const dispatch = useDispatch();
@@ -73,7 +74,8 @@ const DailySchedule = ({ setRenderCalendar }) => {
 
       {/* Schedule Table */}
       <div className="w-full border-white bg-white rounded-lg shadow-sm">
-        <div className="overflow-auto max-h-[65vh] h-[65vh] custom-scrollbar">
+        <div className="">
+          {/* <div className="overflow-auto max-h-[65vh] h-[65vh] custom-scrollbar"> */}
           {/* Header */}
           <div
             className="grid bg-gray-100 text-[#1869BB] font-semibold sticky top-0 z-10"
@@ -137,15 +139,24 @@ const DailySchedule = ({ setRenderCalendar }) => {
                   {employee.last_name}
                 </div>
 
-                <div className="p-2 font-semibold text-center border border-white">
+                <div className=" font-semibold text-center border border-white">
                   {employee.schedules.length > 0 ? (
                     <div className="space-y-2">
                       {employee.schedules.map((schedule) => (
                         <div
                           key={schedule.schedule_id}
-                          className="bg-blue-100 text-blue-900 p-2 rounded-md shadow"
+                          className=" text-blue-900 p-3 rounded-md"
+                          style={{
+                            backgroundColor: lightenColor(
+                              schedule.colour_code,
+                              0.6,
+                            ),
+                          }}
                         >
                           <div className="text-xs text-gray-600">
+                            <div className="mb-1.5">
+                              {schedule.locationName}
+                            </div>
                             {convertToLocalTime(schedule.start_time)} -{" "}
                             {convertToLocalTime(schedule.end_time)}
                           </div>

@@ -7,10 +7,13 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Fetch contractors with pagination and search
 export const fetchContractors = createAsyncThunk(
   "contractors/fetchContractors",
-  async ({ page = 1, search = "" }, { rejectWithValue }) => {
+  async (
+    { page = 1, search = "", sortField, sortOrder },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/contractors`, {
-        params: { page, limit: 10, search },
+        params: { page, limit: 100, search, sortField, sortOrder },
         withCredentials: true,
       });
       return response.data;

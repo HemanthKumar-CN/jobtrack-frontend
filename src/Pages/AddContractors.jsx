@@ -197,10 +197,10 @@ const AddContractors = () => {
         <div className="bg-white p-8 pb-15 pt-2 rounded-2xl shadow-lg w-[70vw]">
           {/* Header */}
           <h2 className="text-2xl font-semibold text-center text-[#1E1E1E]">
-            {id ? "Edit this Contractor" : "Add a Contractor"}
+            {id ? "Contractor - Edit" : "Contractor - Add"}
           </h2>
           <p className="text-gray-500 text-center mb-4">
-            {id ? "Edit contractor details" : "Enter contractor details"}
+            {id ? "" : "Enter contractor details"}
           </p>
 
           {/* Profile Image */}
@@ -235,7 +235,7 @@ const AddContractors = () => {
           </div>
 
           {/* Form */}
-          <form className="space-y-4 overflow-auto max-h-[40vh] custom-scrollbar">
+          <form className="space-y-4  custom-scrollbar">
             <div className="grid grid-cols-2 gap-4">
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
@@ -268,7 +268,7 @@ const AddContractors = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => companyNameRef.current?.focus()}
@@ -295,6 +295,20 @@ const AddContractors = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Write your email"
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
+                />
+              </div>
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
+                onClick={() => phoneRef.current?.focus()}
+              >
+                <p className="text-gray-500 text-sm">Phone</p>
+                <input
+                  ref={phoneRef}
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Write here"
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
               </div>
@@ -331,7 +345,24 @@ const AddContractors = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div
+                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
+                onClick={() => cityRef.current?.click()}
+              >
+                <p className="text-gray-500 text-sm ml-0.5">City</p>
+                <select
+                  ref={cityRef}
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
+                >
+                  <option>Select City</option>
+                  {cities.map((city) => (
+                    <option key={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
                 onClick={() => stateRef.current?.click()}
@@ -352,26 +383,7 @@ const AddContractors = () => {
                   ))}
                 </select>
               </div>
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
-                onClick={() => cityRef.current?.click()}
-              >
-                <p className="text-gray-500 text-sm ml-0.5">City</p>
-                <select
-                  ref={cityRef}
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer text-sm"
-                >
-                  <option>Select City</option>
-                  {cities.map((city) => (
-                    <option key={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div
                 className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
                 onClick={() => zipRef.current?.focus()}
@@ -386,21 +398,9 @@ const AddContractors = () => {
                   className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
                 />
               </div>
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
-                onClick={() => phoneRef.current?.focus()}
-              >
-                <p className="text-gray-500 text-sm">Phone</p>
-                <input
-                  ref={phoneRef}
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Write here"
-                  className="w-full bg-transparent outline-none text-gray-700 mt-1 text-sm"
-                />
-              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4"></div>
           </form>
         </div>
         {/* Buttons */}
