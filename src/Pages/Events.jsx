@@ -216,7 +216,7 @@ const Events = () => {
         </div>
 
         {/* Event List */}
-        <div className="mt-2 overflow-auto max-h-[60vh] custom-scrollbar">
+        <div className="mt-2">
           {events.map((event, index) => {
             return (
               <div

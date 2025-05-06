@@ -251,7 +251,7 @@ const AddLocation = () => {
                   <img
                     src={
                       selectedLocation?.image_url == imagePreview
-                        ? `http://localhost:8080${imagePreview}`
+                        ? `${IMAGE_BASE_URL}${imagePreview}`
                         : imagePreview
                         ? imagePreview
                         : "https://randomuser.me/api/portraits/lego/7.jpg"
