@@ -26,7 +26,7 @@ const OverlappingAvatars = ({ employees }) => {
                 />
               ) : (
                 // Avatar with Initials
-                <div className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-white bg-[#3255F0] text-sm font-semibold text-white shrink-0">
+                <div className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-white bg-[#008CC8] text-sm font-semibold text-white shrink-0">
                   {initials}
                 </div>
               )}

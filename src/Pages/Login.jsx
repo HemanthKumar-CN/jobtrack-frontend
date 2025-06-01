@@ -45,11 +45,11 @@ const Login = () => {
         {/* Left Section */}
         <div
           className="flex flex-col justify-center rounded-l-4xl w-1/2
-         bg-[#3255F0] text-white relative p-8 pl-13 "
+         bg-[#1A2D43] text-white relative p-8 pl-13 "
         >
           {/* <div
           className="flex flex-col justify-center rounded-l-4xl w-1/2 opacity-80
-         bg-[#3255F0] text-white relative p-8 pl-13 "
+         bg-[#008CC8] text-white relative p-8 pl-13 "
         > */}
           <h1 className="text-3xl font-bold mb-2 flex justify-between w-64">
             <img src={CalendarLogo} alt="" className="" />
@@ -115,7 +115,7 @@ const Login = () => {
                 />
                 Remember me
               </label>
-              <a href="#" className="text-[#3255F0] text-sm font-semibold">
+              <a href="#" className="text-[#008CC8] text-sm font-semibold">
                 Forgot password?
               </a>
             </div>
@@ -123,7 +123,7 @@ const Login = () => {
             {/* Login Button */}
             <button
               onClick={handleLogin}
-              className="w-full cursor-pointer bg-[#3255F0] text-white p-3 rounded-lg font-semibold hover:bg-blue-700"
+              className="w-full cursor-pointer bg-[#1A2D43] text-white p-3 rounded-lg font-semibold hover:bg-[#008CC8] transition-colors disabled:opacity-50"
             >
               Login
             </button>

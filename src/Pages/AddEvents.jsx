@@ -19,7 +19,9 @@ import { convertToLocalDateTime } from "../Utils/convertToLocalDateTime";
 import { formatDateTimeLocal } from "../Utils/formatDateTimeLocal";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import Select from "react-select";
+import { convertToISOTime } from "../Utils/convertToISOTime";
 
 const AddEvents = () => {
   const startDateRef = useRef(null);
@@ -38,12 +40,25 @@ const AddEvents = () => {
   const [eventContractors, setEventContractors] = useState("");
   const [eventFields, setEventFields] = useState(null);
 
+  const [selectedLocations, setSelectedLocations] = useState([]);
+  const [contractorMap, setContractorMap] = useState({});
+
   const dispatch = useDispatch();
   const { locationsList, loading, error, contractors } = useSelector(
     (state) => state.dropDownList,
   );
 
   const { newEvent, event } = useSelector((state) => state.events);
+
+  const locationOptions = locationsList.map((l) => ({
+    label: l.name,
+    value: l.id,
+  }));
+
+  const contractorOptions = contractors.map((c) => ({
+    label: c.company_name,
+    value: c.id,
+  }));
 
   useEffect(() => {
     dispatch(fetchLocationsList());
@@ -56,6 +71,54 @@ const AddEvents = () => {
     }
   }, [id]);
 
+  const handleLocationChange = (selected) => {
+    setSelectedLocations(selected || []);
+    // Initialize contractor map if new location added
+    const newMap = { ...contractorMap };
+    selected?.forEach((loc) => {
+      if (!newMap[loc.value]) newMap[loc.value] = [];
+    });
+    setContractorMap(newMap);
+  };
+
+  const handleContractorChange = (locationId, selectedContractors) => {
+    setContractorMap((prev) => {
+      const existingContractors = prev[locationId] || [];
+
+      // Create a map for quick lookup
+      const existingMap = new Map(existingContractors.map((c) => [c.value, c]));
+
+      const updated =
+        selectedContractors?.map((c) => {
+          if (existingMap.has(c.value)) {
+            // Preserve existing time data
+            return existingMap.get(c.value);
+          } else {
+            // New contractor, set default times
+            return {
+              ...c,
+              startTime: "",
+              endTime: "",
+            };
+          }
+        }) || [];
+
+      return {
+        ...prev,
+        [locationId]: updated,
+      };
+    });
+  };
+
+  const handleTimeChange = (locationId, contractorId, field, value) => {
+    setContractorMap((prev) => ({
+      ...prev,
+      [locationId]: prev[locationId].map((c) =>
+        c.value === contractorId ? { ...c, [field]: value } : c,
+      ),
+    }));
+  };
+
   const handleBackToEvents = () => {
     navigate("/events");
     dispatch(clearEvent());
@@ -64,21 +127,34 @@ const AddEvents = () => {
   useEffect(() => {
     if (id && event) {
       setEventName(event.event_name);
-      setEventLocation(event.location_id);
 
-      // Convert ISO date to YYYY-MM-DD format
-      const formattedStartDate = event?.start_date
-        ? formatDateTimeLocal(event.start_date) // Extract only the date part
-        : "";
-      // Convert ISO date to YYYY-MM-DD format
-      const formattedEndDate = event?.end_date
-        ? formatDateTimeLocal(event.end_date) // Extract only the date part
-        : "";
+      console.log("Event:", event);
+      setStartDate(event.start_date);
+      setEndDate(event.end_date);
 
-      console.log(event.start_date, event.end_date);
-      setEndDate(formattedEndDate);
-      setStartDate(formattedStartDate);
-      setEventContractors(event.contractor_id);
+      // Prepare selectedLocations for dropdown
+      const locationDropdownValues = event.EventLocations.map((loc) => ({
+        label: loc.Location.name,
+        value: loc.Location.id,
+      }));
+      setSelectedLocations(locationDropdownValues);
+
+      // Build contractorMap for each location
+      const newContractorMap = {};
+
+      event.EventLocations.forEach((loc) => {
+        const locationId = loc.Location.id;
+        const contractors =
+          loc.EventLocationContractors?.map((elc) => ({
+            label: elc.Contractor.company_name,
+            value: elc.Contractor.id,
+            startTime: format(parseISO(elc.start_time), "HH:mm"),
+            endTime: format(parseISO(elc.end_time), "HH:mm"),
+          })) || [];
+        newContractorMap[locationId] = contractors;
+      });
+
+      setContractorMap(newContractorMap);
     }
   }, [event]);
 
@@ -111,29 +187,53 @@ const AddEvents = () => {
     }
   }, [newEvent]);
 
+  console.log("Selected Locations:", selectedLocations);
+  console.log("Contractor Map:", contractorMap);
+
   const handleAddEvent = () => {
-    console.log(eventName, eventContractors, eventLocation, startDate, endDate);
-    const newEvent = {
+    const payload = {
       event_name: eventName,
-      contractor_id: eventContractors,
-      location_id: eventLocation,
-      start_date: startDate,
-      end_date: endDate,
+      start_date: new Date(startDate).toISOString(), // convert to ISO
+      end_date: new Date(endDate).toISOString(),
+      locations: selectedLocations.map((loc) => ({
+        location_id: loc.value,
+        contractors: (contractorMap[loc.value] || []).map((contractor) => ({
+          contractor_id: contractor.value,
+          start_time: convertToISOTime(startDate, contractor.startTime),
+          end_time: convertToISOTime(startDate, contractor.endTime),
+        })),
+      })),
     };
-    dispatch(createEvent(newEvent));
+
+    console.log("Adding event:", selectedLocations, contractorMap, payload);
+    dispatch(createEvent(payload));
   };
 
   const handleEditEvent = async () => {
-    const updatedEvent = {
+    // const updatedEvent = {
+    //   event_name: eventName,
+    //   contractor_id: eventContractors,
+    //   location_id: eventLocation,
+    //   start_date: startDate,
+    //   end_date: endDate,
+    // };
+
+    const payload = {
       event_name: eventName,
-      contractor_id: eventContractors,
-      location_id: eventLocation,
-      start_date: startDate,
-      end_date: endDate,
+      start_date: new Date(startDate).toISOString(), // convert to ISO
+      end_date: new Date(endDate).toISOString(),
+      locations: selectedLocations.map((loc) => ({
+        location_id: loc.value,
+        contractors: (contractorMap[loc.value] || []).map((contractor) => ({
+          contractor_id: contractor.value,
+          start_time: convertToISOTime(startDate, contractor.startTime),
+          end_time: convertToISOTime(startDate, contractor.endTime),
+        })),
+      })),
     };
 
     try {
-      await dispatch(updateEvent({ id, updatedData: updatedEvent })).unwrap();
+      await dispatch(updateEvent({ id, updatedData: payload })).unwrap();
       showToast("Event updated successfully", "success");
       navigate("/events");
     } catch (error) {
@@ -185,7 +285,7 @@ const AddEvents = () => {
             </div>
 
             {/* Event Location - Click anywhere to open */}
-            <div
+            {/* <div
               className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
               onClick={() => eventLocationRef.current?.click()}
             >
@@ -205,7 +305,7 @@ const AddEvents = () => {
                   );
                 })}
               </select>
-            </div>
+            </div> */}
 
             {/* Date Fields */}
             <div className="grid grid-cols-2 gap-4">
@@ -215,26 +315,18 @@ const AddEvents = () => {
               >
                 <p className="text-gray-500 text-sm">Start Date</p>
                 <div className="relative mt-1 flex items-center">
-                  {/* <input
-                    type="datetime-local"
-                    ref={startDateRef}
-                    value={startDate}
-                    step="1800"
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer appearance-none"
-                  /> */}
-
                   <Flatpickr
+                    ref={startDateRef}
                     options={{
-                      enableTime: true,
-                      dateFormat: "d-m-Y H:i",
+                      // enableTime: true,
+                      dateFormat: "m/d/Y",
                       time_24hr: true,
                       minuteIncrement: 30, // Only allow 00 and 30
                     }}
-                    placeholder="dd-mm-yyyy"
+                    placeholder="MM/DD/YYYY"
                     value={startDate}
                     onChange={([date]) => {
-                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      const formatted = format(date, "MM/dd/yyyy");
                       setStartDate(formatted);
                     }}
                     className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
@@ -250,25 +342,18 @@ const AddEvents = () => {
               >
                 <p className="text-gray-500 text-sm">End Date</p>
                 <div className="relative mt-1 flex items-center">
-                  {/* <input
-                    type="datetime-local"
-                    ref={endDateRef}
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full bg-transparent outline-none text-gray-700 cursor-pointer 
-                              appearance-none -webkit-appearance-none -moz-appearance-none"
-                  /> */}
                   <Flatpickr
+                    ref={endDateRef}
                     options={{
-                      enableTime: true,
-                      dateFormat: "d-m-Y H:i",
+                      // enableTime: true,
+                      dateFormat: "m/d/Y",
                       time_24hr: true,
                       minuteIncrement: 30, // Only allow 00 and 30
                     }}
-                    placeholder="dd-mm-yyyy"
+                    placeholder="MM/DD/YYYY"
                     value={endDate}
                     onChange={([date]) => {
-                      const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+                      const formatted = format(date, "MM/dd/yyyy");
                       setEndDate(formatted);
                     }}
                     className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
@@ -278,8 +363,19 @@ const AddEvents = () => {
               </div>
             </div>
 
+            <div className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer">
+              <label className="font-medium mb-2 block">Select Locations</label>
+              <Select
+                isMulti
+                options={locationOptions}
+                value={selectedLocations}
+                onChange={handleLocationChange}
+                className="text-sm"
+              />
+            </div>
+
             {/* Contractor - Click anywhere to open */}
-            <div
+            {/* <div
               className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
               onClick={() => contractorRef.current?.click()}
             >
@@ -299,7 +395,87 @@ const AddEvents = () => {
                   );
                 })}
               </select>
-            </div>
+            </div> */}
+
+            {selectedLocations.map((location) => (
+              <div
+                key={location.value}
+                className="border border-blue-200 rounded p-4 bg-gray-50 shadow-sm space-y-4"
+              >
+                <h3 className="font-semibold text-md text-gray-800">
+                  {location.label}
+                </h3>
+
+                <div>
+                  <label className="font-medium block mb-1">
+                    Select Contractors
+                  </label>
+                  <Select
+                    isMulti
+                    options={contractorOptions}
+                    value={contractorMap[location.value] || []}
+                    onChange={(selected) =>
+                      handleContractorChange(location.value, selected)
+                    }
+                    className="text-sm"
+                  />
+                </div>
+
+                {contractorMap[location.value]?.length > 0 && (
+                  <div className="space-y-2">
+                    {contractorMap[location.value].map((contractor) => (
+                      <div
+                        key={contractor.value}
+                        className="flex flex-wrap items-center gap-4 ml-4"
+                      >
+                        <span className="w-40 font-medium text-gray-700">
+                          {contractor.label}
+                        </span>
+                        <Flatpickr
+                          value={contractor.startTime}
+                          options={{
+                            enableTime: true,
+                            noCalendar: true,
+                            dateFormat: "H:i",
+                            minuteIncrement: 30,
+                          }}
+                          placeholder="hh:mm"
+                          onChange={(date) =>
+                            handleTimeChange(
+                              location.value,
+                              contractor.value,
+                              "startTime",
+                              date[0]?.toTimeString().slice(0, 5) || "",
+                            )
+                          }
+                          className="border border-gray-400 p-1 rounded w-28"
+                        />
+
+                        <Flatpickr
+                          value={contractor.endTime}
+                          options={{
+                            enableTime: true,
+                            noCalendar: true,
+                            dateFormat: "H:i",
+                            minuteIncrement: 30,
+                          }}
+                          placeholder="hh:mm"
+                          onChange={(date) =>
+                            handleTimeChange(
+                              location.value,
+                              contractor.value,
+                              "endTime",
+                              date[0]?.toTimeString().slice(0, 5) || "",
+                            )
+                          }
+                          className="border border-gray-400 p-1 rounded w-28"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </form>
         </div>
         {/* Buttons - Correct Placement */}
@@ -316,14 +492,14 @@ const AddEvents = () => {
           {id ? (
             <button
               onClick={handleEditEvent}
-              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
+              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
             >
               Save <FaArrowRight />
             </button>
           ) : (
             <button
               onClick={handleAddEvent}
-              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
+              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
             >
               Save <FaArrowRight />
             </button>

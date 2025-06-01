@@ -14,6 +14,7 @@ import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "../Components/Tooltip";
+import collapsedLogo from "../assets/collapsedLogo.svg";
 
 const Contractors = () => {
   const [search, setSearch] = useState("");
@@ -110,7 +111,7 @@ const Contractors = () => {
   };
 
   return (
-    <div className="p-4 pt-0 rounded-xl">
+    <div className="p-2 pt-0 rounded-xl">
       {/* Search Bar */}
       <div className="relative mb-4">
         <input
@@ -131,6 +132,8 @@ const Contractors = () => {
           size={18}
         />
       </div>
+
+      <img src={collapsedLogo} alt="" />
 
       <div className="p-1 bg-white rounded-xl shadow-md">
         {/* Table Headers */}
@@ -260,7 +263,7 @@ const Contractors = () => {
                     </button> */}
                     <Tooltip text={contractor.company_name}>
                       <div
-                        className=" text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                        className=" text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
                         onClick={() =>
                           navigate(`/contractors/details/${contractor.id}`)
                         }

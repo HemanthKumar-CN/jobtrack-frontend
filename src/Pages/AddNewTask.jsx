@@ -461,7 +461,7 @@ const AddTask = () => {
 
             <button
               onClick={handleAddNewTask}
-              className="flex cursor-pointer items-center gap-2 px-6 py-3 bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md bottom-0 right-50"
+              className="flex cursor-pointer items-center gap-2 px-6 py-3 bg-[#008CC8] hover:bg-blue-800 text-white rounded-lg shadow-md bottom-0 right-50"
             >
               Save <FaArrowRight />
             </button>

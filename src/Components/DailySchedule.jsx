@@ -54,7 +54,7 @@ const DailySchedule = ({ setRenderCalendar }) => {
 
         {/* Right: View Mode Buttons */}
         <div className="flex space-x-2">
-          <button className="px-5 py-2 bg-[#3255F0] text-white font-semibold rounded-xl">
+          <button className="px-5 py-2 bg-[#008CC8] text-white font-semibold rounded-xl">
             Daily
           </button>
           <button

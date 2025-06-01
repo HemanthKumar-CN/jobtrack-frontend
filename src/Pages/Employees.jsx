@@ -376,14 +376,14 @@ const Employees = () => {
                       <BiSolidChevronRight className="" />
                     </button> */}
                     <div
-                      className="text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                      className="text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
                       onClick={() => navigate(`/employees/add/${employee.id}`)}
                     >
                       {truncateText(employee?.User?.first_name)}
                     </div>
                   </div>
                   <div
-                    className="text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                    className="text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
                     onClick={() => navigate(`/employees/add/${employee.id}`)}
                   >
                     {truncateText(employee?.User?.last_name)}
@@ -413,7 +413,7 @@ const Employees = () => {
                         }
                         className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
                       >
-                        <FaPen className="text-blue-600 hover:scale-110 transition" />
+                        <FaPen className="text-[#008CC8] hover:scale-110 transition" />
                       </button>
                       <button
                         onClick={() =>
@@ -444,7 +444,7 @@ const Employees = () => {
                       onClick={() => navigate(`/employees/add/${employee.id}`)}
                       className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-blue-100 rounded-t-lg"
                     >
-                      <FaPen className="mr-2 text-blue-500" /> Edit
+                      <FaPen className="mr-2 text-[#1A2D43]" /> Edit
                     </button>
                     <button
                       onClick={() =>

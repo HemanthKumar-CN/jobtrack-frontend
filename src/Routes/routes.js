@@ -10,6 +10,7 @@ import EmployeeHoursDayReport from "../Pages/EmployeeHoursDayReport";
 import EmployeeHoursWeekReport from "../Pages/EmployeeHoursWeekReport";
 import Employees from "../Pages/Employees";
 import EmployeeScheduleReport from "../Pages/EmployeeScheduleReport";
+import EmployeeSchedulingDashboard from "../Pages/EmployeeSchedulingDashboard";
 import Events from "../Pages/Events";
 import Locations from "../Pages/Locations";
 import LocationScheduleReport from "../Pages/LocationScheduleReport";
@@ -35,7 +36,7 @@ const routes = [
   { path: "/events/add", element: AddEvents },
   { path: "/events/add/:id", element: AddEvents },
   { path: "/schedules", element: Schedules },
-  { path: "/schedules/new-task", element: AddTask },
+  { path: "/schedules/new-task", element: EmployeeSchedulingDashboard },
   { path: "/schedules/new-task/:id", element: AddTask },
   { path: "/sms-info", element: SmsInfo },
   { path: "/locations", element: Locations },

@@ -65,7 +65,7 @@ const EmployeeCalendar = () => {
           <div>
             <button
               onClick={() => setCurrentDate(new Date())}
-              className="ml-4 px-4 py-2 cursor-pointer bg-[#3255F0]  text-white rounded-md"
+              className="ml-4 px-4 py-2 cursor-pointer bg-[#008CC8]  text-white rounded-md"
             >
               Today
             </button>

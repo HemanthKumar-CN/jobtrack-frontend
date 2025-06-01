@@ -625,14 +625,14 @@ const AddEmployees = () => {
           {id ? (
             <button
               onClick={handleEditEmployee}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 absolute bottom-0 right-50  bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
+              className="cursor-pointer flex items-center gap-2 px-6 py-3 absolute bottom-0 right-50  bg-[#008CC8] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
               Save <FaArrowRight />
             </button>
           ) : (
             <button
               onClick={handleAddEmployee}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 absolute bottom-0 right-50  bg-[#3255F0] hover:bg-blue-800 text-white rounded-lg shadow-md"
+              className="cursor-pointer flex items-center gap-2 px-6 py-3 absolute bottom-0 right-50  bg-[#008CC8] hover:bg-blue-800 text-white rounded-lg shadow-md"
             >
               Save <FaArrowRight />
             </button>

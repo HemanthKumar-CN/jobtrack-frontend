@@ -78,7 +78,7 @@ const WeeklySchedule = ({ setRenderCalendar }) => {
           >
             Daily
           </button>
-          <button className="px-4 py-2 bg-[#3255F0] text-white font-semibold rounded-xl">
+          <button className="px-4 py-2 bg-[#008CC8] text-white font-semibold rounded-xl">
             Weekly
           </button>
           <button

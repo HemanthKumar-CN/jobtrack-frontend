@@ -98,7 +98,7 @@ const Locations = () => {
   };
 
   return (
-    <div className="p-2 rounded-lg">
+    <div className="p-2 pt-0 rounded-lg">
       {/* Search Bar */}
       <div className="relative mb-2">
         <input
@@ -121,8 +121,10 @@ const Locations = () => {
       </div>
 
       <div className="p-1 bg-white rounded-xl shadow-md">
-        {/* Headers */}
-        <div className="grid grid-cols-5 bg-gray-100 p-3 font-semibold text-gray-700 rounded-md">
+        <div
+          className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
+          style={{ gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr" }}
+        >
           <div
             className="flex items-center gap-1 cursor-pointer select-none"
             onClick={() => handleSort("name")}
@@ -205,7 +207,6 @@ const Locations = () => {
           <div className="ml-4">Zip</div>
         </div>
 
-        {/* Warehouse List */}
         <div
           ref={listRef}
           className="mt-2 overflow-auto max-h-[60vh] custom-scrollbar"
@@ -219,27 +220,21 @@ const Locations = () => {
               <div
                 key={warehouse.id}
                 ref={index === locations.length - 1 ? lastLocationRef : null}
-                className={`grid grid-cols-5 items-center rounded-md ${
+                className={`grid items-center rounded-md ${
                   index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
                 }`}
+                style={{ gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr" }}
               >
                 <Tooltip text={warehouse.name}>
                   <div
                     onClick={() => navigate(`/locations/add/${warehouse.id}`)}
-                    className="border border-white p-3 py-4.5 text-[#3255f0] cursor-pointer hover:underline hover:font-semibold"
+                    className="border border-white p-3 py-4.5 text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
                   >
                     {truncateText(warehouse.name)}
                   </div>
                 </Tooltip>
                 <Tooltip text={formattedAddress}>
-                  <div className="border border-white p-3 py-4.5">
-                    {/* {formattedAddress.length > 25 ? (
-                      <span title={formattedAddress}>
-                        {`${formattedAddress.substring(0, 22)}...`}
-                      </span>
-                    ) : (
-                      formattedAddress
-                    )} */}
+                  <div className="border border-white p-3 py-4.5 break-words whitespace-pre-wrap">
                     {formattedAddress}
                   </div>
                 </Tooltip>

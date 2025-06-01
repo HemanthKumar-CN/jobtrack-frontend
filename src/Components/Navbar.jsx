@@ -2,6 +2,7 @@ import React from "react";
 
 import { FaBell, FaBars } from "react-icons/fa";
 import grpLogo from "../assets/logoGrp.png";
+import calendarLogo from "../assets/calendarLogo.svg";
 import { FaSignOutAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getHeaderAndBreadcrumb } from "../Utils/getHeaderAndBreadcrumb";
@@ -11,8 +12,12 @@ import { logoutUser } from "../redux/slices/authSlice";
 import { useState, useRef, useEffect } from "react";
 import { MdCheckCircle, MdCancel } from "react-icons/md";
 import NotificationDropdown from "./NotificationDropdown";
+import {
+  TbLayoutSidebarLeftCollapse,
+  TbLayoutSidebarRightCollapse,
+} from "react-icons/tb";
 
-const Navbar = () => {
+const Navbar = ({ setCollapsed, collapsed }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -90,16 +95,40 @@ const Navbar = () => {
     }
   };
   return (
-    <div className="flex  justify-between items-center bg-white shadow-md px-6 py-3">
+    <div className="flex  justify-between items-center bg-white shadow-md px-6 pl-2 py-3">
       {/* Left Section - Page Title & Breadcrumbs */}
 
       {/* Logo Section */}
-      <div className="flex w-1/3 justify-between items-end ">
-        <div className="flex ">
-          <img src={grpLogo} alt="React Logo" className="w-60" />
-        </div>
+      <div
+        className={`flex ${
+          collapsed ? "w-1/5" : "w-1/8"
+        } justify-between items-end`}
+      >
+        {/* <div className="flex w-3/4 justify-between items-center">
+          <div className="flex">
+            {false ? (
+              <img
+                src={calendarLogo}
+                alt="React Logo"
+                className="w-15 p-1.5 bg-amber-700"
+              />
+            ) : (
+              <img src={grpLogo} alt="React Logo" className="w-40" />
+            )}
+          </div>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="cursor-pointer text-2xl"
+          >
+            {collapsed ? (
+              <TbLayoutSidebarRightCollapse className="text-gray-600 hover:text-[#008CC8] hover:bg-amber-100 rounded-xs" />
+            ) : (
+              <TbLayoutSidebarLeftCollapse className=" text-gray-600 hover:text-[#008CC8] hover:bg-amber-100 rounded-xs" />
+            )}
+          </button>
+        </div> */}
         <div className="text-center  w-full">
-          <h1 className="text-black text-[16px] font-[700] leading-[19.5px]">
+          <h1 className="text-black text-[1.3em] font-[700] leading-[19.5px]">
             {heading}
           </h1>
           <span className="text-gray-500 text-[12px] font-[600] leading-[14.63px]">
@@ -115,8 +144,8 @@ const Navbar = () => {
             {/* Add an Event Button */}
             <Link to="/events/add">
               <button
-                className="flex cursor-pointer items-center bg-[#3255F0] text-white px-4 py-2 rounded-md shadow-md 
-          hover:bg-[#1F4BCC] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]"
+                className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md 
+          hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]"
               >
                 {/* <Plus size={18} className="mr-2" /> */}
                 <BsFillPlusCircleFill className="mr-2 w-6 h-6" />
@@ -131,8 +160,8 @@ const Navbar = () => {
             {/* Add an Event Button */}
             <Link to="/schedules/new-task">
               <button
-                className="flex cursor-pointer items-center bg-[#3255F0] text-white px-4 py-2 rounded-md shadow-md 
-          hover:bg-[#1F4BCC] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]"
+                className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md 
+          hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]"
               >
                 <BsFillPlusCircleFill className="mr-2 w-6 h-6" />
                 Add a Task
@@ -145,7 +174,7 @@ const Navbar = () => {
           <div className="flex space-x-4 border-r border-gray-300 pr-5">
             {/* Add an Event Button */}
             <Link to="/locations/add">
-              <button className="flex cursor-pointer items-center bg-[#3255F0] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1F4BCC] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
+              <button className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
                 <BsFillPlusCircleFill className="mr-2 w-6 h-6" /> Add a Location
               </button>
             </Link>
@@ -155,7 +184,7 @@ const Navbar = () => {
         {location.pathname === "/employees" && (
           <div className="flex space-x-4 border-r border-gray-300 pr-5">
             <Link to="/employees/add">
-              <button className="flex cursor-pointer items-center bg-[#3255F0] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1F4BCC] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
+              <button className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
                 <BsFillPlusCircleFill className="mr-2 w-6 h-6" /> Add an
                 Employee
               </button>
@@ -166,7 +195,7 @@ const Navbar = () => {
         {location.pathname === "/contractors" && (
           <div className="flex space-x-4 border-r border-gray-300 pr-5">
             <Link to="/contractors/details">
-              <button className="flex cursor-pointer items-center bg-[#3255F0] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1F4BCC] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
+              <button className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
                 <BsFillPlusCircleFill className="mr-2 w-6 h-6" /> Add a
                 Contractor
               </button>
@@ -195,13 +224,13 @@ const Navbar = () => {
           alt="Profile"
           className="w-9 h-9 rounded-full border-2 border-gray-300"
         />
-        <div className="border-l border-gray-300 pl-7 ml-4">
+        {/* <div className="border-l border-gray-300 pl-7 ml-4">
           {" "}
           <FaSignOutAlt
             onClick={handleLogout}
             className="text-[#1869BB] cursor-pointer hover:text-[#5097dd] text-lg w-6 h-6"
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

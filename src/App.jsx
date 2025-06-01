@@ -14,6 +14,7 @@ import { fetchEmployeeData } from "./redux/slices/employeeSlice";
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
   const { auth, roleName, checkAuthLoading, error } = useSelector(
     (state) => state.auth,
@@ -42,7 +43,7 @@ function App() {
   }, [auth]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className=" h-screen bg-gray-100">
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
@@ -51,11 +52,38 @@ function App() {
         <Route
           path="/*"
           element={
+            // <ProtectedRoute>
+            //   <div className="flex-grow flex flex-col">
+            //     <Navbar setCollapsed={setCollapsed} collapsed={collapsed} />
+            //     <div className="flex flex-grow">
+            //       <Sidebar setCollapsed={setCollapsed} collapsed={collapsed} />
+            //       <div className="flex-grow p-8 pt-5 overflow-y-auto bg-[#f1f6fb]">
+            //         <Routes>
+            //           <Route path="/" element={<Navigate to="/dashboard" />} />
+            //           {routes.map((route) => (
+            //             <Route
+            //               key={route.path}
+            //               path={route.path}
+            //               element={<route.element />}
+            //             />
+            //           ))}
+            //           <Route path="*" element={<div>Not Found</div>} />
+            //         </Routes>
+            //       </div>
+            //     </div>
+            //   </div>
+            // </ProtectedRoute>
+
             <ProtectedRoute>
-              <div className="flex-grow flex flex-col">
-                <Navbar />
-                <div className="flex flex-grow">
-                  <Sidebar />
+              <div className="flex h-screen">
+                {/* Sidebar on the left */}
+                <Sidebar setCollapsed={setCollapsed} collapsed={collapsed} />
+
+                {/* Right side: navbar on top and content below */}
+                <div className="flex flex-col flex-grow">
+                  <Navbar setCollapsed={setCollapsed} collapsed={collapsed} />
+
+                  {/* Main content area */}
                   <div className="flex-grow p-8 pt-5 overflow-y-auto bg-[#f1f6fb]">
                     <Routes>
                       <Route path="/" element={<Navigate to="/dashboard" />} />
