@@ -41,3 +41,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   color: white !important;
   font-weight: bold !important;
 }
+
+.react-calendar__tile--active {
+  background-color: #008cc8 !important; /* Tailwind's bg-blue-700 */
+}

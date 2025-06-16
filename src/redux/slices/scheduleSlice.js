@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios from "../../api/axiosInstance";
 import { format } from "date-fns";
 import { parseISO } from "date-fns";
 
@@ -39,9 +39,12 @@ export const fetchSchedule = createAsyncThunk(
   "schedules/fetchSchedule",
   async (date, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/schedules/${date}`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/schedules/allSchedules/${date}`,
+        {
+          withCredentials: true,
+        },
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error fetching schedule");
@@ -108,6 +111,65 @@ export const fetchEmployeeSchedules = createAsyncThunk(
   },
 );
 
+export const fetchNotScheduledEmployees = createAsyncThunk(
+  "schedules/fetchNotScheduledEmployees",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/employees/not-scheduled`,
+        {
+          // params: { startDate, endDate },
+          withCredentials: true,
+        },
+      );
+      return response.data; // Assuming API response format: { data: [...] }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to fetch not scheduled employees",
+      );
+    }
+  },
+);
+
+export const fetchClassifications = createAsyncThunk(
+  "schedules/fetchClassifications",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/schedules/classification/class-list`,
+        {
+          withCredentials: true,
+        },
+      );
+      return response.data; // Assuming API response format: { data: [...] }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch classifications",
+      );
+    }
+  },
+);
+
+export const fetchEventlist = createAsyncThunk(
+  "schedules/fetchEventlist",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/schedules/eventList/event-location-contractors`,
+        {
+          withCredentials: true,
+        },
+      );
+      return response.data; // Assuming API response format: { data: [...] }
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch event list",
+      );
+    }
+  },
+);
+
 // 🔹 Schedule Slice
 const scheduleSlice = createSlice({
   name: "schedules",
@@ -121,6 +183,18 @@ const scheduleSlice = createSlice({
     error: null,
     schedulesLoading: false,
     schedulesError: null,
+
+    notScheduledEmployees: [],
+    notScheduledEmployeesLoading: false,
+    notScheduledEmployeesError: null,
+
+    classifications: [],
+    classificationsLoading: false,
+    classificationsError: null,
+
+    eventList: [],
+    eventListLoading: false,
+    eventListError: null,
   },
   reducers: {
     clearSchedule: (state) => {
@@ -198,6 +272,42 @@ const scheduleSlice = createSlice({
       .addCase(fetchEmployeeSchedules.rejected, (state, action) => {
         state.schedulesLoading = false;
         state.schedulesError = action.payload;
+      })
+      .addCase(fetchNotScheduledEmployees.pending, (state) => {
+        state.notScheduledEmployeesLoading = true;
+        state.notScheduledEmployeesError = null;
+      })
+      .addCase(fetchNotScheduledEmployees.fulfilled, (state, action) => {
+        state.notScheduledEmployeesLoading = false;
+        state.notScheduledEmployees = action.payload.data;
+      })
+      .addCase(fetchNotScheduledEmployees.rejected, (state, action) => {
+        state.notScheduledEmployeesLoading = false;
+        state.notScheduledEmployeesError = action.payload;
+      })
+      .addCase(fetchClassifications.pending, (state) => {
+        state.classificationsLoading = true;
+        state.classificationsError = null;
+      })
+      .addCase(fetchClassifications.fulfilled, (state, action) => {
+        state.classificationsLoading = false;
+        state.classifications = action.payload; // Assuming API returns { data: [...] }
+      })
+      .addCase(fetchClassifications.rejected, (state, action) => {
+        state.classificationsLoading = false;
+        state.classificationsError = action.payload;
+      })
+      .addCase(fetchEventlist.pending, (state) => {
+        state.eventListLoading = true;
+        state.eventListError = null;
+      })
+      .addCase(fetchEventlist.fulfilled, (state, action) => {
+        state.eventListLoading = false;
+        state.eventList = action.payload; // Assuming API returns { data: [...] }
+      })
+      .addCase(fetchEventlist.rejected, (state, action) => {
+        state.eventListLoading = false;
+        state.eventListError = action.payload;
       });
   },
 });

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios from "../../api/axiosInstance";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Async thunk to fetch all locations

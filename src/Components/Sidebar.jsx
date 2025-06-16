@@ -168,13 +168,17 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
       </div>
 
       {/* Sidebar Menu */}
-      <div className="space-y-5">
+      <div className={`space-y-5 ${roleName == "EMPLOYEE" ? "flex-1/2" : ""} `}>
         {menuItems.map(
           (section) =>
             roleName == section.role && (
               <div key={section.heading} className="mb-4">
                 {!collapsed && (
-                  <h3 className="text-sm font-semibold text-white/80 mb-4 uppercase border-b border-gray-500 pb-[1vh] ">
+                  <h3
+                    className={`text-sm font-semibold text-white/80 mb-4 uppercase ${
+                      section.heading ? "border-b" : ""
+                    } border-gray-500 pb-[1vh]`}
+                  >
                     {section.heading}
                   </h3>
                 )}
