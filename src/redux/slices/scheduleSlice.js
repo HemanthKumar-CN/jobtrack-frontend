@@ -34,13 +34,41 @@ export const createBulkSchedule = createAsyncThunk(
   },
 );
 
+export const updateSchedule = createAsyncThunk(
+  "schedules/updateSchedule",
+  async ({ id, updatedData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/schedules/${id}`,
+        updatedData,
+        { withCredentials: true },
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Error updating schedule");
+    }
+  },
+);
+
 // Async thunk to fetch schedules
 export const fetchSchedule = createAsyncThunk(
   "schedules/fetchSchedule",
-  async (date, { rejectWithValue }) => {
+  async (
+    { date, status, event_id, location_id, search },
+    { rejectWithValue },
+  ) => {
     try {
+      const queryParams = new URLSearchParams();
+
+      if (status) queryParams.append("status", status);
+      if (event_id) queryParams.append("task_event_id", event_id);
+      if (location_id) queryParams.append("location_id", location_id);
+      if (search) queryParams.append("search", search); // <-- added
+
+      const query = queryParams.toString();
+
       const response = await axios.get(
-        `${API_BASE_URL}/schedules/allSchedules/${date}`,
+        `${API_BASE_URL}/schedules/allSchedules/${date}?${query}`,
         {
           withCredentials: true,
         },
@@ -48,6 +76,24 @@ export const fetchSchedule = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Error fetching schedule");
+    }
+  },
+);
+
+export const fetchPreviousAssignments = createAsyncThunk(
+  "schedules/fetchPreviousAssignments",
+  async (employeeIds, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/schedules/previous-assignments`,
+        { employeeIds },
+        { withCredentials: true },
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || "Error fetching previous data",
+      );
     }
   },
 );
@@ -113,16 +159,16 @@ export const fetchEmployeeSchedules = createAsyncThunk(
 
 export const fetchNotScheduledEmployees = createAsyncThunk(
   "schedules/fetchNotScheduledEmployees",
-  async (_, { rejectWithValue }) => {
+  async (date, { rejectWithValue }) => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/employees/not-scheduled`,
         {
-          // params: { startDate, endDate },
+          params: { date }, // ✅ append ?date=YYYY-MM-DD
           withCredentials: true,
         },
       );
-      return response.data; // Assuming API response format: { data: [...] }
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -195,10 +241,15 @@ const scheduleSlice = createSlice({
     eventList: [],
     eventListLoading: false,
     eventListError: null,
+
+    previousAssignments: null,
   },
   reducers: {
     clearSchedule: (state) => {
       state.newSchedule = null;
+    },
+    hidePreviousAssignments: (state) => {
+      state.previousAssignments = null;
     },
   }, // No synchronous reducers needed
   extraReducers: (builder) => {
@@ -278,6 +329,11 @@ const scheduleSlice = createSlice({
         state.notScheduledEmployeesError = null;
       })
       .addCase(fetchNotScheduledEmployees.fulfilled, (state, action) => {
+        console.log(
+          action.payload,
+          "?????///////// fetchNotScheduledEmployees",
+        );
+
         state.notScheduledEmployeesLoading = false;
         state.notScheduledEmployees = action.payload.data;
       })
@@ -309,9 +365,12 @@ const scheduleSlice = createSlice({
         state.eventListLoading = false;
         state.eventListError = action.payload;
       });
+    builder.addCase(fetchPreviousAssignments.fulfilled, (state, action) => {
+      state.previousAssignments = action.payload;
+    });
   },
 });
 
-export const { clearSchedule } = scheduleSlice.actions;
+export const { clearSchedule, hidePreviousAssignments } = scheduleSlice.actions;
 
 export default scheduleSlice.reducer;

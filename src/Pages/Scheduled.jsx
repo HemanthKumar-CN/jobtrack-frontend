@@ -6,154 +6,119 @@ import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import { TbCalendarPlus } from "react-icons/tb";
 import { TbEdit } from "react-icons/tb";
 import { SiTicktick } from "react-icons/si";
-import { useDispatch } from "react-redux";
-import { fetchSchedule } from "../redux/slices/scheduleSlice";
-import { format } from "date-fns";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSchedule, updateSchedule } from "../redux/slices/scheduleSlice";
+import { format, parse } from "date-fns";
+import { capitalizeFirst } from "../Utils/capitalizeFirst";
 
-const Scheduled = ({ activeTab, formattedDate }) => {
+const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
+  const [editedData, setEditedData] = useState({});
+  const [filterEvent, setFilterEvent] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
 
   const dispatch = useDispatch();
 
-  const appointments = [
-    {
-      id: 1,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 2,
-      name: "Guy Hawkins",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 3,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 4,
-      name: "Annette Black",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 5,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 6,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 7,
-      name: "Devon Lane",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 8,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 9,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 10,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 11,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-  ];
+  const { schedules } = useSelector((state) => state.schedules);
+  const { locationsList, employees } = useSelector(
+    (state) => state.dropDownList,
+  );
+  const {
+    notScheduledEmployees,
+    notScheduledEmployeesLoading,
+    notScheduledEmployeesError,
+    classifications,
+    eventList,
+  } = useSelector((state) => state.schedules);
+
+  const handleEditClick = (appointment) => {
+    setEditingRowId(appointment.id);
+    setEditedData((prev) => ({
+      ...prev,
+      [appointment.id]: {
+        event_id: appointment.event.event_id,
+        event_location_contractor_id: appointment.location_contractor.id,
+        classification_id: appointment.class.id,
+        start_time: format(new Date(appointment.start_time), "HH:mm"),
+        comments: appointment.comments || "",
+      },
+    }));
+  };
+
+  const handleSave = (id) => {
+    var payload = editedData[id];
+    console.log("Saving edited data:", payload);
+
+    if (payload?.start_time) {
+      // Parse the date and time
+      const parsedDate = parse(
+        formattedDate + " " + payload.start_time,
+        "EEEE, MMMM dd, yyyy HH:mm",
+        new Date(),
+      );
+
+      // Get the system's timezone offset
+      const offsetMinutes = parsedDate.getTimezoneOffset();
+      const sample1 = parsedDate.getTime() + offsetMinutes * 60 * 1000;
+
+      // Convert to UTC
+      const utcDate = new Date(sample1);
+      console.log(utcDate, "?>>>?????=======+++");
+
+      const startTime = format(utcDate, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+      payload = {
+        ...payload,
+        start_time: startTime,
+      };
+    }
+
+    console.log(payload, "???????????");
+
+    dispatch(updateSchedule({ id: id, updatedData: payload }))
+      .unwrap()
+      .then(() => {
+        setEditingRowId(null);
+        const dateFilter = format(formattedDate, "yyyy-MM-dd");
+
+        dispatch(
+          fetchSchedule({
+            date: dateFilter,
+            event_id: filterEvent,
+            location_id: filterLocation,
+            search: searchTerm,
+          }),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
     const dateFilter = format(formattedDate, "yyyy-MM-dd");
 
-    dispatch(fetchSchedule(dateFilter));
-  }, [formattedDate]);
+    dispatch(
+      fetchSchedule({
+        date: dateFilter,
+        event_id: filterEvent,
+        location_id: filterLocation,
+        search: searchTerm,
+      }),
+    );
+  }, [formattedDate, filterEvent, filterLocation, searchTerm]);
+
+  console.log(searchTerm, "?////////");
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Done":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Cancel":
-        return "bg-red-100 text-red-800";
+      case "confirmed":
+        return "text-[#00AD3A] bg-[#00AD3A1A]";
+      case "pending":
+        return "text-[#FF8000] bg-[#FF80001A]";
+      case "declined":
+        return "text-[#E73F3F] bg-[#E73F3F1A]";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -170,6 +135,10 @@ const Scheduled = ({ activeTab, formattedDate }) => {
     ];
     return colors[index % colors.length];
   };
+
+  console.log(editedData, "???///////////");
+
+  console.log(eventList);
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-auto">
       <div className="">
@@ -178,15 +147,16 @@ const Scheduled = ({ activeTab, formattedDate }) => {
             <div className="text-sm text-gray-600 flex flex-col gap-4">
               <span className="font-semibold">{activeTab}</span>
               <span>
-                Total: 77, Available: 26, Limited: 25, Unavailable: 26
+                Total: {schedules.length}, Available: 26, Limited: 25,
+                Unavailable: 26
               </span>
             </div>
 
             <div className="flex items-center space-x-1">
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <PiListChecksBold className="w-4 h-4 border p-[0.01em] rounded-sm text-[#008CC8]" />
                 <span className="text-xs">Select All</span>
-              </button>
+              </button> */}
               <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <RiArrowGoBackLine className="w-4 h-4 border p-[0.08em] rounded-sm" />
                 <span className="text-xs">Show Previous Assignments</span>
@@ -195,14 +165,14 @@ const Scheduled = ({ activeTab, formattedDate }) => {
                 <BsFileEarmarkArrowDown className="w-4 h-4" />
                 <span className="text-xs">Get Previous Assignments</span>
               </button>
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <TbCalendarPlus className="w-4 h-4" />
                 <span className="text-xs">Recommend Scheduled</span>
-              </button>
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              </button> */}
+              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <TbCalendarPlus className="w-4 h-4" />
                 <span className="text-xs">Schedule Selected</span>
-              </button>
+              </button> */}
               <button
                 onClick={() => setShowFilter(!showFilter)}
                 className="p-2 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50"
@@ -225,10 +195,18 @@ const Scheduled = ({ activeTab, formattedDate }) => {
                   <label className="block text-sm font-medium mb-1">
                     Event
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => setFilterEvent(e.target.value)}
+                  >
                     <option value="">Filter by event...</option>
-                    <option value="loc1">Event A</option>
-                    <option value="loc2">Event B</option>
+                    {eventList.map((event) => {
+                      return (
+                        <option key={event?.id} value={event?.id}>
+                          {event?.event_name}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -237,10 +215,14 @@ const Scheduled = ({ activeTab, formattedDate }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Location
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                  >
                     <option value="">Filter by location</option>
-                    <option value="loc1">Location A</option>
-                    <option value="loc2">Location B</option>
+                    {locationsList?.map((location) => (
+                      <option value={location?.id}>{location?.name}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -283,10 +265,10 @@ const Scheduled = ({ activeTab, formattedDate }) => {
         </div>
 
         {/* Rows */}
-        {appointments.map((appointment, index) => (
+        {schedules.map((appointment, index) => (
           <div
             key={appointment.id}
-            className="grid items-center border-t text-sm border-gray-200 px-4 py-4 hover:bg-gray-50"
+            className="grid items-center border-t text-sm border-gray-200 px-4 py-4 hover:bg-gray-50 gap-1.5"
             style={{
               gridTemplateColumns:
                 "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
@@ -302,11 +284,11 @@ const Scheduled = ({ activeTab, formattedDate }) => {
                   index,
                 )} flex items-center justify-center text-white text-sm font-medium shrink-0`}
               >
-                {appointment.name.charAt(0)}
+                {appointment.first_name.charAt(0)}
               </div>
               <div className="min-w-0">
                 <div className="font-medium text-gray-900 truncate">
-                  {appointment.name}
+                  {appointment.first_name} {appointment.last_name}
                 </div>
                 <div className="text-gray-500 text-xs truncate">
                   {appointment.phone}
@@ -315,13 +297,13 @@ const Scheduled = ({ activeTab, formattedDate }) => {
             </div>
 
             {/* Capacity */}
-            <div>
+            <div className="">
               <span
                 className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
                   appointment.status,
                 )}`}
               >
-                {appointment.status}
+                {capitalizeFirst(appointment.status)}
               </span>
             </div>
 
@@ -330,21 +312,46 @@ const Scheduled = ({ activeTab, formattedDate }) => {
               <span
                 className={`inline-flex py-1 text-xs font-medium rounded-full `}
               >
-                {appointment.capacity}
+                {appointment.employee_restrictions
+                  .map((r) => r.description)
+                  .join(", ")}
               </span>
             </div>
 
             {/* Event */}
             <div>
               {editingRowId === appointment.id ? (
-                <select className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white">
-                  <option>None</option>
+                <select
+                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                  onChange={(e) =>
+                    setEditedData((prev) => ({
+                      ...prev,
+                      [appointment.id]: {
+                        ...prev[appointment.id],
+                        event_id: e.target.value,
+                        event_location_contractor_id: "",
+                      },
+                    }))
+                  }
+                  value={
+                    editedData[appointment.id]?.event_id ||
+                    appointment?.event?.event_id
+                  }
+                >
+                  <option value="" className="bg-gray-200 font-semibold">
+                    Select Event
+                  </option>
+                  {eventList.map((event) => (
+                    <option key={event.id} value={event.id}>
+                      {event.event_name}
+                    </option>
+                  ))}
                 </select>
               ) : (
                 <span
                   className={`inline-flex py-1 text-xs font-medium rounded-full `}
                 >
-                  {appointment.event}
+                  {appointment?.event?.eventName}
                 </span>
               )}
             </div>
@@ -352,29 +359,112 @@ const Scheduled = ({ activeTab, formattedDate }) => {
             {/* Location */}
             <div>
               {editingRowId === appointment.id ? (
-                <select className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white">
-                  <option>None</option>
+                <select
+                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                  onChange={(e) =>
+                    setEditedData((prev) => ({
+                      ...prev,
+                      [appointment.id]: {
+                        ...prev[appointment.id],
+                        event_location_contractor_id: e.target.value,
+                      },
+                    }))
+                  }
+                  value={
+                    editedData[appointment.id]?.event_location_contractor_id ||
+                    appointment?.location_contractor?.id
+                  }
+                >
+                  {(() => {
+                    const selectedEventId =
+                      editedData[appointment.id]?.event_id ??
+                      appointment?.event?.event_id;
+
+                    // console.log(
+                    //   "🔍 Selected Event ID:",
+                    //   typeof selectedEventId,
+                    // );
+
+                    const selectedEvent = eventList.find(
+                      (e) => e.id == selectedEventId,
+                    );
+                    // console.log(
+                    //   "🔍 Selected Event Object:",
+                    //   selectedEvent,
+                    //   eventList,
+                    // );
+
+                    if (!selectedEvent) {
+                      //   console.warn("⚠️ No matching event found in eventList");
+                      return null;
+                    }
+
+                    const locations = selectedEvent.locations || [];
+                    // console.log("📍 Event Locations:", locations);
+
+                    const allOptions = locations.flatMap((loc) => {
+                      //   console.log("➡️ Current Location:", loc);
+
+                      return loc.contractors.map((contractor) => {
+                        // console.log("👷 Contractor:", contractor);
+
+                        return (
+                          <option
+                            key={contractor.event_location_contractor_id}
+                            value={contractor.event_location_contractor_id}
+                          >
+                            {`${loc.name} - ${
+                              contractor.name || contractor.company_name
+                            }`}
+                          </option>
+                        );
+                      });
+                    });
+
+                    return allOptions;
+                  })()}
                 </select>
               ) : (
                 <span
                   className={`inline-flex py-1 text-xs font-medium rounded-full `}
                 >
-                  {appointment.location}
+                  {appointment.location_contractor.name}
                 </span>
               )}
             </div>
 
             {/* Class */}
-            <div>
+            <div className="ml-3">
               {editingRowId === appointment.id ? (
-                <select className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white">
+                <select
+                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                  value={
+                    editedData[appointment.id]?.classification_id ||
+                    appointment?.class?.id
+                  }
+                  onChange={(e) =>
+                    setEditedData((prev) => ({
+                      ...prev,
+                      [appointment.id]: {
+                        ...prev[appointment.id],
+                        classification_id: e.target.value,
+                      },
+                    }))
+                  }
+                >
                   <option>None</option>
+                  {classifications?.map((classification) => (
+                    <option key={classification.id} value={classification.id}>
+                      {classification.abbreviation} -{" "}
+                      {classification.description}
+                    </option>
+                  ))}
                 </select>
               ) : (
                 <span
                   className={`inline-flex py-1 text-xs font-medium rounded-full `}
                 >
-                  {appointment.class}
+                  {appointment.class.abbreviation}
                 </span>
               )}
             </div>
@@ -382,14 +472,79 @@ const Scheduled = ({ activeTab, formattedDate }) => {
             {/* Start Time */}
             <div>
               {editingRowId === appointment.id ? (
-                <select className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white">
+                <select
+                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                  value={
+                    editedData[appointment.id]?.start_time ||
+                    format(new Date(appointment.start_time), "HH:mm")
+                  }
+                  onChange={(e) =>
+                    setEditedData((prev) => ({
+                      ...prev,
+                      [appointment.id]: {
+                        ...prev[appointment.id],
+                        start_time: e.target.value,
+                      },
+                    }))
+                  }
+                >
                   <option>None</option>
+                  <option value="00:00">0:00</option>
+                  <option value="00:30">00:30</option>
+                  <option value="01:00">01:00</option>
+                  <option value="01:30">01:30</option>
+                  <option value="02:00">02:00</option>
+                  <option value="02:30">02:30</option>
+                  <option value="03:00">03:00</option>
+                  <option value="03:30">03:30</option>
+                  <option value="04:00">04:00</option>
+                  <option value="04:30">04:30</option>
+                  <option value="05:00">05:00</option>
+                  <option value="05:30">05:30</option>
+                  <option value="06:00">06:00</option>
+                  <option value="06:30">06:30</option>
+                  <option value="07:00">07:00</option>
+                  <option value="07:30">07:30</option>
+                  <option value="08:00">08:00</option>
+                  <option value="08:30">08:30</option>
+                  <option value="09:00">09:00</option>
+                  <option value="09:30">09:30</option>
+                  <option value="10:00">10:00</option>
+                  <option value="10:30">10:30</option>
+                  <option value="11:00">11:00</option>
+                  <option value="11:30">11:30</option>
+                  <option value="12:00">12:00</option>
+                  <option value="12:30">12:30</option>
+                  <option value="13:00">13:00</option>
+                  <option value="13:30">13:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="14:30">14:30</option>
+                  <option value="15:00">15:00</option>
+                  <option value="15:30">15:30</option>
+                  <option value="16:00">16:00</option>
+                  <option value="16:30">16:30</option>
+                  <option value="17:00">17:00</option>
+                  <option value="17:30">17:30</option>
+                  <option value="18:00">18:00</option>
+                  <option value="18:30">18:30</option>
+                  <option value="19:00">19:00</option>
+                  <option value="19:30">19:30</option>
+                  <option value="20:00">20:00</option>
+                  <option value="20:30">20:30</option>
+                  <option value="21:00">21:00</option>
+                  <option value="21:30">21:30</option>
+                  <option value="22:00">22:00</option>
+                  <option value="22:30">22:30</option>
+                  <option value="23:00">23:00</option>
+                  <option value="23:30">23:30</option>
+                  <option value="23:59">23:59</option>
                 </select>
               ) : (
                 <span
                   className={`inline-flex py-1 text-xs font-medium rounded-full `}
                 >
-                  {appointment.startTime}
+                  {format(new Date(appointment.start_time), "h:mm a")}
+                  {/* {appointment.start_time} */}
                 </span>
               )}
             </div>
@@ -401,6 +556,18 @@ const Scheduled = ({ activeTab, formattedDate }) => {
                   type="text"
                   placeholder="Enter comments..."
                   className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
+                  value={
+                    editedData[appointment.id]?.comments || appointment.comments
+                  }
+                  onChange={(e) =>
+                    setEditedData((prev) => ({
+                      ...prev,
+                      [appointment.id]: {
+                        ...prev[appointment.id],
+                        comments: e.target.value,
+                      },
+                    }))
+                  }
                 />
               ) : (
                 <span
@@ -415,14 +582,14 @@ const Scheduled = ({ activeTab, formattedDate }) => {
             <div className="flex justify-center">
               {editingRowId == appointment.id ? (
                 <button
-                  onClick={() => setEditingRowId(null)}
+                  onClick={() => handleSave(appointment.id)}
                   className="p-2 text-gray-400 hover:text-gray-600"
                 >
                   <SiTicktick className="w-4 h-4 text-[#00AD3A] cursor-pointer" />
                 </button>
               ) : (
                 <button
-                  onClick={() => setEditingRowId(appointment.id)}
+                  onClick={() => handleEditClick(appointment)}
                   className="p-2 text-gray-400 cursor-pointer hover:text-gray-600"
                 >
                   <TbEdit className="w-4 h-4" />
@@ -433,7 +600,7 @@ const Scheduled = ({ activeTab, formattedDate }) => {
         ))}
 
         {/* Empty State */}
-        {appointments.length === 0 && (
+        {schedules.length === 0 && (
           <div className="text-center py-6 text-gray-500 text-sm border-t border-gray-200">
             No appointments found.
           </div>

@@ -30,6 +30,7 @@ import {
   fetchClassifications,
   fetchEventlist,
 } from "../redux/slices/scheduleSlice";
+import { fetchLocationsList } from "../redux/slices/dropDownSlice";
 
 const Schedules = () => {
   const [renderCalendar, setRenderCalendar] = useState("Monthly");
@@ -49,156 +50,8 @@ const Schedules = () => {
   useEffect(() => {
     dispatch(fetchClassifications());
     dispatch(fetchEventlist());
+    dispatch(fetchLocationsList());
   }, []);
-
-  const appointments = [
-    {
-      id: 1,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 2,
-      name: "Guy Hawkins",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 3,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 4,
-      name: "Annette Black",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 5,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 6,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 7,
-      name: "Devon Lane",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 8,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 9,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 10,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 11,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Done":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "Cancel":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getAvatarColor = (index) => {
-    const colors = [
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-yellow-500",
-    ];
-    return colors[index % colors.length];
-  };
 
   return (
     <div className=" flex-grow">
@@ -308,6 +161,7 @@ const Schedules = () => {
           activeTab={activeTab}
           formattedDate={formattedDate}
           setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
         />
       )}
 
@@ -316,6 +170,7 @@ const Schedules = () => {
           activeTab={activeTab}
           formattedDate={formattedDate}
           setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
         />
       )}
 

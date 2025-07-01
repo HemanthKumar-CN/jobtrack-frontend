@@ -45,3 +45,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .react-calendar__tile--active {
   background-color: #008cc8 !important; /* Tailwind's bg-blue-700 */
 }
+
+input[type="checkbox"] {
+  transform: scale(0.8);
+}
+input[type="checkbox"]:checked {
+  background-color: #008cc8; /* Tailwind's bg-blue-700 */
+}

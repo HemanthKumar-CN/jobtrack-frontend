@@ -10,6 +10,7 @@ import Login from "./Pages/Login";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { checkAuth } from "./redux/slices/authSlice";
 import { fetchEmployeeData } from "./redux/slices/employeeSlice";
+import ScheduleResponse from "./Pages/ScheduleResponse";
 
 function App() {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ function App() {
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
+        <Route path="/schedule/:responseToken" element={<ScheduleResponse />} />
 
         {/* Protected Routes */}
         <Route

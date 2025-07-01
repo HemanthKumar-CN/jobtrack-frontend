@@ -42,6 +42,23 @@ export const logoutUser = createAsyncThunk(
   },
 );
 
+export const getScheduleByToken = createAsyncThunk(
+  "schedules/getByToken",
+  async (responseToken, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/users/by-token/${responseToken}`,
+        {
+          withCredentials: true,
+        },
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Failed to fetch schedule");
+    }
+  },
+);
+
 export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue }) => {
@@ -58,6 +75,27 @@ export const checkAuth = createAsyncThunk(
   },
 );
 
+export const respondToSchedule = createAsyncThunk(
+  "schedules/respondToSchedule",
+  async ({ responseToken, response }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/users/schedule/respond`,
+        {
+          response_token: responseToken,
+          status: response,
+        },
+        { withCredentials: true },
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || "Failed to respond to schedule",
+      );
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -67,6 +105,10 @@ const authSlice = createSlice({
     error: null,
     checkAuthLoading: null,
     checkAuthError: null,
+
+    tokenSchedule: null,
+    tokenScheduleLoading: false,
+    tokenScheduleError: null,
   },
   reducers: {
     // logout: (state) => {
@@ -112,6 +154,19 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload;
+      })
+      .addCase(getScheduleByToken.pending, (state) => {
+        state.tokenScheduleLoading = true;
+        state.tokenScheduleError = null;
+      })
+      .addCase(getScheduleByToken.fulfilled, (state, action) => {
+        state.tokenScheduleLoading = false;
+        state.tokenSchedule = action.payload;
+      })
+      .addCase(getScheduleByToken.rejected, (state, action) => {
+        state.tokenScheduleLoading = false;
+        state.tokenScheduleError = action.payload;
+        state.tokenSchedule = null;
       });
   },
 });

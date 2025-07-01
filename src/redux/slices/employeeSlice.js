@@ -31,51 +31,87 @@ export const fetchEmployees = createAsyncThunk(
   },
 );
 
-// Create Employee
-export const createEmployee = createAsyncThunk(
-  "employees/createEmployee",
-  async (employeeData, { rejectWithValue }) => {
+export const fetchRestrictions = createAsyncThunk(
+  "restrictions/fetchRestrictions",
+  async (_, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
-
-      formData.append("first_name", employeeData.firstName);
-      formData.append("last_name", employeeData.lastName);
-      formData.append("address_1", employeeData.address1);
-      formData.append("address_2", employeeData.address2);
-      formData.append("postal_code", employeeData.zip);
-      formData.append("date_of_birth", employeeData.Dob);
-      formData.append("status", employeeData.statusType);
-      formData.append("role_id", 3);
-      formData.append("city", employeeData.selectedCity);
-      formData.append("state", employeeData.selectedState);
-      formData.append("hire_date", employeeData.hireDate);
-      formData.append("email", employeeData.email);
-      formData.append("type", employeeData.employeeType);
-      formData.append("phone", employeeData.employeePhone);
-      formData.append(
-        "emergency_contact_name",
-        employeeData.emergencyContactName,
+      const res = await axios.get(
+        `${API_BASE_URL}/employees/get-restrictions`,
+        {
+          withCredentials: true,
+        },
       );
-      formData.append(
-        "emergency_contact_phone",
-        employeeData.emergencyContactPhone,
-      );
-
-      if (employeeData.file) {
-        formData.append("image", employeeData.file);
-      }
-
-      console.log(formData, "-=========");
-
-      const response = await axios.post(`${API_BASE_URL}/employees`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
-      });
-      return response.data;
+      return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data || "Failed to create employee",
+        error.response?.data?.message || "Failed to fetch restrictions",
       );
+    }
+  },
+);
+
+// Create Employee
+// export const createEmployee = createAsyncThunk(
+//   "employees/createEmployee",
+//   async (employeeData, { rejectWithValue }) => {
+//     try {
+//       const formData = new FormData();
+
+//       formData.append("first_name", employeeData.firstName);
+//       formData.append("last_name", employeeData.lastName);
+//       formData.append("address_1", employeeData.address1);
+//       formData.append("address_2", employeeData.address2);
+//       formData.append("postal_code", employeeData.zip);
+//       formData.append("date_of_birth", employeeData.Dob);
+//       formData.append("status", employeeData.statusType);
+//       formData.append("role_id", 3);
+//       formData.append("city", employeeData.selectedCity);
+//       formData.append("state", employeeData.selectedState);
+//       formData.append("hire_date", employeeData.hireDate);
+//       formData.append("email", employeeData.email);
+//       formData.append("type", employeeData.employeeType);
+//       formData.append("phone", employeeData.employeePhone);
+//       formData.append(
+//         "emergency_contact_name",
+//         employeeData.emergencyContactName,
+//       );
+//       formData.append(
+//         "emergency_contact_phone",
+//         employeeData.emergencyContactPhone,
+//       );
+
+//       if (employeeData.file) {
+//         formData.append("image", employeeData.file);
+//       }
+
+//       console.log(formData, "-=========");
+
+//       const response = await axios.post(`${API_BASE_URL}/employees`, formData, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//         withCredentials: true,
+//       });
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(
+//         error.response?.data || "Failed to create employee",
+//       );
+//     }
+//   },
+// );
+
+export const createEmployee = createAsyncThunk(
+  "employees/createEmployee",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/employees`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
     }
   },
 );
@@ -316,6 +352,8 @@ const employeeSlice = createSlice({
     EmployeeLocationSchedulesByWeek: {},
     employeeLocationSchedulesByWeekLoading: false,
     employeeLocationSchedulesByWeekError: null,
+
+    employeeRestrictionList: [],
   },
   reducers: {
     resetEmployees(state) {
@@ -481,6 +519,9 @@ const employeeSlice = createSlice({
       .addCase(getLocationEmployeeWeeklyHours.rejected, (state, action) => {
         state.employeeLocationSchedulesByWeekLoading = false;
         state.employeeLocationSchedulesByWeekError = action.payload;
+      })
+      .addCase(fetchRestrictions.fulfilled, (state, action) => {
+        state.employeeRestrictionList = action.payload;
       });
   },
 });

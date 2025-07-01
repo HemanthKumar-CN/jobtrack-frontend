@@ -30,7 +30,7 @@ const SuccessCard = ({ title, fields, onBack, backButton, modalData }) => {
 
         {/* Display Dynamic Fields */}
 
-        <div className="overflow-auto max-h-[50vh] custom-scrollbar">
+        <div className="">
           {fields?.map((field, index) => {
             if (field.type == "image") {
               return (
@@ -116,7 +116,7 @@ const SuccessCard = ({ title, fields, onBack, backButton, modalData }) => {
       <div className="mt-6 text-center absolute bottom-0">
         <button
           onClick={onBack}
-          className="bg-[#008CC8] hover:bg-blue-700 cursor-pointer text-white font-semibold py-2 px-6 rounded-lg transition"
+          className="bg-[#008CC8] hover:bg-[#008cc8bb] cursor-pointer text-white font-semibold py-2 px-6 rounded-lg transition"
         >
           {backButton}
         </button>
