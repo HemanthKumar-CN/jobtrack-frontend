@@ -691,13 +691,19 @@ const AddEmployees = () => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [employeeFields, setEmployeeFields] = useState([]);
+  const [inactiveReason, setInactiveReason] = useState("");
+
+  const [four, setFour] = useState("");
+  const [GES, setGES] = useState("");
+  const [FDC, setFDC] = useState("");
+  const [DrvLic, setDrvLic] = useState("");
 
   const [recurringTimes, setRecurringTimes] = useState([
-    { days: [], startDate: "", startTime: "", endDate: "", endTime: "" },
+    { days: [], startDate: "", endDate: "", startTime: "", endTime: "" },
   ]);
 
   const [timeOffs, setTimeOffs] = useState([
-    { name: "", startDate: "", startTime: "", endDate: "", endTime: "" },
+    { reason_id: "", startDate: "", endDate: "", startTime: "", endTime: "" },
   ]);
 
   const {
@@ -845,7 +851,11 @@ const AddEmployees = () => {
     if (!SSN.trim()) missingFields.push("SSN");
     if (!birthdate) missingFields.push("Birthdate");
     if (!SN.trim()) missingFields.push("SN");
-    if (!numberId.trim()) missingFields.push("Number ID");
+    // if (!numberId.trim()) missingFields.push("Number ID");
+    // if (!four.trim()) missingFields.push("Four");
+    // if (!GES.trim()) missingFields.push("GES");
+    // if (!FDC.trim()) missingFields.push("FDC");
+    // if (!DrvLic.trim()) missingFields.push("DrvLic");
     if (!status.trim()) missingFields.push("Status");
     if (!type.trim()) missingFields.push("Type");
 
@@ -877,9 +887,14 @@ const AddEmployees = () => {
     formData.append("birthdate", birthdate);
     formData.append("comments", comments);
     formData.append("SN", SN);
-    formData.append("numberId", numberId);
+    // formData.append("numberId", numberId);
+    formData.append("four", four);
+    formData.append("GES", GES);
+    formData.append("FDC", FDC);
+    formData.append("DrvLic", DrvLic);
     formData.append("status", status);
     formData.append("type", type);
+    formData.append("inactive_reason", inactiveReason);
 
     // Image upload
     if (imageFile) {
@@ -895,7 +910,13 @@ const AddEmployees = () => {
     formData.append("timeOffs", JSON.stringify(timeOffs));
 
     // Redux dispatch (calls backend API)
-    dispatch(createEmployee(formData));
+    dispatch(createEmployee(formData))
+      .unwrap()
+      .then(() => {})
+      .catch((err) => {
+        console.log(err, "Error while creating employee");
+        showToast("Error while creating employee", "error");
+      });
 
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}:`, pair[1]);
@@ -915,8 +936,127 @@ const AddEmployees = () => {
 
   return (
     <div className=" w-full max-w-7xl mx-auto">
+      <div className="bg-white px-5 py-5 rounded-xl shadow mb-4">
+        <div
+          className={`grid ${
+            status == "inactive" ? "grid-cols-4" : "grid-cols-3"
+          }  gap-6 mb-6`}
+        >
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              SN <span className="text-red-600">*</span>
+            </label>
+            <input
+              value={SN}
+              onChange={(e) => setSN(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
+              placeholder="1"
+            />
+          </div>
+
+          <div className="relative">
+            <label className="block text-sm font-semibold mb-2">
+              Status <span className="text-red-600">*</span>
+            </label>
+
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="appearance-none cursor-pointer w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8]"
+            >
+              <option value="">Select Status</option>
+              <option value={"active"} className="text-gray-700">
+                Active
+              </option>
+              <option value={"inactive"} className="text-gray-700">
+                Inactive
+              </option>
+              {/* <option value={"inactive-deceased"} className="text-gray-700">
+                Inactive-Deceased
+              </option> */}
+            </select>
+
+            <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
+              <FaAngleDown />
+            </div>
+          </div>
+
+          {status == "inactive" && (
+            <div className="relative">
+              <label className="block text-sm font-semibold mb-2">
+                Inactive Reason <span className="text-red-600">*</span>
+              </label>
+
+              <select
+                value={inactiveReason}
+                name="inactive_reason"
+                onChange={(e) => setInactiveReason(e.target.value)}
+                className="appearance-none cursor-pointer w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8]"
+              >
+                <option value="">Select Inactive Reason</option>
+                <option value={"Terminated"} className="text-gray-700">
+                  Terminated
+                </option>
+                <option value={"Leave of Absence"} className="text-gray-700">
+                  Leave of Absence
+                </option>
+                <option value={"Suspension"} className="text-gray-700">
+                  Suspension
+                </option>
+                <option value={"Retirement"} className="text-gray-700">
+                  Retirement
+                </option>
+                <option value={"Probation"} className="text-gray-700">
+                  Probation
+                </option>
+                <option value={"Layoff"} className="text-gray-700">
+                  Layoff
+                </option>
+                <option value={"llness/Injury"} className="text-gray-700">
+                  llness/Injury
+                </option>
+                <option value={"Non-Compliance"} className="text-gray-700">
+                  Non-Compliance
+                </option>
+                <option value={"Deceased"} className="text-gray-700">
+                  Deceased
+                </option>
+              </select>
+
+              <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
+                <FaAngleDown />
+              </div>
+            </div>
+          )}
+
+          <div className="relative">
+            <label className="block text-sm font-semibold mb-2">
+              Type <span className="text-red-600">*</span>
+            </label>
+
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="appearance-none cursor-pointer w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8]"
+            >
+              <option value="">Select Type</option>
+              <option value={"A"} className="text-gray-700">
+                A
+              </option>
+              <option value={"E"} className="text-gray-700">
+                E
+              </option>
+            </select>
+
+            <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
+              <FaAngleDown />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Name & Address Section */}
-      <div className="bg-white px-5 py-5 rounded-xl shadow">
+      <div className="bg-white px-5 py-5 rounded-xl shadow mb-4">
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-semibold mb-2">
@@ -973,7 +1113,7 @@ const AddEmployees = () => {
               City <span className="text-red-600">*</span>
             </label>
 
-            <select
+            {/* <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="appearance-none w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8] cursor-pointer"
@@ -982,11 +1122,18 @@ const AddEmployees = () => {
               {cities.map((city) => (
                 <option key={city}>{city}</option>
               ))}
-            </select>
+            </select> */}
 
-            <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
+              placeholder="City name here"
+            />
+
+            {/* <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
               <FaAngleDown />
-            </div>
+            </div> */}
           </div>
           <div className="relative">
             <label className="block text-sm font-semibold mb-2">
@@ -1028,7 +1175,7 @@ const AddEmployees = () => {
         </div>
       </div>
 
-      <div className="bg-white px-5 py-5 rounded-xl shadow mt-4">
+      <div className="bg-white px-5 py-5 rounded-xl shadow mb-4">
         <div className="grid grid-cols-3 gap-6 mb-6">
           <div>
             <label className="block text-sm font-semibold mb-2">
@@ -1085,9 +1232,9 @@ const AddEmployees = () => {
               <Flatpickr
                 value={birthdate}
                 onChange={([date]) => setBirthdate(date)}
-                placeholder="yyyy-mm-dd"
+                placeholder="mm-dd-yyyy"
                 options={{
-                  dateFormat: "Y-m-d",
+                  dateFormat: "m-d-Y",
                   maxDate: "today", // can't select future date
                 }}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8] pr-10"
@@ -1106,69 +1253,49 @@ const AddEmployees = () => {
           </div>
         </div>
       </div>
-
-      <div className="bg-white px-5 py-5 rounded-xl shadow mt-4">
+      <div className="bg-white px-5 py-5 rounded-xl shadow">
         <div className="grid grid-cols-4 gap-6 mb-6">
           <div>
-            <label className="block text-sm font-semibold mb-2">
-              SN <span className="text-red-600">*</span>
-            </label>
+            <label className="block text-sm font-semibold mb-2">Four #</label>
             <input
-              value={SN}
-              onChange={(e) => setSN(e.target.value)}
+              value={four}
+              name="four"
+              onChange={(e) => setFour(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
-              placeholder="1"
+              placeholder=""
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-2">GES #</label>
+            <input
+              value={GES}
+              name="GES"
+              onChange={(e) => setGES(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
+              placeholder="Enter#"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-2">FDC #</label>
+            <input
+              value={FDC}
+              name="FDC"
+              onChange={(e) => setFDC(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
+              placeholder="Enter#"
             />
           </div>
           <div>
             <label className="block text-sm font-semibold mb-2">
-              Number ID <span className="text-red-600">*</span>
+              Drv Lic #
             </label>
             <input
-              value={numberId}
-              onChange={(e) => setNumberId(e.target.value)}
+              name="DrvLic"
+              value={DrvLic}
+              onChange={(e) => setDrvLic(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] focus:outline-none focus:border-[#008CC8]"
-              placeholder="Number ID here"
+              placeholder="Enter#"
             />
-          </div>
-
-          <div className="relative">
-            <label className="block text-sm font-semibold mb-2">
-              Status <span className="text-red-600">*</span>
-            </label>
-
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="appearance-none cursor-pointer w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8]"
-            >
-              <option className="text-gray-700">Active</option>
-              <option className="text-gray-700">Inactive</option>
-              <option className="text-gray-700">Inactive-Deceased</option>
-            </select>
-
-            <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
-              <FaAngleDown />
-            </div>
-          </div>
-
-          <div className="relative">
-            <label className="block text-sm font-semibold mb-2">
-              Type <span className="text-red-600">*</span>
-            </label>
-
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="appearance-none cursor-pointer w-full border border-gray-300 rounded-lg px-4 py-3 text-[14px] pr-10 focus:outline-none focus:border-[#008CC8]"
-            >
-              <option className="text-gray-700">A</option>
-              <option className="text-gray-700">E</option>
-            </select>
-
-            <div className="pointer-events-none absolute right-4 top-12 -translate-y-1/2 text-gray-500">
-              <FaAngleDown />
-            </div>
           </div>
         </div>
       </div>

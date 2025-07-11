@@ -1,3 +1,7 @@
+body {
+  font-family: "Nunito", sans-serif;
+}
+
 .sidebar-menu {
   color: white;
 }
@@ -51,4 +55,35 @@ input[type="checkbox"] {
 }
 input[type="checkbox"]:checked {
   background-color: #008cc8; /* Tailwind's bg-blue-700 */
+}
+
+.css-1p3m7a8-multiValue {
+  background-color: #f5f6f7 !important;
+  padding: 0.4em;
+  font-size: 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px !important;
+}
+
+.css-1dyz3mf {
+  padding: 0.6em 0.7em !important;
+}
+
+.css-13cymwt-control {
+  border-radius: 12px !important;
+  border-color: #e6e6e6 !important;
+}
+
+/* In your CSS file */
+.text-gradient {
+  color: #e73f3f;
+}
+
+.bg-gradient-soft {
+  background: linear-gradient(
+    270deg,
+    rgba(231, 63, 63, 0.25) 0%,
+    rgba(0, 173, 58, 0.25) 50%,
+    rgba(0, 140, 200, 0.25) 100%
+  );
 }

@@ -50,6 +50,21 @@ export const fetchEmployeesDropdown = createAsyncThunk(
   },
 );
 
+// Async thunk to fetch event list
+export const fetchEventsDropdown = createAsyncThunk(
+  "dropdown/fetchEvents",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/events/event-list`, {
+        withCredentials: true,
+      });
+      return response.data; // Expecting an array of { id, event_name }
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch events");
+    }
+  },
+);
+
 const dropDownSlice = createSlice({
   name: "dropDown",
   initialState: {
@@ -64,6 +79,10 @@ const dropDownSlice = createSlice({
     employees: [],
     employeesLoading: false,
     employeesError: null,
+
+    eventList: [],
+    eventsLoading: false,
+    eventsError: null,
   },
   reducers: {}, // Can add more dropdown-related reducers later
   extraReducers: (builder) => {
@@ -103,6 +122,18 @@ const dropDownSlice = createSlice({
       .addCase(fetchEmployeesDropdown.rejected, (state, action) => {
         state.employeesLoading = false;
         state.employeesError = action.payload;
+      })
+      .addCase(fetchEventsDropdown.pending, (state) => {
+        state.eventsLoading = true;
+        state.eventsError = null;
+      })
+      .addCase(fetchEventsDropdown.fulfilled, (state, action) => {
+        state.eventsLoading = false;
+        state.eventList = action.payload;
+      })
+      .addCase(fetchEventsDropdown.rejected, (state, action) => {
+        state.eventsLoading = false;
+        state.eventsError = action.payload;
       });
   },
 });

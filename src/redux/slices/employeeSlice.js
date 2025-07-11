@@ -317,6 +317,25 @@ export const getLocationEmployeeWeeklyHours = createAsyncThunk(
   },
 );
 
+export const fetchTimeOffReasons = createAsyncThunk(
+  "timeOffReasons/fetchTimeOffReasons",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/schedules/timeoff/reason-list`,
+        {
+          withCredentials: true,
+        },
+      );
+      return res.data.data; // or res.data if your API returns array directly
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch time off reasons",
+      );
+    }
+  },
+);
+
 const employeeSlice = createSlice({
   name: "employees",
   initialState: {
@@ -354,6 +373,8 @@ const employeeSlice = createSlice({
     employeeLocationSchedulesByWeekError: null,
 
     employeeRestrictionList: [],
+
+    timeOffReasonsList: [],
   },
   reducers: {
     resetEmployees(state) {
@@ -522,6 +543,9 @@ const employeeSlice = createSlice({
       })
       .addCase(fetchRestrictions.fulfilled, (state, action) => {
         state.employeeRestrictionList = action.payload;
+      })
+      .addCase(fetchTimeOffReasons.fulfilled, (state, action) => {
+        state.timeOffReasonsList = action.payload;
       });
   },
 });

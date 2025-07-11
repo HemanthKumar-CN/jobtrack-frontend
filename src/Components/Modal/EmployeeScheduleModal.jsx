@@ -23,7 +23,7 @@ const EmployeeScheduleModal = ({ event, onClose, formattedDate }) => {
         <h2 className="text-xl font-semibold text-center mb-4">Task Details</h2>
 
         {/* Date & Time */}
-        <div className="bg-[#F1F6FB] p-3 text-start rounded-md mb-4">
+        <div className="bg-[#f5f6f7] p-3 text-start rounded-md mb-4">
           <p className="text-sm font-semibold text-gray-600">Date & Time</p>
           <p className="text-md text-gray-800">
             {/* {format(
@@ -35,13 +35,13 @@ const EmployeeScheduleModal = ({ event, onClose, formattedDate }) => {
         </div>
 
         {/* Task Title & Description */}
-        <div className="bg-[#F1F6FB] p-3 text-start rounded-md mb-4">
+        <div className="bg-[#f5f6f7] p-3 text-start rounded-md mb-4">
           <p className="text-md font-semibold text-gray-800">{event.title}</p>
           <p className="text-sm text-gray-600 mt-1">{event.description}</p>
         </div>
 
         {/* Address */}
-        <div className="bg-[#F1F6FB] p-3 text-start rounded-md mb-4">
+        <div className="bg-[#f5f6f7] p-3 text-start rounded-md mb-4">
           <p className="text-sm font-semibold text-gray-600">Address</p>
           <p className="text-md text-gray-800">
             {address || "No address provided"}

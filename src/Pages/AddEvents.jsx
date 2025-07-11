@@ -22,6 +22,7 @@ import "flatpickr/dist/themes/airbnb.css"; // Choose any theme you like
 import { format, parseISO } from "date-fns";
 import Select from "react-select";
 import { convertToISOTime } from "../Utils/convertToISOTime";
+import CalendarInput from "../assets/calendarInput.svg";
 
 const AddEvents = () => {
   const startDateRef = useRef(null);
@@ -29,6 +30,9 @@ const AddEvents = () => {
   const eventNameRef = useRef(null);
   const eventLocationRef = useRef(null);
   const contractorRef = useRef(null);
+
+  const projectCodeRef = useRef(null);
+  const eventCommentRef = useRef(null);
   const navigate = useNavigate();
   const { id } = useParams();
   const showToast = useToast();
@@ -39,6 +43,8 @@ const AddEvents = () => {
   const [eventLocation, setEventLocation] = useState("");
   const [eventContractors, setEventContractors] = useState("");
   const [eventFields, setEventFields] = useState(null);
+  const [projectCode, setProjectCode] = useState("");
+  const [projectComments, setProjectComments] = useState("");
 
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [contractorMap, setContractorMap] = useState({});
@@ -127,6 +133,8 @@ const AddEvents = () => {
   useEffect(() => {
     if (id && event) {
       setEventName(event.event_name);
+      setProjectCode(event?.project_code);
+      setProjectComments(event?.project_comments);
 
       console.log("Event:", event);
       setStartDate(event.start_date);
@@ -160,16 +168,27 @@ const AddEvents = () => {
 
   useEffect(() => {
     if (newEvent) {
+      const locationNames = newEvent?.EventLocations?.map(
+        (loc) => loc?.Location?.name,
+      )
+        .filter(Boolean)
+        .join(", ");
+
+      const contractorNames = newEvent?.EventLocations?.flatMap((loc) =>
+        loc?.EventLocationContractors?.map((c) => c?.Contractor?.company_name),
+      )
+        .filter(Boolean)
+        .join(", ");
       const newEventFields = [
         { label: "Event Name", value: newEvent.event_name, type: "text" },
         {
           label: "Event Location",
-          value: newEvent?.Location?.name,
+          value: locationNames,
           type: "text",
         },
         {
           label: "Contractor Name",
-          value: newEvent?.Contractor?.company_name,
+          value: contractorNames,
           type: "text",
         },
         {
@@ -193,6 +212,8 @@ const AddEvents = () => {
   const handleAddEvent = () => {
     const payload = {
       event_name: eventName,
+      project_code: projectCode,
+      project_comments: projectComments,
       start_date: new Date(startDate).toISOString(), // convert to ISO
       end_date: new Date(endDate).toISOString(),
       locations: selectedLocations.map((loc) => ({
@@ -220,6 +241,8 @@ const AddEvents = () => {
 
     const payload = {
       event_name: eventName,
+      project_code: projectCode,
+      project_comments: projectComments,
       start_date: new Date(startDate).toISOString(), // convert to ISO
       end_date: new Date(endDate).toISOString(),
       locations: selectedLocations.map((loc) => ({
@@ -256,115 +279,138 @@ const AddEvents = () => {
     );
   } else {
     return (
-      <div className="flex relative pb-6 justify-center items-center bg-[#F4F7FE]">
-        <div className="bg-white p-8 pb-15 pt-5 rounded-2xl shadow-lg w-[60vw]">
+      <div className=" flex relative pb-6 justify-center items-center">
+        <div className=" pb-15 w-full">
           {/* Header */}
-          <h2 className="text-2xl font-semibold text-center text-[#1E1E1E]">
-            {id ? "Edit an Event" : "Add an Event"}
-          </h2>
-          <p className="text-gray-500 text-center mb-6">
-            {id ? "Edit event details below" : "Enter the event details below"}
-          </p>
 
           {/* Form */}
           <form className="space-y-4">
             {/* Event Name - Click anywhere to focus */}
-            <div
-              className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer"
-              onClick={() => eventNameRef.current?.focus()}
-            >
-              <p className="text-gray-500 text-sm">Event Name</p>
-              <input
-                ref={eventNameRef}
-                type="text"
-                value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
-                placeholder="Write here"
-                className="w-full bg-transparent outline-none text-gray-700 mt-1"
-              />
-            </div>
 
-            {/* Event Location - Click anywhere to open */}
-            {/* <div
-              className="bg-[#F4F7FE] p-2 rounded-md cursor-pointer"
-              onClick={() => eventLocationRef.current?.click()}
-            >
-              <p className="text-gray-500 text-sm">Event Location</p>
-              <select
-                ref={eventLocationRef}
-                value={eventLocation}
-                onChange={(e) => setEventLocation(e.target.value)}
-                className="w-full bg-transparent outline-none text-gray-700 mt-1 cursor-pointer"
+            <div className="px-3 py-3 bg-white shadow-xs rounded-xl">
+              <div className="grid grid-cols-4">
+                <div
+                  className=" p-2 rounded-md  cursor-pointer"
+                  onClick={() => eventNameRef.current?.focus()}
+                >
+                  <p className="font-semibold">
+                    Event Name <span className="text-red-600">*</span>{" "}
+                  </p>
+                  <input
+                    ref={eventNameRef}
+                    type="text"
+                    value={eventName}
+                    onChange={(e) => setEventName(e.target.value)}
+                    placeholder="Event name here"
+                    className="w-full border text-sm border-gray-300 rounded-lg px-3 py-3 bg-transparent outline-none text-black mt-1"
+                  />
+                </div>
+
+                <div
+                  className=" p-2 rounded-md relative cursor-pointer"
+                  onClick={() => startDateRef.current?.showPicker()}
+                >
+                  <p className="font-semibold">
+                    Start Date <span className="text-red-600">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center border border-gray-300 rounded-lg px-3 py-1">
+                    <Flatpickr
+                      ref={startDateRef}
+                      options={{
+                        // enableTime: true,
+                        dateFormat: "m/d/Y",
+                        time_24hr: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      placeholder="MM/DD/YYYY"
+                      value={startDate}
+                      onChange={([date]) => {
+                        const formatted = format(date, "MM/dd/yyyy");
+                        setStartDate(formatted);
+                      }}
+                      className=" py-2 text-sm rounded-md focus:outline-none "
+                    />
+                    {/* <FaCalendarAlt className="absolute right-2 text-gray-500" />  */}
+                    <img
+                      src={CalendarInput}
+                      alt=""
+                      className="absolute right-2"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="p-2 rounded-md relative cursor-pointer"
+                  onClick={() => endDateRef.current?.showPicker()}
+                >
+                  <p className="font-semibold">
+                    End Date <span className="text-red-600">*</span>
+                  </p>
+                  <div className="relative mt-1 flex items-center rounded-lg px-3 py-1 border border-gray-300">
+                    <Flatpickr
+                      ref={endDateRef}
+                      options={{
+                        // enableTime: true,
+                        dateFormat: "m/d/Y",
+                        time_24hr: true,
+                        minuteIncrement: 30, // Only allow 00 and 30
+                      }}
+                      placeholder="MM/DD/YYYY"
+                      value={endDate}
+                      onChange={([date]) => {
+                        const formatted = format(date, "MM/dd/yyyy");
+                        setEndDate(formatted);
+                      }}
+                      className=" py-2 text-sm rounded-md focus:outline-none"
+                    />
+                    <img
+                      src={CalendarInput}
+                      alt=""
+                      className="absolute right-2"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className=" p-2 rounded-md  cursor-pointer"
+                  onClick={() => projectCodeRef.current?.focus()}
+                >
+                  <p className="font-semibold">
+                    Project Code <span className="text-red-600">*</span>{" "}
+                  </p>
+                  <input
+                    ref={projectCodeRef}
+                    type="text"
+                    value={projectCode}
+                    onChange={(e) => setProjectCode(e.target.value)}
+                    placeholder="Event code here"
+                    className="w-full border text-sm border-gray-300 rounded-lg px-3 py-3 bg-transparent outline-none text-black mt-1"
+                  />
+                </div>
+              </div>
+
+              <div
+                className=" p-2 rounded-md  cursor-pointer"
+                onClick={() => eventCommentRef.current?.focus()}
               >
-                <option>Select event location</option>
-                {locationsList.map((location) => {
-                  return (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  );
-                })}
-              </select>
-            </div> */}
+                <p className="font-semibold">
+                  Comments <span className="text-red-600">*</span>{" "}
+                </p>
+                <input
+                  ref={eventCommentRef}
+                  type="text"
+                  value={projectComments}
+                  onChange={(e) => setProjectComments(e.target.value)}
+                  placeholder="Event comment here"
+                  className="w-full border text-sm border-gray-300 rounded-lg px-3 py-3 bg-transparent outline-none text-black mt-1"
+                />
+              </div>
+            </div>
 
             {/* Date Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
-                onClick={() => startDateRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">Start Date</p>
-                <div className="relative mt-1 flex items-center">
-                  <Flatpickr
-                    ref={startDateRef}
-                    options={{
-                      // enableTime: true,
-                      dateFormat: "m/d/Y",
-                      time_24hr: true,
-                      minuteIncrement: 30, // Only allow 00 and 30
-                    }}
-                    placeholder="MM/DD/YYYY"
-                    value={startDate}
-                    onChange={([date]) => {
-                      const formatted = format(date, "MM/dd/yyyy");
-                      setStartDate(formatted);
-                    }}
-                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
-                  />
-                  <FaCalendarAlt className="absolute right-2 text-gray-500" />
-                </div>
-              </div>
 
-              {/* End Date */}
-              <div
-                className="bg-[#F4F7FE] p-2 rounded-md relative cursor-pointer"
-                onClick={() => endDateRef.current?.showPicker()}
-              >
-                <p className="text-gray-500 text-sm">End Date</p>
-                <div className="relative mt-1 flex items-center">
-                  <Flatpickr
-                    ref={endDateRef}
-                    options={{
-                      // enableTime: true,
-                      dateFormat: "m/d/Y",
-                      time_24hr: true,
-                      minuteIncrement: 30, // Only allow 00 and 30
-                    }}
-                    placeholder="MM/DD/YYYY"
-                    value={endDate}
-                    onChange={([date]) => {
-                      const formatted = format(date, "MM/dd/yyyy");
-                      setEndDate(formatted);
-                    }}
-                    className="w-full py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F4F7FE]"
-                  />
-                  <FaCalendarAlt className="absolute right-2 text-gray-500 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#F4F7FE] p-2 rounded-md text-gray-600 cursor-pointer">
-              <label className="font-medium mb-2 block">Select Locations</label>
+            <div className="bg-white px-5 py-4 rounded-xl font-semibold cursor-pointer">
+              <label className=" mb-2 block">Select Locations</label>
               <Select
                 isMulti
                 options={locationOptions}
@@ -400,80 +446,110 @@ const AddEvents = () => {
             {selectedLocations.map((location) => (
               <div
                 key={location.value}
-                className="border border-blue-200 rounded p-4 bg-gray-50 shadow-sm space-y-4"
+                className="border border-[#E4E4E4] rounded-xl p-4 bg-white shadow-sm space-y-4"
               >
-                <h3 className="font-semibold text-md text-gray-800">
+                <h3 className="font-bold text-lg text-gray-800">
                   {location.label}
                 </h3>
 
-                <div>
-                  <label className="font-medium block mb-1">
-                    Select Contractors
-                  </label>
-                  <Select
-                    isMulti
-                    options={contractorOptions}
-                    value={contractorMap[location.value] || []}
-                    onChange={(selected) =>
-                      handleContractorChange(location.value, selected)
-                    }
-                    className="text-sm"
-                  />
-                </div>
-
-                {contractorMap[location.value]?.length > 0 && (
-                  <div className="space-y-2">
-                    {contractorMap[location.value].map((contractor) => (
-                      <div
-                        key={contractor.value}
-                        className="flex flex-wrap items-center gap-4 ml-4"
-                      >
-                        <span className="w-40 font-medium text-gray-700">
-                          {contractor.label}
-                        </span>
-                        <Flatpickr
-                          value={contractor.startTime}
-                          options={{
-                            enableTime: true,
-                            noCalendar: true,
-                            dateFormat: "H:i",
-                            minuteIncrement: 30,
-                          }}
-                          placeholder="hh:mm"
-                          onChange={(date) =>
-                            handleTimeChange(
-                              location.value,
-                              contractor.value,
-                              "startTime",
-                              date[0]?.toTimeString().slice(0, 5) || "",
-                            )
-                          }
-                          className="border border-gray-400 p-1 rounded w-28"
-                        />
-
-                        <Flatpickr
-                          value={contractor.endTime}
-                          options={{
-                            enableTime: true,
-                            noCalendar: true,
-                            dateFormat: "H:i",
-                            minuteIncrement: 30,
-                          }}
-                          placeholder="hh:mm"
-                          onChange={(date) =>
-                            handleTimeChange(
-                              location.value,
-                              contractor.value,
-                              "endTime",
-                              date[0]?.toTimeString().slice(0, 5) || "",
-                            )
-                          }
-                          className="border border-gray-400 p-1 rounded w-28"
-                        />
-                      </div>
-                    ))}
+                <div className="bg-[#F5F6F7] rounded-xl px-3 py-4">
+                  <div>
+                    <label className="font-medium block mb-1">
+                      Select Contractors
+                    </label>
+                    <Select
+                      isMulti
+                      options={contractorOptions}
+                      value={contractorMap[location.value] || []}
+                      onChange={(selected) =>
+                        handleContractorChange(location.value, selected)
+                      }
+                      className="text-sm"
+                    />
                   </div>
-                )}
+
+                  {contractorMap[location.value]?.length > 0 && (
+                    <div className="w-full border border-[#E6E6E6] rounded-xl overflow-hidden mt-3">
+                      {/* Header */}
+                      <div className="grid grid-cols-3 bg-[#f8f9fa] text-sm text-gray-700 font-medium px-4 py-2">
+                        <div className="flex items-center font-bold">
+                          Name <span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <div className="flex items-center font-bold">
+                          Start Time{" "}
+                          <span className="text-red-500 ml-1">*</span>
+                        </div>
+                        <div className="flex items-center font-bold">
+                          End Time
+                        </div>
+                      </div>
+
+                      {/* Rows */}
+                      <div className="bg-white">
+                        {contractorMap[location.value].map(
+                          (contractor, idx) => (
+                            <div
+                              key={contractor.value}
+                              className={`grid grid-cols-3 items-center px-4 py-2 text-sm text-gray-800 ${
+                                idx !== contractorMap[location.value].length - 1
+                                  ? "border-b border-gray-200"
+                                  : ""
+                              }`}
+                            >
+                              <div className="font-bold">
+                                {contractor.label}
+                              </div>
+
+                              <div>
+                                <Flatpickr
+                                  value={contractor.startTime}
+                                  options={{
+                                    enableTime: true,
+                                    noCalendar: true,
+                                    dateFormat: "H:i",
+                                    minuteIncrement: 30,
+                                  }}
+                                  placeholder="hh:mm"
+                                  onChange={(date) =>
+                                    handleTimeChange(
+                                      location.value,
+                                      contractor.value,
+                                      "startTime",
+                                      date[0]?.toTimeString().slice(0, 5) || "",
+                                    )
+                                  }
+                                  className="border border-gray-300 p-1 rounded w-24"
+                                />
+                              </div>
+
+                              <div>
+                                <Flatpickr
+                                  value={contractor.endTime}
+                                  options={{
+                                    enableTime: true,
+                                    noCalendar: true,
+                                    dateFormat: "H:i",
+                                    minuteIncrement: 30,
+                                  }}
+                                  placeholder="hh:mm"
+                                  onChange={(date) =>
+                                    handleTimeChange(
+                                      location.value,
+                                      contractor.value,
+                                      "endTime",
+                                      date[0]?.toTimeString().slice(0, 5) || "",
+                                    )
+                                  }
+                                  className="border border-gray-300 p-1 rounded w-24"
+                                />
+                              </div>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </form>
@@ -483,25 +559,28 @@ const AddEvents = () => {
           <Link to="/events">
             <button
               onClick={handleClearEvent}
-              className="cursor-pointer w-1/9 absolute bottom-0 left-50 flex justify-center items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm"
+              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-2 bg-[#E4E5E5] hover:bg-gray-200 text-gray-800 rounded-lg shadow-sm"
             >
-              <FaArrowLeft /> Back
+              {/* <FaArrowLeft /> */}
+              Back
             </button>
           </Link>
 
           {id ? (
             <button
               onClick={handleEditEvent}
-              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
+              className="cursor-pointer w-1/9 absolute bottom-0 right-10 flex justify-center items-center gap-2 px-6 py-2 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
             >
-              Save <FaArrowRight />
+              Save
+              {/* <FaArrowRight /> */}
             </button>
           ) : (
             <button
               onClick={handleAddEvent}
-              className="cursor-pointer w-1/9 absolute bottom-0 right-50 flex justify-center items-center gap-2 px-6 py-3 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
+              className="cursor-pointer w-1/9 absolute bottom-0 right-10 flex justify-center items-center gap-2 px-6 py-2 bg-[#008CC8] hover:bg-[#1A2D43] text-white rounded-lg shadow-md"
             >
-              Save <FaArrowRight />
+              Save
+              {/* <FaArrowRight /> */}
             </button>
           )}
         </div>

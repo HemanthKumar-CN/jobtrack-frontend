@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaCalendarAlt } from "react-icons/fa";
 import Flatpickr from "react-flatpickr";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTimeOffReasons } from "../redux/slices/employeeSlice";
 
 const weekdayOptions = ["M", "T", "W", "Th", "F", "Sa", "Su"];
 
@@ -38,19 +40,9 @@ const RecurringTimeRow = ({ item, index, onChange, onDelete }) => {
       <td className="px-3 py-2 border border-gray-200">
         <Flatpickr
           value={item.startDate}
-          options={{ dateFormat: "Y-m-d" }}
+          options={{ dateFormat: "m-d-Y" }}
           onChange={([date]) => onChange(index, "startDate", date)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
-        />
-      </td>
-
-      {/* Start Time */}
-      <td className="px-3 py-2 border border-gray-200">
-        <Flatpickr
-          value={item.startTime}
-          options={{ enableTime: true, noCalendar: true, dateFormat: "H:i" }}
-          onChange={([time]) => onChange(index, "startTime", time)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
 
@@ -58,9 +50,24 @@ const RecurringTimeRow = ({ item, index, onChange, onDelete }) => {
       <td className="px-3 py-2 border border-gray-200">
         <Flatpickr
           value={item.endDate}
-          options={{ dateFormat: "Y-m-d" }}
+          options={{ dateFormat: "m-d-Y" }}
           onChange={([date]) => onChange(index, "endDate", date)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
+        />
+      </td>
+
+      {/* Start Time */}
+      <td className="px-3 py-2 border border-gray-200">
+        <Flatpickr
+          value={item.startTime}
+          options={{
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minuteIncrement: 30,
+          }}
+          onChange={([time]) => onChange(index, "startTime", time)}
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
 
@@ -68,9 +75,14 @@ const RecurringTimeRow = ({ item, index, onChange, onDelete }) => {
       <td className="px-3 py-2 border border-gray-200">
         <Flatpickr
           value={item.endTime}
-          options={{ enableTime: true, noCalendar: true, dateFormat: "H:i" }}
+          options={{
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minuteIncrement: 30,
+          }}
           onChange={([time]) => onChange(index, "endTime", time)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
 
@@ -89,47 +101,84 @@ const RecurringTimeRow = ({ item, index, onChange, onDelete }) => {
 };
 
 const TimeOffRow = ({ item, index, onChange, onDelete }) => {
+  const { timeOffReasonsList } = useSelector((state) => state.employees);
+
+  const dispatch = useDispatch();
+  const [timeOffReason, setTimeOffReason] = useState("");
+
+  useEffect(() => {
+    dispatch(fetchTimeOffReasons());
+  }, []);
+
   return (
     <tr className="text-sm text-gray-700">
       <td className="px-3 py-2 border">
-        <input
+        {/* <input
           type="text"
           name="name"
           value={item.name}
           onChange={(e) => onChange(index, "name", e.target.value)}
           className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
-        />
+        /> */}
+        <select
+          value={item.reason_id}
+          name="reason_id"
+          onChange={(e) => {
+            onChange(index, "reason_id", e.target.value);
+          }}
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+        >
+          <option className="text-gray-700">Select Reason</option>
+          {timeOffReasonsList?.map((reason) => (
+            <option key={reason.id} value={reason.id}>
+              {reason.name}
+            </option>
+          ))}
+        </select>
       </td>
       <td className="px-3 py-2 border">
         <Flatpickr
           value={item.startDate}
-          options={{ dateFormat: "Y-m-d" }}
+          options={{ dateFormat: "m-d-Y" }}
           onChange={([date]) => onChange(index, "startDate", date)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
-      <td className="px-3 py-2 border">
-        <Flatpickr
-          value={item.startTime}
-          options={{ enableTime: true, noCalendar: true, dateFormat: "H:i" }}
-          onChange={([time]) => onChange(index, "startTime", time)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
-        />
-      </td>
+
       <td className="px-3 py-2 border">
         <Flatpickr
           value={item.endDate}
-          options={{ dateFormat: "Y-m-d" }}
+          options={{ dateFormat: "m-d-Y" }}
           onChange={([date]) => onChange(index, "endDate", date)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
+
+      <td className="px-3 py-2 border">
+        <Flatpickr
+          value={item.startTime}
+          options={{
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minuteIncrement: 30,
+          }}
+          onChange={([time]) => onChange(index, "startTime", time)}
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
+        />
+      </td>
+
       <td className="px-3 py-2 border">
         <Flatpickr
           value={item.endTime}
-          options={{ enableTime: true, noCalendar: true, dateFormat: "H:i" }}
+          options={{
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            minuteIncrement: 30,
+          }}
           onChange={([time]) => onChange(index, "endTime", time)}
-          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-center"
+          className="w-full outline-none bg-transparent border border-gray-400 cursor-pointer rounded-lg py-1.5 text-end px-2"
         />
       </td>
       <td className="px-3 py-2 border text-center">
@@ -166,14 +215,14 @@ const RecurringBlockedTimeAndTimeOff = ({
   const addRecurringRow = () => {
     setRecurringTimes([
       ...recurringTimes,
-      { days: "", startDate: "", startTime: "", endDate: "", endTime: "" },
+      { days: "", startDate: "", endDate: "", startTime: "", endTime: "" },
     ]);
   };
 
   const addTimeOffRow = () => {
     setTimeOffs([
       ...timeOffs,
-      { name: "", startDate: "", startTime: "", endDate: "", endTime: "" },
+      { reason_id: "", startDate: "", endDate: "", startTime: "", endTime: "" },
     ]);
   };
 
@@ -216,16 +265,17 @@ const RecurringBlockedTimeAndTimeOff = ({
                     Start Date <span className="text-red-600">*</span>
                   </th>
                   <th className="px-3 py-2 border border-gray-200">
-                    Start Time <span className="text-red-600">*</span>
-                  </th>
-                  <th className="px-3 py-2 border border-gray-200">
                     End Date <span className="text-red-600">*</span>
                   </th>
+                  <th className="px-3 py-2 border border-gray-200">
+                    Start Time <span className="text-red-600">*</span>
+                  </th>
+
                   <th className="px-3 py-2 border border-gray-200">
                     End Time <span className="text-red-600">*</span>
                   </th>
                   <th className="px-3 py-2 border border-gray-200 rounded-tr-lg">
-                    Edit
+                    Action
                   </th>
                 </tr>
               </thead>
@@ -263,21 +313,22 @@ const RecurringBlockedTimeAndTimeOff = ({
           <thead className="bg-gray-100">
             <tr>
               <th className="px-3 py-2 border">
-                Name <span className="text-red-600">*</span>
+                Reason <span className="text-red-600">*</span>
               </th>
               <th className="px-3 py-2 border">
                 Start Date <span className="text-red-600">*</span>
               </th>
               <th className="px-3 py-2 border">
-                Start Time <span className="text-red-600">*</span>
-              </th>
-              <th className="px-3 py-2 border">
                 End Date <span className="text-red-600">*</span>
               </th>
               <th className="px-3 py-2 border">
+                Start Time <span className="text-red-600">*</span>
+              </th>
+
+              <th className="px-3 py-2 border">
                 End Time <span className="text-red-600">*</span>
               </th>
-              <th className="px-3 py-2 border">Edit</th>
+              <th className="px-3 py-2 border">Action</th>
             </tr>
           </thead>
           <tbody>

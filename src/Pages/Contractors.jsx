@@ -133,8 +133,6 @@ const Contractors = () => {
         />
       </div>
 
-      <img src={collapsedLogo} alt="" />
-
       <div className="p-1 bg-white rounded-xl shadow-md">
         {/* Table Headers */}
         <div

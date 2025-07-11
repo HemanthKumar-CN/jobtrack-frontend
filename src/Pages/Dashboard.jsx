@@ -94,7 +94,7 @@ const Dashboard = () => {
               return (
                 <div
                   key={index}
-                  className="relative h-21 rounded-lg shadow-sm pl-4 pt-4 bg-[#f1f6fb] overflow-hidden"
+                  className="relative h-21 rounded-lg shadow-sm pl-4 pt-4 bg-[#f5f6f7] overflow-hidden"
                 >
                   {/* Circle at the top-right corner */}
                   <div

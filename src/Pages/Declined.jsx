@@ -245,7 +245,7 @@ const Declined = ({ activeTab, formattedDate, searchTerm }) => {
           }
         </div>
       </div>
-      <div className="min-w-[52vw]">
+      <div className="w-[80vw]">
         {/* Header */}
         <div
           className="grid items-center bg-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3"
@@ -604,7 +604,7 @@ const Declined = ({ activeTab, formattedDate, searchTerm }) => {
         {/* Empty State */}
         {schedules.length === 0 && (
           <div className="text-center py-6 text-gray-500 text-sm border-t border-gray-200">
-            No appointments found.
+            No schedules found.
           </div>
         )}
       </div>

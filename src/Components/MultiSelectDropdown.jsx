@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown, FaTimes } from "react-icons/fa";
 
 /**
@@ -15,6 +15,7 @@ const MultiSelectDropdown = ({
   setSelected,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -28,8 +29,19 @@ const MultiSelectDropdown = ({
     setSelected(selected.filter((item) => item.id !== option.id));
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="mb-6 relative">
+    <div className="mb-6 relative" ref={dropdownRef}>
       {label && (
         <label className="block text-sm font-semibold mb-2">{label}</label>
       )}

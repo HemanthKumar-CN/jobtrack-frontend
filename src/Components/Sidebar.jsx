@@ -29,6 +29,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../redux/slices/authSlice";
 
+import CalendarLogo from "../assets/calendar.svg";
+import EmployeeIcon from "../assets/profileUser.svg";
+import EventIcon from "../assets/archiveBook.svg";
+import ReportIcon from "../assets/activity.svg";
+import DashboardIcon from "../assets/element3.svg";
+import LocationIcon from "../assets/Group.svg";
+import ContractorIcon from "../assets/profile.svg";
+import SMSIcon from "../assets/message.svg";
+
+import CloseSideBar from "../assets/arrowClose.svg";
+import OpenSideBar from "../assets/arrowSquareRight.svg";
+
 const Sidebar = ({ setCollapsed, collapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,17 +79,19 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
         {
           menu: "Schedules",
           path: "/schedules",
-          icon: <FaCalendarAlt className="w-5 h-5 mr-3" />,
+          // icon: <FaCalendarAlt className="w-5 h-5 mr-3" />,
+          icon: <img src={CalendarLogo} alt="" className="" />,
         },
         {
           menu: "Employees",
           path: "/employees",
-          icon: <FaUserLock className="w-5 h-5 mr-3" />,
+          // icon: <FaUserLock className="w-5 h-5 mr-3" />,
+          icon: <img src={EmployeeIcon} alt="" />,
         },
         {
           menu: "Events",
           path: "/events",
-          icon: <FaCalendarCheck className="w-5 h-5 mr-3" />,
+          icon: <img src={EventIcon} alt="" />,
         },
       ],
     },
@@ -88,12 +102,12 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
         {
           menu: "Reports",
           path: "/reports",
-          icon: <TbReportAnalytics className="w-5 h-5 mr-3" />,
+          icon: <img src={ReportIcon} alt="" />,
         },
         {
           menu: "Dashboard",
           path: "/dashboard",
-          icon: <BiSolidDashboard className="w-5 h-5 mr-3" />,
+          icon: <img src={DashboardIcon} alt="" />,
         },
       ],
     },
@@ -104,17 +118,17 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
         {
           menu: "Locations",
           path: "/locations",
-          icon: <HiLocationMarker className="w-5 h-5 mr-3" />,
+          icon: <img src={LocationIcon} alt="" />,
         },
         {
           menu: "Contractors",
           path: "/contractors",
-          icon: <GrUserWorker className="w-5 h-5 mr-3" />,
+          icon: <img src={ContractorIcon} alt="" />,
         },
         {
           menu: "SMS Info",
           path: "/sms-info",
-          icon: <IoNotificationsSharp className="w-5 h-5 mr-3" />,
+          icon: <img src={SMSIcon} alt="" />,
         },
       ],
     },
@@ -145,7 +159,7 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
           {collapsed ? (
             <img src={collapsedLogo} alt="calendar Logo" className="" />
           ) : (
-            <img src={grpLogo} alt="React Logo" className="w-37" />
+            <img src={grpLogo} alt="React Logo" className="w-35" />
           )}
         </div>
         <button
@@ -153,29 +167,39 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
           className="cursor-pointer text-2xl"
         >
           {!collapsed && (
-            <TbLayoutSidebarLeftCollapse className=" text-white hover:text-[#008CC8] rounded-xs" />
+            // <TbLayoutSidebarLeftCollapse className=" text-white hover:text-[#008CC8] rounded-xs" />
+            <img
+              src={CloseSideBar}
+              alt=""
+              className="w-5 cursor-pointer transition duration-200 hover:brightness-150"
+            />
           )}
         </button>
 
         {collapsed && (
           <button
             onClick={() => setCollapsed(false)}
-            className="absolute cursor-pointer left-[70px] top-1/20 transform -translate-y-1/2 z-50 bg-[#008CC8] p-1 rounded-r-md border border-l-0 border-blue-700/20 hover:bg-[#008CC8] transition-colors"
+            className="absolute cursor-pointer left-[70px] top-1/20 transform -translate-y-1/2 z-50 bg-[#1A2D43] p-1 rounded-r-md border border-l-0 border-blue-700/20 hover:bg-[#1A2D43] transition-colors"
           >
-            <TbLayoutSidebarRightCollapse className="text-white" />
+            {/* <TbLayoutSidebarRightCollapse className="text-white" /> */}
+            <img src={OpenSideBar} alt="" className="w-5" />
           </button>
         )}
       </div>
 
       {/* Sidebar Menu */}
-      <div className={`space-y-5 ${roleName == "EMPLOYEE" ? "flex-1/2" : ""} `}>
+      <div
+        className={`flex flex-col flex-grow space-y-5 mt-7 ${
+          roleName == "EMPLOYEE" ? "flex-1/2" : ""
+        } `}
+      >
         {menuItems.map(
           (section) =>
             roleName == section.role && (
               <div key={section.heading} className="mb-4">
                 {!collapsed && (
                   <h3
-                    className={`text-sm font-semibold text-white/80 mb-4 uppercase ${
+                    className={`text-sm pl-3 font-semibold text-white/80 mb-4 uppercase ${
                       section.heading ? "border-b" : ""
                     } border-gray-500 pb-[1vh]`}
                   >
@@ -187,18 +211,20 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
                     <li key={item.path}>
                       <Link
                         to={item.path}
-                        className={`px-3 flex items-center gap-2.5 py-1 text-white text-sm ${
+                        className={`${
+                          collapsed ? "px-1 " : "px-3 py-1.5"
+                        } flex items-center gap-2.5 py-1 text-white text-md ${
                           collapsed ? "rounded-full" : "rounded-[10px]"
                         } cursor-pointer transition-colors ${
                           location.pathname.includes(item.path)
                             ? "bg-[#008CC8] text-[#008CC8] sidebar-menu"
-                            : "hover:text-black hover:bg-[#008CC8]"
+                            : "hover:text-white hover:bg-[#008CC8]"
                         } ${collapsed ? "justify-center " : "justify-start"}`}
                       >
                         {/* {item.icon} */}
                         <div
                           className={`flex justify-center items-center ${
-                            collapsed ? "pl-3 py-1" : ""
+                            collapsed ? "p-1" : ""
                           }`}
                         >
                           {item.icon}
@@ -213,11 +239,13 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
         )}
       </div>
 
-      <div className="">
+      <div className="space-y-2">
         <Link
           to="/settings"
-          className={`px-3 mb-3 flex items-center gap-2.5 py-2 text-white text-sm ${
-            collapsed ? "rounded-full" : "rounded-[10px]"
+          className={`px-3 flex items-center gap-2.5 py-2 text-white text-md transition-colors ${
+            collapsed
+              ? "justify-center rounded-full"
+              : "justify-start rounded-[10px]"
           }  cursor-pointer transition-colors hover:text-[#008CC8] hover:bg-[#008CC8] ${
             collapsed ? "justify-center" : "justify-start"
           } ${
@@ -238,7 +266,7 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
 
         <button
           onClick={handleLogout}
-          className={`px-3 w-full flex items-center gap-2.5 text-white text-sm rounded-[10px] cursor-pointer transition-colors   ${
+          className={`px-3 w-full flex items-center gap-2.5 text-white text-md rounded-[10px] cursor-pointer transition-colors   ${
             collapsed ? "justify-center" : "justify-start"
           }`}
         >
