@@ -14,12 +14,27 @@ export const fetchEmployees = createAsyncThunk(
       status,
       sortField = "first_name",
       sortOrder = "asc",
+      typeFilter,
+      firstNameFilter,
+      lastNameFilter,
     },
     { rejectWithValue },
   ) => {
     try {
+      const queryParams = new URLSearchParams({
+        search,
+        page,
+        limit,
+        status,
+        sortField,
+        sortOrder,
+        typeFilter: typeFilter || "",
+        firstNameFilter: firstNameFilter || "",
+        lastNameFilter: lastNameFilter || "",
+      });
+
       const response = await axios.get(
-        `${API_BASE_URL}/employees?search=${search}&page=${page}&limit=${limit}&status=${status}&sortField=${sortField}&sortOrder=${sortOrder}`,
+        `${API_BASE_URL}/employees?${queryParams.toString()}`,
         { withCredentials: true },
       );
       return response.data;

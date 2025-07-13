@@ -14,8 +14,11 @@ import {
 } from "../redux/slices/employeeSlice";
 import { useToast } from "../Components/Toast/ToastContext";
 import { useModal } from "../Components/Modal/ModalProvider";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CustomDropdown from "../Components/CustomDropdown";
+import LocationIcon from "../assets/filter.svg";
+import { GoPlus } from "react-icons/go";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const Employees = () => {
   const dropdownRef = useRef(null);
@@ -42,6 +45,14 @@ const Employees = () => {
   }); // Track selected status
   const [sortField, setSortField] = useState("first_name"); // which field
   const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
+
+  const [activeTab, setActiveTab] = useState("active");
+
+  const [typeFilter, setTypeFilter] = useState("");
+  const [firstNameFilter, setFirstNameFilter] = useState("");
+  const [lastNameFilter, setLastNameFilter] = useState("");
+
+  const [showFilters, setShowFilters] = useState(false);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -79,16 +90,24 @@ const Employees = () => {
   };
 
   useEffect(() => {
-    console.log("Fetching employees...", selectedStatus);
+    console.log(
+      "Fetching employees...",
+      typeFilter,
+      firstNameFilter,
+      lastNameFilter,
+    );
     if (hasMore) {
       const prevScrollHeight = listRef.current?.scrollHeight; // Store scroll height before update
       dispatch(
         fetchEmployees({
           page,
           search,
-          status: selectedStatus.id,
+          status: activeTab,
           sortField,
           sortOrder,
+          typeFilter,
+          firstNameFilter,
+          lastNameFilter,
         }),
       ).then(() => {
         if (listRef.current) {
@@ -96,7 +115,36 @@ const Employees = () => {
         }
       });
     }
-  }, [dispatch, page, search, selectedStatus, sortField, sortOrder]);
+  }, [
+    dispatch,
+    page,
+    search,
+    activeTab,
+    sortField,
+    sortOrder,
+    typeFilter,
+    firstNameFilter,
+    lastNameFilter,
+  ]);
+
+  const getStatusStyle = (status) => {
+    const base = "text-xs px-2 py-1 rounded-full";
+    switch (status) {
+      case "active":
+        return (
+          <span className={`${base} text-green-600 bg-green-100`}>Active</span>
+        );
+
+      case "inactive":
+        return (
+          <span className={`${base} text-[#E73F3F] bg-[#E73F3F1A]`}>
+            Inactive
+          </span>
+        );
+      default:
+        return base;
+    }
+  };
 
   // Intersection Observer for infinite scroll
   const lastEmployeeRef = useCallback(
@@ -131,341 +179,278 @@ const Employees = () => {
     setPage(1);
   };
 
-  return (
-    <div className="p-4 pt-0 rounded-xl ">
-      {/* Search Bar */}
-      {/* <div className="relative mb-4">
-        <input
-          type="text"
-          placeholder="Search"
-          ref={searchRef}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
-          className="w-full p-3 pr-10 border bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <FiSearch
-          onClick={handleSearch}
-          className="absolute right-3 top-1/2 cursor-pointer transform -translate-y-1/2 
-            text-gray-500 transition-all duration-200 hover:text-blue-600 hover:scale-110"
-          size={18}
-        />
-      </div> */}
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
 
-      <div className="flex items-center gap-4 mb-4">
-        {/* Search Box */}
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search"
-            ref={searchRef}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-            className="w-full p-3 pr-10 border bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <FiSearch
-            onClick={handleSearch}
-            className="absolute right-3 top-1/2 cursor-pointer transform -translate-y-1/2 
-        text-gray-500 transition-all duration-200 hover:text-blue-600 hover:scale-110"
-            size={18}
-          />
+    dispatch(resetEmployees());
+    setPage(1);
+  };
+
+  return (
+    <div className="p-2 pt-0 rounded-xl ">
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="bg-white p-1 rounded-md">
+          <button
+            className={`${
+              activeTab == "active"
+                ? "text-[#00AD3A] bg-[#00AD3A1A]"
+                : `text-gray-600 hover:text-gray-900`
+            } px-6 py-1 rounded-md cursor-pointer `}
+            onClick={() => handleTabClick("active")}
+          >
+            Active
+          </button>
+          <button
+            className={` cursor-pointer rounded-md p-2 py-1 px-6 ${
+              activeTab == "inactive"
+                ? "text-[#E73F3F] bg-[#E73F3F1A]"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            onClick={() => handleTabClick("inactive")}
+          >
+            Inactive
+          </button>
+          <button
+            className={` cursor-pointer rounded-md py-1 px-9 ${
+              activeTab == ""
+                ? "text-gradient bg-gradient-soft"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            onClick={() => handleTabClick("")}
+          >
+            All
+          </button>
         </div>
 
-        {/* CustomDropdown */}
-        <div className="w-60">
-          <CustomDropdown
-            label=""
-            options={[
-              { id: "active", name: "Active" },
-              { id: "inactive", name: "Inactive" },
-              { id: "inactive-deceased", name: "Inactive-Deceased" },
-            ]}
-            value={selectedStatus}
-            onChange={handleStatusChange}
-            placeholder="Select Status"
-          />
+        <div className="flex justify-between items-center gap-4">
+          {/* Search Box */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search"
+              ref={searchRef}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch();
+                }
+              }}
+              className="w-full p-3 py-2 pr-10 border bg-white border-gray-300 rounded-lg focus:outline-none"
+            />
+            <FiSearch
+              onClick={handleSearch}
+              className="absolute right-3 top-1/2 cursor-pointer transform -translate-y-1/2 
+        text-gray-500 transition-all duration-200 hover:text-blue-600 hover:scale-110"
+              size={18}
+            />
+          </div>
+
+          <div>
+            <Link to="/employees/add">
+              <button className="border border-[#008CC8] rounded-xl flex justify-center items-center p-2 px-3 cursor-pointer bg-[#008CC81A] hover:bg-[#008cc832] ">
+                <GoPlus className="mr-2 text-[#008CC8]" />
+                <span className="text-[#008CC8]">Add Employee</span>
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="p-1 bg-white rounded-xl shadow-md">
-        {/* Table Headers */}
-        <div
-          className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "10vw 10vw 24vw 7vw 8vw 7vw 10vw" }}
-        >
-          {/* First Name */}
-          <div
-            className="flex items-center gap-1 cursor-pointer select-none"
-            onClick={() => handleSort("first_name")}
-          >
-            First Name
-            <div className="flex flex-col ml-1">
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "first_name" && sortOrder === "asc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▲
-              </span>
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "first_name" && sortOrder === "desc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
+      <div className=" text-gray-800 bg-white w-[80vw] rounded-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4">
+          <div className="flex flex-col font-bold">
+            {activeTab?.toUpperCase()}{" "}
+            <span className="text-sm text-gray-500">
+              Total: {employees.length}
+            </span>
           </div>
 
-          {/* Last Name */}
-          <div
-            className="flex items-center gap-1 cursor-pointer select-none"
-            onClick={() => handleSort("last_name")}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="p-2 px-2.5 border border-gray-300 rounded-md hover:bg-gray-100 cursor-pointer"
           >
-            Last Name
-            <div className="flex flex-col ml-1">
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "last_name" && sortOrder === "asc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▲
-              </span>
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "last_name" && sortOrder === "desc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
-          </div>
-
-          <div>Address</div>
-
-          {/* City */}
-          <div
-            className="flex items-center gap-1 cursor-pointer select-none"
-            onClick={() => handleSort("city")}
-          >
-            City
-            <div className="flex flex-col ml-1">
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "city" && sortOrder === "asc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▲
-              </span>
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "city" && sortOrder === "desc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
-          </div>
-
-          {/* State */}
-          <div
-            className="flex items-center gap-1 cursor-pointer select-none"
-            onClick={() => handleSort("state")}
-          >
-            State
-            <div className="flex flex-col ml-1">
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "state" && sortOrder === "asc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▲
-              </span>
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "state" && sortOrder === "desc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
-          </div>
-          <div>Status</div>
-          {/* Type */}
-          <div
-            className="flex items-center gap-1 cursor-pointer select-none"
-            onClick={() => handleSort("type")}
-          >
-            Type
-            <div className="flex flex-col ml-1">
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "type" && sortOrder === "asc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▲
-              </span>
-              <span
-                className={`leading-none text-xs ${
-                  sortField === "type" && sortOrder === "desc"
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                ▼
-              </span>
-            </div>
-          </div>
+            {/* <FiFilter size={16} className="text-gray-700" /> */}
+            <img src={LocationIcon} alt="" width={18} />
+          </button>
         </div>
 
-        {/* Employee List */}
+        {/* Filters */}
         <div
-          ref={listRef}
-          className="mt-2 overflow-auto max-h-[60vh] h-[60vh] custom-scrollbar"
+          className={`grid transition-all duration-300 ease-in-out overflow-hidden ${
+            showFilters
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
         >
-          {employees.map((employee, index) => {
-            const formattedAddress = `${employee.address_1}, ${employee.address_2}`;
-            return (
-              <div key={index} className="relative">
-                {selectedIndex !== null && selectedIndex !== index && (
-                  <div className="absolute inset-0  border-b-orange-800 bg-white/40 backdrop-blur-md rounded-md z-10"></div>
-                )}
-                <div
-                  ref={index === employees.length - 1 ? lastEmployeeRef : null} // Attach observer to last element
-                  className={`grid grid-cols-7 items-center p-3 rounded-md  transition relative ${
-                    index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
-                  } ${
-                    selectedIndex === index ? "shadow-lg bg-white z-40" : "z-20"
-                  }`}
-                  style={{
-                    gridTemplateColumns: "10vw 10vw 24vw 7vw 8vw 7vw 10vw",
-                  }}
-                >
-                  <div className="flex items-center relative">
-                    {/* <button
-                      className={`p-1 cursor-pointer rounded-lg hover:bg-blue-400 hover:text-white ${
-                        index % 2 === 0 ? "bg-white" : "bg-gray-200"
-                      } `}
-                      onClick={() =>
-                        setSelectedIndex(selectedIndex === index ? null : index)
-                      }
-                    >
-                      <BiSolidChevronRight className="" />
-                    </button> */}
-                    <div
-                      className="text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
-                      onClick={() => navigate(`/employees/add/${employee.id}`)}
-                    >
-                      {truncateText(employee?.User?.first_name)}
-                    </div>
-                  </div>
-                  <div
-                    className="text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
-                    onClick={() => navigate(`/employees/add/${employee.id}`)}
+          {showFilters && (
+            <div className="bg-[#F5F6F7] rounded-lg mb-3 grid grid-cols-1 sm:grid-cols-3 gap-4 mx-3 px-1 ">
+              {/* Event Input */}
+              <label className="block font-medium text-gray-700 p-2">
+                Type
+                <div className="relative mt-2">
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value);
+                      dispatch(resetEmployees());
+                      setPage(1);
+                    }}
+                    className="w-full p-2 py-3 cursor-pointer pr-10 bg-white text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 appearance-none"
                   >
-                    {truncateText(employee?.User?.last_name)}
-                  </div>
-                  <div>{truncateText(formattedAddress, 30)}</div>
-                  <div>{truncateText(employee.city, 7)}</div>
-                  <div>{truncateText(employee.state)}</div>
-                  <div
-                    className={`px-3  rounded-full text-xs font-semibold w-fit
-                    ${
-                      employee.status === "active"
-                        ? "bg-green-100 text-green-800"
-                        : employee.status === "inactive"
-                        ? "bg-orange-100 text-orange-800"
-                        : "bg-red-100 text-red-800"
-                    }
-                  `}
-                  >
-                    {truncateText(employee.status)}
-                  </div>
-                  <div className="flex items-center py-1 justify-between">
-                    <span>{truncateText(employee.type)}</span>
-                    <span className="flex items-center">
-                      <button
-                        onClick={() =>
-                          navigate(`/employees/add/${employee.id}`)
-                        }
-                        className="cursor-pointer border border-gray-300 p-2 mr-2 bg-white hover:bg-gray-200 rounded-lg transition"
-                      >
-                        <FaPen className="text-[#008CC8] hover:scale-110 transition" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          openModal({
-                            title: "Delete this item?",
-                            message:
-                              "This action is permanent and cannot be undone.",
-                            onConfirm: () => handleDeleteEmployee(employee.id), // Call delete function inside modal
-                            confirmText: "Delete",
-                            cancelText: "Cancel",
-                          })
-                        }
-                        className="border border-gray-300 p-2 cursor-pointer bg-white hover:bg-gray-200 rounded-lg transition"
-                      >
-                        <RiDeleteBin6Line className="text-red-600 cursor-pointer hover:scale-110 transition" />
-                      </button>
-                    </span>
+                    <option value="">Filter by type...</option>
+                    <option value="A">A</option>
+                    <option value="E">E</option>
+                    {/* {eventList?.map((event) => (
+                        <option key={event?.id} value={event?.id}>
+                          {event?.event_name}
+                        </option>
+                      ))} */}
+                  </select>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
                 </div>
+              </label>
 
-                {/* Dropdown Menu */}
-                {selectedIndex === index && (
-                  <div
-                    ref={dropdownRef}
-                    className="absolute left-10 top-0 bg-white shadow-lg rounded-lg w-32 z-50"
-                  >
-                    <button
-                      onClick={() => navigate(`/employees/add/${employee.id}`)}
-                      className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-blue-100 rounded-t-lg"
-                    >
-                      <FaPen className="mr-2 text-[#1A2D43]" /> Edit
-                    </button>
-                    <button
-                      onClick={() =>
-                        openModal({
-                          title: "Delete this item?",
-                          message:
-                            "This action is permanent and cannot be undone.",
-                          onConfirm: () => handleDeleteEmployee(employee.id), // Call delete function inside modal
-                          confirmText: "Delete",
-                          cancelText: "Cancel",
-                        })
-                      }
-                      className="flex items-center cursor-pointer w-full px-3 py-2 text-sm text-gray-700 hover:bg-red-100 rounded-b-lg"
-                    >
-                      <RiDeleteBin6Line className="mr-2 text-red-500" /> Delete
-                    </button>
+              {/* Location Dropdown */}
+              <label className="block font-medium text-gray-700 p-2">
+                First Name
+                <input
+                  type="text"
+                  value={firstNameFilter}
+                  onChange={(e) => {
+                    setFirstNameFilter(e.target.value);
+                    dispatch(resetEmployees());
+                    setPage(1);
+                  }}
+                  placeholder="Filter by first name"
+                  className="w-full mt-2 p-2 py-3 bg-white text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+              </label>
+
+              {/* Contractors Dropdown */}
+              <label className="block font-medium text-gray-700 p-2">
+                Last Name
+                <input
+                  type="text"
+                  value={lastNameFilter}
+                  onChange={(e) => {
+                    setLastNameFilter(e.target.value);
+                    dispatch(resetEmployees());
+                    setPage(1);
+                  }}
+                  placeholder="Filter by last name"
+                  className="w-full mt-2 p-2 py-3 bg-white text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+              </label>
+            </div>
+          )}
+        </div>
+
+        <div className="">
+          {/* Columns Header */}
+          <div
+            className="grid font-semibold text-sm text-gray-600 bg-gray-100 py-2 rounded-t-md"
+            style={{
+              gridTemplateColumns:
+                "1fr 1.5fr 1.5fr 1fr 2fr 1.7fr 1.5fr 1fr 2fr 3fr 1fr",
+            }}
+          >
+            <div className="ml-4">SN#</div>
+            <div className="">FIRST NAME</div>
+            <div>LAST NAME</div>
+            <div>TYPE</div>
+            <div>ADDRESS</div>
+            <div>CITY</div>
+            <div>STATE</div>
+            <div>ZIP</div>
+            <div>PHONE #</div>
+            <div>EMAIL</div>
+            {/* <div>SSN</div> */}
+            {/* <div>COMMENTS</div>
+            <div>MEMBER ID</div> */}
+            <div>STATUS</div>
+          </div>
+
+          {/* Rows */}
+          <div className="rounded-b-md border border-gray-200">
+            {employees?.length === 0 ? (
+              <div className="text-center p-4 text-gray-500">No data found</div>
+            ) : (
+              employees?.map((row, index) => (
+                <div
+                  key={row?.id}
+                  className="grid text-sm border-t border-gray-100 px-2 py-3 items-center hover:bg-gray-50"
+                  style={{
+                    gridTemplateColumns:
+                      "1fr 1.5fr 1.5fr 1fr 2fr 1.7fr 1.5fr 1fr 2fr 3fr 1fr",
+                  }}
+                >
+                  <div className="ml-4">{index + 1}</div>
+                  <div className="flex items-center gap-2">
+                    {row?.User?.image_url && (
+                      <img
+                        src={`${IMAGE_BASE_URL}${row?.User?.image_url}`}
+                        alt={row?.User?.first_name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    )}
+                    <span className="font-medium text-gray-900">
+                      {row?.User?.first_name}
+                    </span>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  <div>{row?.User?.last_name}</div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {row?.type && (
+                        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold">
+                          {/* {row.first_name[0]} */}
+                          {/* {row.last_name[0]} */}
+                          <span>{row.type}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-sm">{`${row?.address_1} ${row?.address_2}`}</div>
+                  <div>{row.city}</div>
+                  <div>{row.state}</div>
+                  <div>{row.postal_code}</div>
+                  <div className="flex flex-col text-sm text-gray-900 leading-relaxed">
+                    {row?.mobile_phone && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#F67C1A] font-semibold">M</span>
+                        <span>{row.mobile_phone}</span>
+                      </div>
+                    )}
+                    {row?.phone && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#23AA4D] font-semibold">H</span>
+                        <span>{row.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>{row?.User?.email}</div>
+                  {/* <div>{row.ssn}</div> */}
+                  {/* <div>{row.comments}</div>
+                  <div>{row.number_id}</div> */}
+                  <div>{getStatusStyle(row?.status)}</div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

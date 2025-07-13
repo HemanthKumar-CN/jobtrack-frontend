@@ -130,7 +130,7 @@ const Navbar = ({ setCollapsed, collapsed }) => {
           </div>
         )}
 
-        {location.pathname === "/employees" && (
+        {/* {location.pathname === "/employees" && (
           <div className="flex space-x-4 border-r border-gray-300 pr-5">
             <Link to="/employees/add">
               <button className="flex cursor-pointer items-center bg-[#008CC8] text-white px-4 py-2 rounded-md shadow-md hover:bg-[#1A2D43] transition font-montserrat font-bold text-[12px] leading-[14.63px] tracking-[0px]">
@@ -139,7 +139,7 @@ const Navbar = ({ setCollapsed, collapsed }) => {
               </button>
             </Link>
           </div>
-        )}
+        )} */}
 
         {location.pathname === "/contractors" && (
           <div className="flex space-x-4 border-r border-gray-300 pr-5">

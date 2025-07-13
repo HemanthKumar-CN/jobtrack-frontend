@@ -1358,7 +1358,10 @@ const AddEmployees = () => {
       <div className="flex justify-end">
         {/* Buttons */}
         <div className="flex gap-10 mt-10 ">
-          <button className="bg-gray-300 w-44 cursor-pointer hover:bg-gray-200 px-6 py-2 rounded-lg font-semibold">
+          <button
+            onClick={handleBackToEmployees}
+            className="bg-gray-300 w-44 cursor-pointer hover:bg-gray-200 px-6 py-2 rounded-lg font-semibold"
+          >
             Back
           </button>
           <button

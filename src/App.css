@@ -82,8 +82,8 @@ input[type="checkbox"]:checked {
 .bg-gradient-soft {
   background: linear-gradient(
     270deg,
-    rgba(231, 63, 63, 0.25) 0%,
-    rgba(0, 173, 58, 0.25) 50%,
-    rgba(0, 140, 200, 0.25) 100%
+    rgba(231, 63, 63, 0.15) 0%,
+    rgba(0, 173, 58, 0.15) 50%,
+    rgba(0, 140, 200, 0.15) 100%
   );
 }
