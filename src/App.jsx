@@ -86,7 +86,7 @@ function App() {
                   <Navbar setCollapsed={setCollapsed} collapsed={collapsed} />
 
                   {/* Main content area */}
-                  <div className="flex-grow p-8 pt-5 overflow-y-auto bg-[#f5f6f7]">
+                  <div className="flex-grow p-5 pt-5 overflow-y-auto bg-[#f5f6f7]">
                     <Routes>
                       <Route path="/" element={<Navigate to="/dashboard" />} />
                       {routes.map((route) => (

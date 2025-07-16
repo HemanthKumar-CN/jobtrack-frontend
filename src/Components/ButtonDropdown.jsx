@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { hidePreviousAssignments } from "../redux/slices/scheduleSlice";
+import ShowPreviousBlue from "../assets/showPreviousBlue.svg";
+import ShowPreviousBlack from "../assets/ShowPreviousBlack.svg";
 
 export default function ButtonDropdown({
   show,
@@ -34,11 +36,16 @@ export default function ButtonDropdown({
     >
       <button
         onClick={() => setOpen(!open)}
-        className={`inline-flex items-center px-1.5 py-2 text-xs font-medium  hover:bg-blue-200 rounded-md focus:outline-none cursor-pointer ${
-          show ? "text-[#008CC8] bg-[#e6f3f9]" : " border border-gray-300"
+        className={`inline-flex items-center px-2 py-2 text-xs font-medium  hover:border hover:border-gray-200 rounded-md focus:outline-none cursor-pointer ${
+          show ? "text-[#008CC8] bg-[#e6f3f9]" : "border-gray-300"
         }`}
       >
-        <FaEye className="mr-2" />
+        {/* <FaEye className="mr-2" /> */}
+        {show ? (
+          <img src={ShowPreviousBlue} alt="" className="mr-2" />
+        ) : (
+          <img src={ShowPreviousBlack} alt="" className="mr-2" />
+        )}
         {"Show Previous Assignments"}
       </button>
 

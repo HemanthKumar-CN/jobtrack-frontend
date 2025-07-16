@@ -19,6 +19,7 @@ import {
 
 import NotificationBell from "../assets/notificationBell.svg";
 import NotificationStatus from "../assets/notificationStatus.svg";
+import ProfileImg from "../assets/profileImg.png";
 
 const Navbar = ({ setCollapsed, collapsed }) => {
   const location = useLocation();
@@ -180,7 +181,7 @@ const Navbar = ({ setCollapsed, collapsed }) => {
         <div className="flex items-center gap-2">
           <div>
             <img
-              src="https://randomuser.me/api/portraits/men/32.jpg"
+              src={ProfileImg}
               alt="Profile"
               className="w-10 rounded-xl border-2 border-gray-300"
             />

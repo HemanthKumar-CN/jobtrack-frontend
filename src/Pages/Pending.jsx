@@ -253,7 +253,7 @@ const Pending = ({ activeTab, formattedDate, searchTerm }) => {
               "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
           }}
         >
-          <div>S/N</div>
+          <div>SN#</div>
           <div>Name</div>
           <div>Status</div>
           <div>Restrictions</div>
@@ -275,7 +275,7 @@ const Pending = ({ activeTab, formattedDate, searchTerm }) => {
                 "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
             }}
           >
-            {/* S/N */}
+            {/* SN# */}
             <div>{index + 1}</div>
 
             {/* Name with avatar */}

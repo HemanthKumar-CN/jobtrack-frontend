@@ -10,6 +10,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchSchedule, updateSchedule } from "../redux/slices/scheduleSlice";
 import { format, parse } from "date-fns";
 import { capitalizeFirst } from "../Utils/capitalizeFirst";
+import ButtonDropdown from "../Components/ButtonDropdown";
+import SelectAllBlack from "../assets/selectAllBlack.svg";
+import SelectAllBlue from "../assets/selectAllBlue.svg";
+import GetPreviousBlack from "../assets/getPreviousBlack.svg";
+import RecommendScheduled from "../assets/recommedScheduled.svg";
+import ScheduleSelected from "../assets/scheduleSelected.svg";
+import LocationIcon from "../assets/filter.svg";
 
 const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
   const [editingRowId, setEditingRowId] = useState(null);
@@ -17,6 +24,7 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
   const [editedData, setEditedData] = useState({});
   const [filterEvent, setFilterEvent] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
+  const [allSelected, setAllSelected] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -152,32 +160,60 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
               </span>
             </div>
 
-            <div className="flex items-center space-x-1">
-              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <PiListChecksBold className="w-4 h-4 border p-[0.01em] rounded-sm text-[#008CC8]" />
-                <span className="text-xs">Select All</span>
-              </button> */}
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <RiArrowGoBackLine className="w-4 h-4 border p-[0.08em] rounded-sm" />
-                <span className="text-xs">Show Previous Assignments</span>
-              </button>
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <BsFileEarmarkArrowDown className="w-4 h-4" />
-                <span className="text-xs">Get Previous Assignments</span>
-              </button>
-              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <TbCalendarPlus className="w-4 h-4" />
-                <span className="text-xs">Recommend Scheduled</span>
-              </button> */}
-              {/* <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <TbCalendarPlus className="w-4 h-4" />
-                <span className="text-xs">Schedule Selected</span>
-              </button> */}
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 rounded-xl px-1 py-0.5 border border-gray-300">
+                <button
+                  className={`flex items-center cursor-pointer space-x-2 px-2 py-2 font-semibold  rounded-lg hover:border hover:border-gray-200 ${
+                    allSelected ? "text-[#008CC8] bg-[#008CC81A]" : ""
+                  }`}
+                  // onClick={handleToggleSelectAll}
+                >
+                  {/* <PiListChecksBold className="w-4 h-4 border p-[0.01em] rounded-sm " /> */}
+                  {allSelected ? (
+                    <img src={SelectAllBlue} alt="" />
+                  ) : (
+                    <img src={SelectAllBlack} alt="" />
+                  )}
+                  <span className="text-xs">
+                    {allSelected ? "Deselect All" : "Select All"}
+                  </span>
+                </button>
+                {/* <button
+                            className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            onClick={handleShowPreviousAssignments}
+                          >
+                            <RiArrowGoBackLine className="w-4 h-4 border p-[0.08em] rounded-sm " />
+                            <span className="text-xs">Show Previous Assignments</span>
+                          </button> */}
+                <ButtonDropdown
+                // show={showPrevious}
+                // onToggle={(value) => setShowPrevious(value)}
+                // handleShowPreviousAssignments={handleShowPreviousAssignments}
+                />
+                <button
+                  className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:bg-gray-50"
+                  // onClick={handleGetPrevious}
+                >
+                  {/* <BsFileEarmarkArrowDown className="w-4 h-4" /> */}
+                  <img src={GetPreviousBlack} alt="" />
+                  <span className="text-xs">Get Previous Assignments</span>
+                </button>
+                <button className="flex items-center cursor-pointer space-x-2 px-1 py-2  border-gray-300 rounded-lg hover:bg-gray-50">
+                  {/* <TbCalendarPlus className="w-4 h-4" /> */}
+                  <img src={RecommendScheduled} alt="" />
+                  <span className="text-xs">Recommend Scheduled</span>
+                </button>
+
+                {/* <button className="p-2 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50">
+                            <CiFilter className="w-4 h-4" />
+                          </button> */}
+              </div>
               <button
                 onClick={() => setShowFilter(!showFilter)}
-                className="p-2 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50"
+                className="p-2.5 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                <CiFilter className="w-4 h-4" />
+                {/* <CiFilter className="w-4 h-4" /> */}
+                <img src={LocationIcon} alt="" width={18} />
               </button>
             </div>
           </div>
@@ -252,7 +288,7 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
               "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
           }}
         >
-          <div>S/N</div>
+          <div>SN#</div>
           <div>Name</div>
           <div>Status</div>
           <div>Restrictions</div>
@@ -274,7 +310,7 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
                 "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
             }}
           >
-            {/* S/N */}
+            {/* SN# */}
             <div>{index + 1}</div>
 
             {/* Name with avatar */}
@@ -310,7 +346,7 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
             {/* Restrictions */}
             <div>
               <span
-                className={`inline-flex py-1 text-xs font-medium rounded-full `}
+                className={`inline-flex py-1 text-xs font-semibold rounded-full `}
               >
                 {appointment.employee_restrictions
                   .map((r) => r.description)
