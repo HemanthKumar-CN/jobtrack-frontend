@@ -25,7 +25,7 @@ export const fetchEmployees = createAsyncThunk(
         search,
         page,
         limit,
-        status,
+        status: status == "All" ? "" : status, // Handle 'All' status
         sortField,
         sortOrder,
         typeFilter: typeFilter || "",
@@ -171,27 +171,58 @@ export const updateEmployee = createAsyncThunk(
     try {
       const formData = new FormData();
 
-      formData.append("first_name", employeeData.firstName);
-      formData.append("last_name", employeeData.lastName);
-      formData.append("address_1", employeeData.address1);
-      formData.append("address_2", employeeData.address2);
-      formData.append("postal_code", employeeData.zip);
-      formData.append("date_of_birth", employeeData.Dob);
-      formData.append("role_id", 3);
+      // formData.append("first_name", employeeData.firstName);
+      // formData.append("last_name", employeeData.lastName);
+      // formData.append("address_1", employeeData.address1);
+      // formData.append("address_2", employeeData.address2);
+      // formData.append("postal_code", employeeData.zip);
+      // formData.append("date_of_birth", employeeData.Dob);
+      // formData.append("role_id", 3);
+      // formData.append("city", employeeData.selectedCity);
+      // formData.append("state", employeeData.selectedState);
+      // formData.append("hire_date", employeeData.hireDate);
+      // formData.append("email", employeeData.email);
+      // formData.append("type", employeeData.employeeType);
+      // formData.append("phone", employeeData.employeePhone);
+      // formData.append(
+      //   "emergency_contact_name",
+      //   employeeData.emergencyContactName,
+      // );
+      // formData.append(
+      //   "emergency_contact_phone",
+      //   employeeData.emergencyContactPhone,
+      // );
+      formData.append("firstName", employeeData.firstName);
+      formData.append("lastName", employeeData.lastName);
+      formData.append("email", employeeData.email);
+      formData.append("address1", employeeData.address1);
+      formData.append("address2", employeeData.address2);
       formData.append("city", employeeData.selectedCity);
       formData.append("state", employeeData.selectedState);
-      formData.append("hire_date", employeeData.hireDate);
-      formData.append("email", employeeData.email);
+      formData.append("zip", employeeData.zip);
+      formData.append("homePhone", employeeData.employeePhone);
+      formData.append("mobilePhone", employeeData.employeeMobilePhone);
+      formData.append("birthdate", employeeData.Dob);
+      formData.append("status", employeeData.status);
+      formData.append("comments", employeeData.comments);
+      formData.append("SSN", employeeData.ssn);
+      formData.append("SN", employeeData.snf);
+      formData.append("numberId", employeeData.numberId);
       formData.append("type", employeeData.employeeType);
-      formData.append("phone", employeeData.employeePhone);
+      formData.append("inactive_reason", employeeData.inactiveReason);
+      formData.append("FDC", employeeData.fdc);
+      formData.append("GES", employeeData.ges);
+      formData.append("DrvLic", employeeData.drvLic);
+      formData.append("four", employeeData.four);
       formData.append(
-        "emergency_contact_name",
-        employeeData.emergencyContactName,
+        "selectedRestrictions",
+        JSON.stringify(employeeData.selectedRestrictions),
       );
       formData.append(
-        "emergency_contact_phone",
-        employeeData.emergencyContactPhone,
+        "recurringTimes",
+        JSON.stringify(employeeData.recurringTimes),
       );
+      formData.append("timeOffs", JSON.stringify(employeeData.timeOffs));
 
       if (employeeData.file) {
         formData.append("image", employeeData.file);

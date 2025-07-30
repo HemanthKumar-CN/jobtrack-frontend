@@ -10,74 +10,33 @@ export default function ButtonDropdown({
   onToggle,
   handleShowPreviousAssignments,
 }) {
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef();
   const dispatch = useDispatch();
 
-  const handleHidePreviousAssignment = () => {
-    dispatch(hidePreviousAssignments());
+  const handleClick = () => {
+    if (show) {
+      // Hide previous assignments
+      dispatch(hidePreviousAssignments());
+      onToggle(false);
+    } else {
+      // Show previous assignments
+      const shouldShow = handleShowPreviousAssignments();
+      if (shouldShow) onToggle(true);
+    }
   };
 
-  // Close on outside click
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div
-      className="relative inline-block items-center cursor-pointer space-x-2 px-1 py-1  border-gray-300 rounded-lg hover:bg-gray-50"
-      ref={dropdownRef}
+    <button
+      onClick={handleClick}
+      className={`inline-flex items-center cursor-pointer px-3 py-2 text-[13px] font-semibold rounded-md  hover:shadow-md transition ${
+        show ? "text-[#008CC8] bg-[#e6f3f9]" : " bg-white"
+      }`}
     >
-      <button
-        onClick={() => setOpen(!open)}
-        className={`inline-flex items-center px-2 py-2 text-xs font-medium  hover:border hover:border-gray-200 rounded-md focus:outline-none cursor-pointer ${
-          show ? "text-[#008CC8] bg-[#e6f3f9]" : "border-gray-300"
-        }`}
-      >
-        {/* <FaEye className="mr-2" /> */}
-        {show ? (
-          <img src={ShowPreviousBlue} alt="" className="mr-2" />
-        ) : (
-          <img src={ShowPreviousBlack} alt="" className="mr-2" />
-        )}
-        {"Show Previous Assignments"}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 z-10 mt-2 rounded-md bg-white shadow-lg ">
-          <div className="py-1">
-            <button
-              onClick={() => {
-                if (handleShowPreviousAssignments()) {
-                  onToggle(true);
-                  setOpen(false);
-                }
-              }}
-              className="flex items-center w-full px-1.5 py-3 text-xs text-gray-700 hover:bg-gray-100 cursor-pointer"
-            >
-              <FaEye className="mr-2" />
-              Show Previous Assignments
-            </button>
-            <button
-              onClick={() => {
-                onToggle(false);
-                setOpen(false);
-                handleHidePreviousAssignment();
-              }}
-              className="flex items-center w-full px-1.5 py-3 text-xs text-gray-700 hover:bg-gray-100 cursor-pointer"
-            >
-              <FaEyeSlash className="mr-2" />
-              Hide Previous Assignments
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      <img
+        src={show ? ShowPreviousBlue : ShowPreviousBlack}
+        alt=""
+        className="mr-2 w-4 h-4"
+      />
+      {show ? "Hide Previous Assignments" : "Show Previous Assignments"}
+    </button>
   );
 }

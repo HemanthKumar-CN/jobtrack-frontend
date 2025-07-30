@@ -11,6 +11,7 @@ import { useModal } from "../Components/Modal/ModalProvider";
 import { useNavigate } from "react-router-dom";
 import { truncateText } from "../Utils/truncateText";
 import Tooltip from "../Components/Tooltip";
+import { TbEdit } from "react-icons/tb";
 
 const Locations = () => {
   const navigate = useNavigate();
@@ -120,30 +121,31 @@ const Locations = () => {
         />
       </div>
 
-      <div className="p-1 bg-white rounded-xl shadow-md">
-        <div
-          className="grid bg-gray-100 p-3 font-semibold text-gray-700 rounded-md"
-          style={{ gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr" }}
-        >
+      <div className="w-full border border-gray-200 rounded-xl overflow-hidden">
+        <div className="flex justify-between items-center mb-3 mx-4">
+          <h2 className=" font-bold text-gray-900">Events</h2>
+        </div>
+        {/* Table Header */}
+        <div className="grid grid-cols-5 text-left bg-[#F8F9FA] text-gray-600 text-sm font-bold px-4 py-3 border-b border-gray-200">
           <div
-            className="flex items-center gap-1 cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleSort("name")}
           >
-            Location Name
-            <div className="flex flex-col ml-1">
+            <span>LOCATION NAME</span>
+            <div className="flex flex-col text-xs leading-[0.8rem]">
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "name" && sortOrder === "asc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
                 ▲
               </span>
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "name" && sortOrder === "desc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
@@ -151,26 +153,28 @@ const Locations = () => {
               </span>
             </div>
           </div>
-          <div className="ml-1">Address</div>
+
+          <div>ADDRESS</div>
+
           <div
-            className="flex items-center gap-1 cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleSort("city")}
           >
-            City
-            <div className="flex flex-col ml-1">
+            <span>CITY</span>
+            <div className="flex flex-col text-xs leading-[0.8rem]">
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "city" && sortOrder === "asc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
                 ▲
               </span>
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "city" && sortOrder === "desc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
@@ -178,25 +182,26 @@ const Locations = () => {
               </span>
             </div>
           </div>
+
           <div
-            className="flex items-center gap-1 cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleSort("state")}
           >
-            State
-            <div className="flex flex-col ml-1">
+            <span>STATE</span>
+            <div className="flex flex-col text-xs leading-[0.8rem]">
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "state" && sortOrder === "asc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
                 ▲
               </span>
               <span
-                className={`leading-none text-xs ${
+                className={`${
                   sortField === "state" && sortOrder === "desc"
-                    ? "text-gray-700"
+                    ? "text-[#1A2D43]"
                     : "text-gray-400"
                 }`}
               >
@@ -204,13 +209,12 @@ const Locations = () => {
               </span>
             </div>
           </div>
-          <div className="ml-4">Zip</div>
+
+          <div className="text-left pr-4">ZIP / ACTIONS</div>
         </div>
 
-        <div
-          ref={listRef}
-          className="mt-2 overflow-auto max-h-[60vh] custom-scrollbar"
-        >
+        {/* Locations List */}
+        <div className="" ref={listRef}>
           {locations.map((warehouse, index) => {
             let formattedAddress =
               warehouse?.address_1 +
@@ -220,61 +224,66 @@ const Locations = () => {
               <div
                 key={warehouse.id}
                 ref={index === locations.length - 1 ? lastLocationRef : null}
-                className={`grid items-center rounded-md ${
-                  index % 2 === 0 ? "bg-[rgba(24,105,187,0.1)]" : "bg-white"
-                }`}
-                style={{ gridTemplateColumns: "1fr 2fr 1fr 1fr 1fr" }}
+                className="grid grid-cols-5 items-center text-sm text-gray-800 px-4 py-3 border-b border-gray-100"
               >
-                <Tooltip text={warehouse.name}>
-                  <div
-                    onClick={() => navigate(`/locations/add/${warehouse.id}`)}
-                    className="border border-white p-3 py-4.5 text-[#008CC8] cursor-pointer hover:underline hover:font-semibold"
-                  >
-                    {truncateText(warehouse.name)}
-                  </div>
-                </Tooltip>
+                <div
+                  onClick={() => navigate(`/locations/add/${warehouse.id}`)}
+                  className="font-bold hover:underline cursor-pointer truncate"
+                >
+                  {truncateText(warehouse.name)}
+                </div>
+
                 <Tooltip text={formattedAddress}>
-                  <div className="border border-white p-3 py-4.5 break-words whitespace-pre-wrap">
+                  <div className="break-words whitespace-pre-wrap truncate">
                     {formattedAddress}
                   </div>
                 </Tooltip>
-                <div className="border border-white p-3 py-4.5">
-                  {warehouse.city}
-                </div>
-                <div className="border border-white p-3 py-4.5">
-                  {warehouse.state}
-                </div>
-                <div className="border border-white p-3 flex justify-between items-center">
-                  <span className="">{warehouse.postal_code}</span>
-                  <span>
+
+                <div>{warehouse.city}</div>
+                <div>{warehouse.state}</div>
+
+                <div className="flex justify-between items-center gap-2">
+                  <span>{warehouse.postal_code}</span>
+                  <div className="flex gap-2">
                     <button
                       onClick={() =>
                         openModal({
                           title: "Delete this item?",
                           message:
                             "This action is permanent and cannot be undone.",
-                          onConfirm: () => handleDeleteLocation(warehouse.id), // Call delete function inside modal
+                          onConfirm: () => handleDeleteLocation(warehouse.id),
                           confirmText: "Delete",
                           cancelText: "Cancel",
                         })
                       }
-                      className="border border-gray-300 p-2 mr-3 bg-white hover:bg-gray-200 rounded-lg transition"
+                      className="p-1.5 rounded-md hover:bg-gray-100"
                     >
-                      <RiDeleteBin6Line className="text-red-600 cursor-pointer hover:scale-110 transition" />
+                      <RiDeleteBin6Line className="text-red-600 w-4 h-4" />
                     </button>
                     <button
                       onClick={() => navigate(`/locations/add/${warehouse.id}`)}
-                      className="border border-gray-300 p-2 bg-white hover:bg-gray-200 rounded-lg transition"
+                      className="p-1.5 rounded-md hover:bg-gray-100"
                     >
-                      <FaPen className="text-blue-600 cursor-pointer hover:scale-110 transition" />
+                      <TbEdit className="w-4 h-4" />
                     </button>
-                  </span>
+                  </div>
                 </div>
               </div>
             );
           })}
-          {loading && <Loader />}
+
+          {loading && (
+            <div className="flex justify-center items-center py-4">
+              <Loader />
+            </div>
+          )}
         </div>
+
+        {locations.length === 0 && !loading && (
+          <div className="flex justify-center items-center text-gray-500 py-6 h-[30vh]">
+            🏢 No locations found.
+          </div>
+        )}
       </div>
     </div>
   );

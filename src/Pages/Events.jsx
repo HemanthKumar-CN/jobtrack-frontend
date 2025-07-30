@@ -31,7 +31,7 @@ const Events = () => {
   const { openModal } = useModal();
   const showToast = useToast();
 
-  const [sortField, setSortField] = useState("event_name"); // which field
+  const [sortField, setSortField] = useState(""); // which field
   const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
 
   const [eventFilter, setEventFilter] = useState("");
@@ -381,13 +381,89 @@ const Events = () => {
           </div>
         </div>
         {/* Headers */}
-        <div className="w-full border border-gray-200 rounded-xl overflow-hidden">
+        <div className="w-full  border-gray-200 overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-6 text-left bg-[#F8F9FA] text-gray-600 text-sm font-bold px-4 py-3 rounded-t-xl border-b border-gray-200">
-            <div>EVENT NAME</div>
+          <div className="grid grid-cols-6 text-left bg-[#F8F9FA] text-gray-600 text-sm font-bold px-4 py-3 border-b border-gray-200">
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => handleSort("event_name")}
+            >
+              <span>EVENT NAME</span>
+              <div className="flex flex-col text-xs leading-[0.8rem]">
+                <span
+                  className={`${
+                    sortField === "event_name" && sortOrder === "asc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▲
+                </span>
+                <span
+                  className={`${
+                    sortField === "event_name" && sortOrder === "desc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
             <div>STATUS</div>
-            <div>START DATE</div>
-            <div>END DATE</div>
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => handleSort("start_date")}
+            >
+              <span>START DATE</span>
+              <div className="flex flex-col text-xs leading-[0.8rem]">
+                <span
+                  className={`${
+                    sortField === "start_date" && sortOrder === "asc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▲
+                </span>
+                <span
+                  className={`${
+                    sortField === "start_date" && sortOrder === "desc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => handleSort("end_date")}
+            >
+              <span>END DATE</span>
+              <div className="flex flex-col text-xs leading-[0.8rem]">
+                <span
+                  className={`${
+                    sortField === "end_date" && sortOrder === "asc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▲
+                </span>
+                <span
+                  className={`${
+                    sortField === "end_date" && sortOrder === "desc"
+                      ? "text-[#1A2D43]"
+                      : "text-gray-400"
+                  }`}
+                >
+                  ▼
+                </span>
+              </div>
+            </div>
+
             <div>PROJECT CODE</div>
             <div className="text-left pr-4">COMMENTS</div>
           </div>
@@ -460,10 +536,17 @@ const Events = () => {
                               {contractor?.Contractor?.company_name}
                             </div>
                             <div className="p-2 px-3 border-r border-[#E6E6E6]">
-                              {contractor?.start_time?.slice(11, 16)}
+                              {contractor?.start_time
+                                ? format(
+                                    parseISO(contractor.start_time),
+                                    "HH:mm",
+                                  )
+                                : "--"}
                             </div>
                             <div className="p-2 px-3">
-                              {contractor?.end_time?.slice(11, 16)}
+                              {contractor?.end_time
+                                ? format(parseISO(contractor.end_time), "HH:mm")
+                                : "--"}
                             </div>
                           </div>
                         ),

@@ -87,3 +87,19 @@ input[type="checkbox"]:checked {
     rgba(0, 140, 200, 0.15) 100%
   );
 }
+
+select,
+option {
+  background-color: white !important;
+  color: black;
+}
+
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) {
+    select,
+    option {
+      background-color: white !important;
+      color: black !important;
+    }
+  }
+}

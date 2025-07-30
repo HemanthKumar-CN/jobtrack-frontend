@@ -201,15 +201,31 @@ const RecurringBlockedTimeAndTimeOff = ({
   setTimeOffs,
 }) => {
   const handleRecurringChange = (index, field, value) => {
-    const updated = [...recurringTimes];
-    updated[index][field] = value;
-    setRecurringTimes(updated);
+    setRecurringTimes((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
   };
 
+  // const handleTimeOffChange = (index, field, value) => {
+  //   const updated = [...timeOffs];
+  //   updated[index][field] = value;
+  //   setTimeOffs(updated);
+  // };
+
   const handleTimeOffChange = (index, field, value) => {
-    const updated = [...timeOffs];
-    updated[index][field] = value;
-    setTimeOffs(updated);
+    setTimeOffs((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
   };
 
   const addRecurringRow = () => {

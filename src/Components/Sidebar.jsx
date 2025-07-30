@@ -118,17 +118,17 @@ const Sidebar = ({ setCollapsed, collapsed }) => {
         {
           menu: "Locations",
           path: "/locations",
-          icon: <img src={LocationIcon} alt="" />,
+          icon: <img src={LocationIcon} alt="" className="mr-1.5" />,
         },
         {
           menu: "Contractors",
           path: "/contractors",
-          icon: <img src={ContractorIcon} alt="" />,
+          icon: <img src={ContractorIcon} alt="" className="mr-2" />,
         },
         {
           menu: "SMS Info",
           path: "/sms-info",
-          icon: <img src={SMSIcon} alt="" />,
+          icon: <img src={SMSIcon} alt="" className="mr-0.5" />,
         },
       ],
     },

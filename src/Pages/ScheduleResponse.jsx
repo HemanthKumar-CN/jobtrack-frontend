@@ -7,6 +7,7 @@ import {
 } from "../redux/slices/authSlice";
 import { format } from "date-fns";
 import { useToast } from "../Components/Toast/ToastContext";
+const API_IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 export default function ScheduleResponse() {
   const dispatch = useDispatch();
@@ -82,6 +83,13 @@ export default function ScheduleResponse() {
             </p>
           </div>
 
+          <div className="shadow-md">
+            <img
+              src={`${API_IMAGE_BASE_URL}${tokenSchedule?.locationImageUrl}`}
+              alt=""
+            />
+          </div>
+
           <div className="mt-6 text-gray-500 text-xs">
             Contact your admin for any support.
           </div>
@@ -128,6 +136,13 @@ export default function ScheduleResponse() {
                   "MMM dd, yyyy — h:mm a",
                 )}
             </p>
+          </div>
+
+          <div className="shadow-md">
+            <img
+              src={`${API_IMAGE_BASE_URL}${tokenSchedule?.locationImageUrl}`}
+              alt=""
+            />
           </div>
 
           <div className="flex justify-center gap-4 mt-6">

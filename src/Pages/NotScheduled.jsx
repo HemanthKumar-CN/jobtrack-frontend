@@ -1,11 +1,4 @@
-import React, { use, useEffect, useState } from "react";
-import { CiFilter, CiSettings } from "react-icons/ci";
-import { PiListChecksBold } from "react-icons/pi";
-import { RiArrowGoBackLine } from "react-icons/ri";
-import { BsFileEarmarkArrowDown } from "react-icons/bs";
-import { TbCalendarPlus } from "react-icons/tb";
-import { SiTicktick } from "react-icons/si";
-import { FaSave } from "react-icons/fa";
+import React, { Fragment, useEffect, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,6 +7,7 @@ import {
   fetchEventlist,
   fetchNotScheduledEmployees,
   fetchPreviousAssignments,
+  setPreviousAssignments,
 } from "../redux/slices/scheduleSlice";
 import { format, parse } from "date-fns";
 import ButtonDropdown from "../Components/ButtonDropdown";
@@ -24,6 +18,7 @@ import GetPreviousBlack from "../assets/getPreviousBlack.svg";
 import RecommendScheduled from "../assets/recommedScheduled.svg";
 import ScheduleSelected from "../assets/scheduleSelected.svg";
 import { FaCheck } from "react-icons/fa6";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const NotScheduled = ({
   activeTab,
@@ -44,12 +39,15 @@ const NotScheduled = ({
   const [showPrevious, setShowPrevious] = useState(false);
 
   const [allSelected, setAllSelected] = useState(false);
+  // const [populateFromPrevious, setPopulateFromPrevious] = useState({});
 
   const [
     selectedEventLocationContractorId,
     setSelectedEventLocationContractorId,
   ] = useState(null);
-  const { previousAssignments } = useSelector((state) => state.schedules);
+  const { previousAssignments, populateFromPrevious } = useSelector(
+    (state) => state.schedules,
+  );
 
   const {
     notScheduledEmployees,
@@ -77,139 +75,41 @@ const NotScheduled = ({
     }
   }, [notScheduledEmployees]);
 
-  const appointments = [
-    {
-      id: 1,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 2,
-      name: "Guy Hawkins",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 3,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 4,
-      name: "Annette Black",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 5,
-      name: "Cameron Williamson",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 6,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 7,
-      name: "Devon Lane",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Pending",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 8,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "No physical limitations",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 9,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 10,
-      name: "Cody Fisher",
-      phone: "312-921-6724",
-      capacity: "Restricted hours",
-      status: "Done",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-    {
-      id: 11,
-      name: "Robert Fox",
-      phone: "312-921-6724",
-      capacity: "Limited lifting capacity",
-      status: "Cancel",
-      event: "None",
-      location: "None",
-      class: "None",
-      startTime: "None",
-    },
-  ];
+  useEffect(() => {
+    if (populateFromPrevious && Object.keys(populateFromPrevious).length > 0) {
+      const updatedSelections = { ...rowSelections };
+
+      for (const [id, data] of Object.entries(populateFromPrevious)) {
+        if (data) {
+          updatedSelections[id] = {
+            ...(updatedSelections[id] || {}),
+            checked: true,
+            eventId: data.event_id,
+            locationContractorId: data.event_location_contractor_id, // confirm the key if it's event_location_contractor_id
+            classificationId: data.classification_id,
+            startTime: format(new Date(data.start_time), "HH:mm"),
+            comments: data.comments || "",
+          };
+        }
+      }
+
+      setRowSelections(updatedSelections);
+    }
+  }, [populateFromPrevious]);
+
+  console.log("populate from previous ---:", populateFromPrevious);
 
   useEffect(() => {
     const dateFilter = format(formattedDate, "yyyy-MM-dd");
 
-    dispatch(fetchNotScheduledEmployees(dateFilter))
+    dispatch(
+      fetchNotScheduledEmployees({ date: dateFilter, search: searchTerm }),
+    )
       .unwrap()
       .catch((error) => {
         console.log("Failed to fetch not scheduled employees:", error);
       });
-  }, [formattedDate]);
+  }, [formattedDate, searchTerm]);
 
   useEffect(() => {
     setEventData(eventList);
@@ -231,6 +131,13 @@ const NotScheduled = ({
       ...prev,
       [id]: {
         ...prev[id],
+        checked: true,
+      },
+    }));
+    setRowSelections((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
         eventId,
         locationContractorId: null, // reset location-contractor on event change
       },
@@ -238,13 +145,97 @@ const NotScheduled = ({
   };
 
   const handleLocationChange = (id, locContractorId) => {
+    // Step 1: Get eventId for this row
+    const eventId = rowSelections[id]?.eventId;
+
+    // Step 2: Find the matching contractor from eventData
+    const contractorStartTime = eventData
+      .find((e) => e.id === eventId)
+      ?.locations.flatMap((loc) => loc.contractors)
+      .find(
+        (contractor) =>
+          contractor.event_location_contractor_id === locContractorId,
+      )?.start_time;
+
+    let formattedStartTime = "";
+
+    if (contractorStartTime) {
+      console.log(contractorStartTime, "???///////////////");
+      const parsedDate = new Date(contractorStartTime);
+      formattedStartTime = format(parsedDate, "HH:mm"); // → "09:30"
+    }
+
     setRowSelections((prev) => ({
       ...prev,
       [id]: {
         ...prev[id],
         locationContractorId: locContractorId,
+        startTime: formattedStartTime || "", // fallback to empty string
       },
     }));
+  };
+
+  const handleCreateSchedulesForSelected = () => {
+    const invalidRows = [];
+
+    Object.entries(rowSelections).forEach(([id, data]) => {
+      if (data?.checked) {
+        const isValid =
+          data.eventId &&
+          data.locationContractorId &&
+          data.classificationId &&
+          data.startTime;
+
+        if (!isValid) {
+          const index = notScheduledEmployees.findIndex(
+            (emp) => emp.id === parseInt(id),
+          );
+          invalidRows.push(index + 1); // SN# is index + 1
+        }
+      }
+    });
+
+    if (invalidRows.length > 0) {
+      showToast(
+        `Rows ${invalidRows.join(", ")} have missing fields. Please fill them.`,
+        "error",
+      );
+      return;
+    }
+
+    // ✅ All valid – prepare bulk data
+    const bulkData = {};
+
+    Object.entries(rowSelections).forEach(([id, data]) => {
+      if (data?.checked) {
+        const parsedDate = parse(
+          formattedDate + " " + data.startTime,
+          "EEEE, MMMM dd, yyyy HH:mm",
+          new Date(),
+        );
+        const offsetMinutes = parsedDate.getTimezoneOffset();
+        const utcDate = new Date(parsedDate.getTime() - offsetMinutes * 60000);
+
+        bulkData[id] = {
+          classificationId: data.classificationId,
+          eventId: data.eventId,
+          locationContractorId: data.locationContractorId,
+          startTime: format(utcDate, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+          comments: data?.comments || "",
+        };
+      }
+    });
+
+    console.log("Bulk Data to submit:", bulkData);
+
+    dispatch(createBulkSchedule(bulkData))
+      .unwrap()
+      .then(() => {
+        setActiveTab("Scheduled");
+      })
+      .catch((err) => {
+        showToast("Error while creating schedules.", "error");
+      });
   };
 
   const handleCreateSchedule = (id) => {
@@ -292,12 +283,26 @@ const NotScheduled = ({
       ...prev,
       [id]: {
         ...prev[id],
+        checked: true,
+      },
+    }));
+    setRowSelections((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
         classificationId,
       },
     }));
   };
 
   const handleStartTimeChange = (id, startTime) => {
+    setRowSelections((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        checked: true,
+      },
+    }));
     setRowSelections((prev) => ({
       ...prev,
       [id]: {
@@ -315,9 +320,15 @@ const NotScheduled = ({
         comments,
       },
     }));
-  };
 
-  console.log("Row selections:", rowSelections, "????", previousAssignments);
+    setRowSelections((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        checked: true,
+      },
+    }));
+  };
 
   const handleCheckboxToggle = (id) => {
     setRowSelections((prev) => ({
@@ -379,6 +390,16 @@ const NotScheduled = ({
       showToast("Select atleast one row from the table", "error");
       return false;
     }
+
+    if (selectedEmployeeIds.length) {
+      console.log(selectedEmployeeIds, "??????????");
+      dispatch(setPreviousAssignments(selectedEmployeeIds))
+        .unwrap()
+        .then((response) => {
+          // setPopulateFromPrevious(response);
+        })
+        .catch((error) => {});
+    }
   };
 
   const getAvatarColor = (index) => {
@@ -398,16 +419,16 @@ const NotScheduled = ({
         <div className="bg-white rounded-t-lg  border-gray-200 p-4 px-3">
           <div className="flex items-center justify-between">
             <div className=" text-gray-600 flex flex-col gap-4">
-              <span className="font-bold text-black">{activeTab}</span>
+              <span className="font-bold text-lg text-black">{activeTab}</span>
               <span>
                 Total: {Total}, Available: {Available}, Limited: {Limited},
                 Unavailable: {Unavailable}
               </span>
             </div>
 
-            <div className="flex items-center space-x-1 rounded-xl px-1 py-0.5 border border-gray-300">
+            <div className="flex items-center space-x-1 rounded-xl px-1 py-1 border border-gray-300">
               <button
-                className={`flex items-center cursor-pointer space-x-2 px-2 py-2 font-semibold  rounded-lg hover:border hover:border-gray-200 ${
+                className={`flex items-center cursor-pointer space-x-2 px-2 py-2 font-semibold rounded-lg hover:shadow-md ${
                   allSelected ? "text-[#008CC8] bg-[#008CC81A]" : ""
                 }`}
                 onClick={handleToggleSelectAll}
@@ -418,39 +439,36 @@ const NotScheduled = ({
                 ) : (
                   <img src={SelectAllBlack} alt="" />
                 )}
-                <span className="text-xs">
+                <span className="text-[13px]">
                   {allSelected ? "Deselect All" : "Select All"}
                 </span>
               </button>
-              {/* <button
-                className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                onClick={handleShowPreviousAssignments}
-              >
-                <RiArrowGoBackLine className="w-4 h-4 border p-[0.08em] rounded-sm " />
-                <span className="text-xs">Show Previous Assignments</span>
-              </button> */}
+
               <ButtonDropdown
                 show={showPrevious}
                 onToggle={(value) => setShowPrevious(value)}
                 handleShowPreviousAssignments={handleShowPreviousAssignments}
               />
               <button
-                className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:shadow-md "
                 onClick={handleGetPrevious}
               >
                 {/* <BsFileEarmarkArrowDown className="w-4 h-4" /> */}
                 <img src={GetPreviousBlack} alt="" />
-                <span className="text-xs">Get Previous Assignments</span>
+                <span className="text-[13px]">Get Previous Assignments</span>
               </button>
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2  border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:shadow-md">
                 {/* <TbCalendarPlus className="w-4 h-4" /> */}
                 <img src={RecommendScheduled} alt="" />
-                <span className="text-xs">Recommend Scheduled</span>
+                <span className="text-[13px]">Recommend Scheduled</span>
               </button>
-              <button className="flex items-center cursor-pointer space-x-2 px-1 py-2  border-gray-300 rounded-lg hover:bg-gray-50">
+              <button
+                onClick={handleCreateSchedulesForSelected}
+                className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:shadow-md"
+              >
                 {/* <TbCalendarPlus className="w-4 h-4" /> */}
                 <img src={ScheduleSelected} alt="" />
-                <span className="text-xs">Schedule Selected</span>
+                <span className="text-[13px]">Schedule Selected</span>
               </button>
               {/* <button className="p-2 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50">
                 <CiFilter className="w-4 h-4" />
@@ -460,11 +478,11 @@ const NotScheduled = ({
         </div>
       </div>
 
-      <table className="w-[82vw] text-sm border-collapse">
+      <table className="w-full text-sm border-collapse">
         {/* Header */}
         <thead className="bg-gray-100 uppercase tracking-wider text-[#4D4E50] font-bold">
           <tr>
-            <th className="px-3.5 py-3 text-left">
+            <th className="px-3.5 py-3.5 ">
               <label className="inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -478,27 +496,28 @@ const NotScheduled = ({
               </label>
             </th>
             <th>SN#</th>
-            <th>Name</th>
-            <th>Capacity</th>
-            <th>Restrictions</th>
-            <th>Event</th>
-            <th>Location</th>
-            <th>Class</th>
+            <th className="text-left pl-3">Name</th>
+            <th className="text-left px-2">Capacity</th>
+            <th className="text-left px-2">Restrictions</th>
+            <th className="text-left px-2">Event</th>
+            <th className="text-left px-2">Location</th>
+            <th className="text-left px-2">Class</th>
             <th>Start Time</th>
-            <th>Comments</th>
+            <th className="text-left px-2">Comments</th>
             <th className="px-3">Action</th>
           </tr>
         </thead>
 
         {/* Body */}
         <tbody>
-          {notScheduledEmployees.map((appointment, index) => (
-            <>
+          {notScheduledEmployees?.map((appointment, index) => (
+            <Fragment key={index}>
               <tr
                 key={index}
                 className="border-t border-gray-200 hover:bg-gray-50"
+                // style={{ fontSize: "1rem" }}
               >
-                <td className="px-4 py-4">
+                <td className="px-4">
                   <label className="inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -513,25 +532,39 @@ const NotScheduled = ({
                     </div>
                   </label>
                 </td>
-                <td>{index + 1}</td>
-                <td className="px-2">
+                <td className="text-center">{appointment?.snf}</td>
+                <td className="px-2 ">
                   <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-9 h-9 rounded-full bg-[#008CC8] flex items-center justify-center text-white text-sm font-medium`}
-                    >
-                      {appointment.User.first_name.charAt(0).toUpperCase()}
-                      {appointment?.User?.last_name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
+                    {appointment.User?.image_url ? (
+                      <img
+                        src={`${IMAGE_BASE_URL}${appointment?.User?.image_url}`}
+                        alt={appointment?.User?.first_name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    ) : (
+                      <div
+                        className={`w-9 h-9 rounded-full bg-[#008CC8] flex items-center justify-center text-white text-sm font-medium`}
+                      >
+                        {appointment.User.first_name.charAt(0).toUpperCase()}
+                        {appointment?.User?.last_name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="">
                       <div className="font-medium text-gray-900 truncate">
                         {appointment.User.first_name}{" "}
                         {appointment.User.last_name}
                       </div>
-                      <div className="flex justify-between items-center">
-                        <div className="text-gray-500 text-xs truncate">
+                      <div className="flex justify-between gap-2 items-center ">
+                        <div className="text-gray-500 text-xs truncate ">
                           {appointment.phone}
                         </div>
-                        <div className=" w-5 h-5 ml-2 rounded-full bg-[#008CC8] flex items-center justify-center text-white text-xs font-mediums">
+                        <div
+                          className={`w-5 h-5  rounded-full  ${
+                            appointment?.type == "A"
+                              ? "bg-[#008CC8]"
+                              : "bg-[#1A2D43]"
+                          } flex items-center justify-center text-white text-xs font-mediums`}
+                        >
                           {appointment.type || "A"}
                         </div>
                       </div>
@@ -547,12 +580,30 @@ const NotScheduled = ({
                     {appointment.capacity || "Available"}
                   </span>
                 </td>
-                <td className="px-2">
+                {/* <td className="px-2 py-4">
                   {appointment.restrictions.map((r, i) => (
-                    <span key={i} className="block text-xs">
+                    <span key={i} className="block text-[13px]">
                       {r.description}
                     </span>
                   ))}
+                </td> */}
+                <td className="px-2 py-4 align-top">
+                  <div className="h-[3.9rem] overflow-hidden">
+                    {appointment.restrictions.slice(0, 3).map((r, i) => (
+                      <span
+                        key={i}
+                        className="block text-[13px] leading-[1.3rem] truncate"
+                      >
+                        {r.description}
+                        {i < appointment.restrictions.length - 1 && ", "}
+                      </span>
+                    ))}
+                  </div>
+                  {appointment.restrictions.length > 3 && (
+                    <span className="text-[12px] text-gray-400 block mt-1">
+                      + more...
+                    </span>
+                  )}
                 </td>
                 <td className="px-2">
                   <select
@@ -565,12 +616,21 @@ const NotScheduled = ({
                       )
                     }
                   >
-                    <option value="">Select Event</option>
-                    {eventData.map((event) => (
-                      <option key={event.id} value={event.id}>
-                        {event.event_name}
+                    {!eventData.length && (
+                      <option value="" disabled>
+                        No events available
                       </option>
-                    ))}
+                    )}
+                    {eventData.length > 0 && (
+                      <>
+                        <option value="">Select Event</option>
+                        {eventData.map((event) => (
+                          <option key={event.id} value={event.id}>
+                            {event.event_name}
+                          </option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </td>
                 <td className="px-2">
@@ -674,17 +734,17 @@ const NotScheduled = ({
 
               {/* Previous Assignment */}
               {previousAssignments?.[appointment.id] !== undefined && (
-                <tr className="border border-[#E6E6E6] h-20 border-dashed bg-[#008CC80D] text-gray-700 text-xs">
+                <tr className="border border-[#E6E6E6] border-dashed bg-[#008CC80D] text-gray-700 text-sm">
                   {/* Checkbox column */}
                   <td></td>
 
                   {/* SN# */}
-                  <td className="italic">
+                  <td className="">
                     {previousAssignments[appointment.id] ? "" : "-"}
                   </td>
 
                   {/* Name column - "Previous Assignment" label */}
-                  <td className="italic text-gray-600">Previous Assignment</td>
+                  <td className=" text-[#848484]">Previous Assignment</td>
 
                   {/* Capacity */}
                   <td></td>
@@ -699,7 +759,7 @@ const NotScheduled = ({
                   </td>
 
                   {/* Location */}
-                  <td className="px-2">
+                  <td className="px-2 py-4">
                     {previousAssignments[appointment.id]
                       ? `${
                           previousAssignments[appointment.id].location || "N/A"
@@ -735,7 +795,7 @@ const NotScheduled = ({
                   <td></td>
                 </tr>
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

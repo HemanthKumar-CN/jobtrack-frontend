@@ -658,11 +658,14 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createEmployee,
   fetchRestrictions,
+  getEmployeeById,
   resetEmployees,
+  updateEmployee,
 } from "../redux/slices/employeeSlice";
 import SuccessCard from "../Components/SuccessCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../Components/Toast/ToastContext";
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const AddEmployees = () => {
   const fileInputRef = useRef(null);
@@ -717,6 +720,7 @@ const AddEmployees = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const showToast = useToast();
+  const { id } = useParams();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -801,6 +805,121 @@ const AddEmployees = () => {
       setEmployeeFields(updatedNewEmployee);
     }
   }, [newEmployee]);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(getEmployeeById(id));
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id && employeeDetails) {
+      setFirstName(employeeDetails?.User?.first_name || "");
+      setLastName(employeeDetails?.User?.last_name || "");
+      setAddress1(employeeDetails?.address_1 || "");
+      setAddress2(employeeDetails?.address_2 || "");
+      setCity(employeeDetails?.city || "");
+      setState(employeeDetails?.state || "");
+      setZip(employeeDetails?.postal_code || "");
+      setHomePhone(employeeDetails?.phone || "");
+      setMobilePhone(employeeDetails?.mobile_phone || "");
+      setEmail(employeeDetails?.User?.email || "");
+      setInactiveReason(employeeDetails?.inactive_reason || "");
+
+      // Convert ISO date to YYYY-MM-DD format
+      const isoDate = employeeDetails?.date_of_birth;
+      const parsedDate = new Date(isoDate); // ✅ Convert to Date object
+      setBirthdate(parsedDate);
+
+      setComments(employeeDetails?.comments || "");
+      setSSN(employeeDetails?.ssn || "");
+      setStatus(employeeDetails?.status || "");
+      setType(employeeDetails?.type || "");
+      setSN(employeeDetails?.snf || "");
+      setDrvLic(employeeDetails?.drv_lic || "");
+      setFDC(employeeDetails?.fdc || "");
+
+      // Set other fields if they exist
+      setFour(employeeDetails?.four || "");
+      setGES(employeeDetails?.ges || "");
+
+      // Set image preview if available
+      if (employeeDetails.User && employeeDetails.User.image_url) {
+        setImagePreview(`${IMAGE_BASE_URL}${employeeDetails.User.image_url}`);
+        // Set image file for upload
+        // Assuming you have the image file URL, you can fetch it and convert to Blob/File if needed
+        // For now, we just keep the URL for preview
+        // You might need to handle this differently based on your backend response
+        // e.g., fetching the image file from the server if needed
+        // setImageFile(new Blob([employeeDetails.User.image_url], { type: 'image/jpeg' }));
+      }
+
+      // 🔹 Set restrictions
+      const restrictions =
+        employeeDetails?.restrictions?.map((r) => ({
+          id: r.id,
+          description: r.description,
+        })) || [];
+      setSelectedRestrictions(restrictions);
+
+      // 🔹 Set recurring blocked times
+      const recTimes = (employeeDetails?.recurringBlockedTimes || []).reduce(
+        (acc, item) => {
+          const existing = acc.find(
+            (block) =>
+              block.startDate === item.start_date &&
+              block.endDate === item.end_date &&
+              block.startTime === item.start_time &&
+              block.endTime === item.end_time,
+          );
+
+          const startDateObj = new Date(item.start_date);
+          const endDateObj = new Date(item.end_date);
+
+          // 👇 Convert "12:00:00" to "1970-01-01T12:00:00"
+          const startTimeObj = item.start_time
+            ? new Date(`1970-01-01T${item.start_time}`)
+            : null;
+
+          const endTimeObj = item.end_time
+            ? new Date(`1970-01-01T${item.end_time}`)
+            : null;
+
+          if (existing) {
+            existing.days.push(item.day_of_week);
+          } else {
+            acc.push({
+              days: [item.day_of_week],
+              startDate: startDateObj,
+              endDate: endDateObj,
+              startTime: startTimeObj,
+              endTime: endTimeObj,
+            });
+          }
+
+          return acc;
+        },
+        [],
+      );
+
+      setRecurringTimes(recTimes);
+
+      // 🔹 Set time offs
+      const offs =
+        employeeDetails?.timeOffs?.map((item) => ({
+          reason_id: item.reason_id,
+          startDate: item.start_date ? new Date(item.start_date) : "",
+          endDate: item.end_date ? new Date(item.end_date) : "",
+          startTime: item.start_time
+            ? new Date(`1970-01-01T${item.start_time}`)
+            : "",
+          endTime: item.end_time ? new Date(`1970-01-01T${item.end_time}`) : "",
+        })) || [];
+      setTimeOffs(offs);
+    }
+  }, [employeeDetails]);
+
+  console.log(recurringTimes, "rii", timeOffs, "timeOffs");
 
   //   // Fetch US States
   const fetchStates = async () => {
@@ -909,18 +1028,81 @@ const AddEmployees = () => {
     formData.append("recurringTimes", JSON.stringify(recurringTimes));
     formData.append("timeOffs", JSON.stringify(timeOffs));
 
-    // Redux dispatch (calls backend API)
-    dispatch(createEmployee(formData))
-      .unwrap()
-      .then(() => {})
-      .catch((err) => {
-        console.log(err, "Error while creating employee");
-        showToast("Error while creating employee", "error");
-      });
-
     for (let pair of formData.entries()) {
       console.log(`${pair[0]}:`, pair[1]);
     }
+  };
+
+  const handleUpdateEmployee = () => {
+    const missingFields = [];
+
+    if (!firstName.trim()) missingFields.push("First Name");
+    if (!lastName.trim()) missingFields.push("Last Name");
+    if (!address1.trim()) missingFields.push("Address 1");
+    if (!city.trim()) missingFields.push("City");
+    if (!state.trim()) missingFields.push("State");
+    if (!zip.trim()) missingFields.push("Zip");
+    if (!homePhone.trim()) missingFields.push("Home Phone");
+    if (!mobilePhone.trim()) missingFields.push("Mobile Phone");
+    if (!email.trim()) missingFields.push("Email Address");
+    if (!SSN.trim()) missingFields.push("SSN");
+    if (!birthdate) missingFields.push("Birthdate");
+    if (!SN.trim()) missingFields.push("SN");
+    if (!status.trim()) missingFields.push("Status");
+    if (!type.trim()) missingFields.push("Type");
+
+    if (missingFields.length > 0) {
+      showToast(
+        `Please fill in the following required fields:\n- ${missingFields.join(
+          "\n- ",
+        )}`,
+        "error",
+      );
+      return;
+    }
+
+    const employeeData = {
+      firstName,
+      lastName,
+      address1,
+      address2,
+      selectedCity: city,
+      selectedState: state,
+      zip,
+      employeePhone: homePhone,
+      employeeMobilePhone: mobilePhone,
+      email,
+      ssn: SSN,
+      Dob: birthdate,
+      comments,
+      snf: SN,
+      numberId,
+      four,
+      ges: GES,
+      fdc: FDC,
+      drvLic: DrvLic,
+      status,
+      employeeType: type,
+      inactiveReason,
+      selectedRestrictions,
+      recurringTimes,
+      timeOffs,
+      file: imageFile,
+    };
+
+    console.log("Employee Data to Update:", employeeData);
+
+    dispatch(updateEmployee({ id, employeeData }))
+      .unwrap()
+      .then(() => {
+        showToast("Employee updated successfully", "success");
+        navigate("/employees");
+        dispatch(resetEmployees());
+      })
+      .catch((err) => {
+        console.error("Update failed:", err);
+        showToast("Failed to update employee", "error");
+      });
   };
 
   if (newEmployee) {
@@ -1364,12 +1546,21 @@ const AddEmployees = () => {
           >
             Back
           </button>
-          <button
-            onClick={handleSave}
-            className="bg-[#008CC8] w-44 cursor-pointer hover:bg-[#008cc8bb] text-white px-6 py-2 rounded-lg font-semibold"
-          >
-            Save
-          </button>
+          {id ? (
+            <button
+              onClick={handleUpdateEmployee}
+              className="bg-[#008CC8] hover:bg-[#008cc8e6] cursor-pointer text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="bg-[#008CC8] w-44 cursor-pointer hover:bg-[#008cc8e6] text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              Save
+            </button>
+          )}
         </div>
       </div>
     </div>

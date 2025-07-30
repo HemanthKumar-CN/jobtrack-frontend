@@ -24,7 +24,7 @@ const Login = () => {
 
   useEffect(() => {
     if (roleName) {
-      navigate(roleName === "ADMIN" ? "/dashboard" : "/mySchedule");
+      navigate(roleName === "ADMIN" ? "/schedules" : "/mySchedule");
     }
   }, [roleName]);
 

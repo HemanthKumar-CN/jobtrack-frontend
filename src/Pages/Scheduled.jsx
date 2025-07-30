@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { CiFilter, CiSettings } from "react-icons/ci";
 import { PiListChecksBold } from "react-icons/pi";
 import { RiArrowGoBackLine } from "react-icons/ri";
@@ -7,7 +7,12 @@ import { TbCalendarPlus } from "react-icons/tb";
 import { TbEdit } from "react-icons/tb";
 import { SiTicktick } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSchedule, updateSchedule } from "../redux/slices/scheduleSlice";
+import {
+  fetchPreviousAssignments,
+  fetchSchedule,
+  setPreviousAssignments,
+  updateSchedule,
+} from "../redux/slices/scheduleSlice";
 import { format, parse } from "date-fns";
 import { capitalizeFirst } from "../Utils/capitalizeFirst";
 import ButtonDropdown from "../Components/ButtonDropdown";
@@ -17,6 +22,8 @@ import GetPreviousBlack from "../assets/getPreviousBlack.svg";
 import RecommendScheduled from "../assets/recommedScheduled.svg";
 import ScheduleSelected from "../assets/scheduleSelected.svg";
 import LocationIcon from "../assets/filter.svg";
+import { FaCheck } from "react-icons/fa";
+import { useToast } from "../Components/Toast/ToastContext";
 
 const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
   const [editingRowId, setEditingRowId] = useState(null);
@@ -24,13 +31,27 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
   const [editedData, setEditedData] = useState({});
   const [filterEvent, setFilterEvent] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
+  const [filterAvailability, setFilterAvailability] = useState("");
   const [allSelected, setAllSelected] = useState(false);
 
+  const [Total, setTotal] = useState("");
+  const [Available, setAvailable] = useState("");
+  const [Limited, setLimited] = useState("");
+  const [Unavailable, setUnavailable] = useState("");
+
+  const [showPrevious, setShowPrevious] = useState(false);
+
+  const [rowSelections, setRowSelections] = useState({});
+
   const dispatch = useDispatch();
+  const showToast = useToast();
 
   const { schedules } = useSelector((state) => state.schedules);
   const { locationsList, employees } = useSelector(
     (state) => state.dropDownList,
+  );
+  const { previousAssignments, populateFromPrevious } = useSelector(
+    (state) => state.schedules,
   );
   const {
     notScheduledEmployees,
@@ -53,6 +74,21 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
       },
     }));
   };
+
+  useEffect(() => {
+    {
+      setTotal(schedules.length);
+      setAvailable(
+        schedules.filter((emp) => emp?.capacity === "Available").length || 0,
+      );
+      setLimited(
+        schedules.filter((emp) => emp?.capacity === "Limited").length || 0,
+      );
+      setUnavailable(
+        schedules.filter((emp) => emp?.capacity === "Unavailable").length || 0,
+      );
+    }
+  }, [schedules]);
 
   const handleSave = (id) => {
     var payload = editedData[id];
@@ -104,6 +140,39 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
       });
   };
 
+  const handleToggleSelectAll = () => {
+    const newSelections = {};
+
+    if (!allSelected) {
+      schedules.forEach((employee) => {
+        newSelections[employee.id] = {
+          ...rowSelections[employee.id],
+          checked: true,
+        };
+      });
+    } else {
+      schedules.forEach((employee) => {
+        newSelections[employee.id] = {
+          ...rowSelections[employee.id],
+          checked: false,
+        };
+      });
+    }
+
+    setRowSelections(newSelections);
+    setAllSelected(!allSelected);
+  };
+
+  const handleCheckboxToggle = (id) => {
+    setRowSelections((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        checked: !prev[id]?.checked,
+      },
+    }));
+  };
+
   useEffect(() => {
     const dateFilter = format(formattedDate, "yyyy-MM-dd");
 
@@ -113,11 +182,16 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
         event_id: filterEvent,
         location_id: filterLocation,
         search: searchTerm,
+        capacity: filterAvailability,
       }),
     );
-  }, [formattedDate, filterEvent, filterLocation, searchTerm]);
-
-  console.log(searchTerm, "?////////");
+  }, [
+    formattedDate,
+    filterEvent,
+    filterLocation,
+    searchTerm,
+    filterAvailability,
+  ]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -132,6 +206,24 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
     }
   };
 
+  const handleShowPreviousAssignments = () => {
+    const selectedEmployeeIds = Object.entries(rowSelections)
+      .filter(([_, val]) => val.checked)
+      .map(([id]) => parseInt(id));
+
+    if (selectedEmployeeIds.length == 0) {
+      showToast("Select atleast one row from the table", "error");
+      return false;
+    }
+
+    if (selectedEmployeeIds.length) {
+      console.log(selectedEmployeeIds, "??????????");
+      dispatch(fetchPreviousAssignments(selectedEmployeeIds));
+    }
+
+    return true;
+  };
+
   const getAvatarColor = (index) => {
     const colors = [
       "bg-blue-500",
@@ -144,29 +236,26 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
     return colors[index % colors.length];
   };
 
-  console.log(editedData, "???///////////");
-
-  console.log(eventList);
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-auto">
       <div className="">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 px-3">
+        <div className="bg-white rounded-lg border-gray-200 p-4 px-3">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600 flex flex-col gap-4">
-              <span className="font-semibold">{activeTab}</span>
+              <span className="font-bold text-lg text-black">{activeTab}</span>
               <span>
-                Total: {schedules.length}, Available: 26, Limited: 25,
-                Unavailable: 26
+                Total: {Total}, Available: {Available}, Limited:{Limited},
+                Unavailable:{Unavailable}
               </span>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1 rounded-xl px-1 py-0.5 border border-gray-300">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1 rounded-xl px-1 py-1 border border-gray-300">
                 <button
-                  className={`flex items-center cursor-pointer space-x-2 px-2 py-2 font-semibold  rounded-lg hover:border hover:border-gray-200 ${
+                  className={`flex items-center cursor-pointer space-x-2 px-2 py-2 font-semibold rounded-lg hover:shadow-md ${
                     allSelected ? "text-[#008CC8] bg-[#008CC81A]" : ""
                   }`}
-                  // onClick={handleToggleSelectAll}
+                  onClick={handleToggleSelectAll}
                 >
                   {/* <PiListChecksBold className="w-4 h-4 border p-[0.01em] rounded-sm " /> */}
                   {allSelected ? (
@@ -174,39 +263,22 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
                   ) : (
                     <img src={SelectAllBlack} alt="" />
                   )}
-                  <span className="text-xs">
+                  <span className="text-[13px]">
                     {allSelected ? "Deselect All" : "Select All"}
                   </span>
                 </button>
-                {/* <button
-                            className="flex items-center cursor-pointer space-x-2 px-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                            onClick={handleShowPreviousAssignments}
-                          >
-                            <RiArrowGoBackLine className="w-4 h-4 border p-[0.08em] rounded-sm " />
-                            <span className="text-xs">Show Previous Assignments</span>
-                          </button> */}
+
                 <ButtonDropdown
-                // show={showPrevious}
-                // onToggle={(value) => setShowPrevious(value)}
-                // handleShowPreviousAssignments={handleShowPreviousAssignments}
+                  show={showPrevious}
+                  onToggle={(value) => setShowPrevious(value)}
+                  handleShowPreviousAssignments={handleShowPreviousAssignments}
                 />
-                <button
-                  className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold border-gray-300 rounded-lg hover:bg-gray-50"
-                  // onClick={handleGetPrevious}
-                >
-                  {/* <BsFileEarmarkArrowDown className="w-4 h-4" /> */}
-                  <img src={GetPreviousBlack} alt="" />
-                  <span className="text-xs">Get Previous Assignments</span>
-                </button>
-                <button className="flex items-center cursor-pointer space-x-2 px-1 py-2  border-gray-300 rounded-lg hover:bg-gray-50">
+
+                <button className="flex items-center cursor-pointer space-x-2 px-1 py-2 font-semibold  border-gray-300 rounded-lg hover:shadow-md">
                   {/* <TbCalendarPlus className="w-4 h-4" /> */}
                   <img src={RecommendScheduled} alt="" />
-                  <span className="text-xs">Recommend Scheduled</span>
+                  <span className="text-[13px]">Recommend Scheduled</span>
                 </button>
-
-                {/* <button className="p-2 border cursor-pointer border-gray-300 rounded-lg hover:bg-gray-50">
-                            <CiFilter className="w-4 h-4" />
-                          </button> */}
               </div>
               <button
                 onClick={() => setShowFilter(!showFilter)}
@@ -267,11 +339,14 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Availability
                   </label>
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => setFilterAvailability(e.target.value)}
+                  >
                     <option value="">All</option>
-                    <option value="available">Available</option>
-                    <option value="limited">Limited</option>
-                    <option value="unavailable">Unavailable</option>
+                    <option value="Available">Available</option>
+                    <option value="Limited">Limited</option>
+                    <option value="Unavailable">Unavailable</option>
                   </select>
                 </div>
               </div>
@@ -279,369 +354,392 @@ const Scheduled = ({ activeTab, formattedDate, searchTerm }) => {
           }
         </div>
       </div>
-      <div className="w-[80vw]">
+      <table className="w-full text-sm border-collapse">
         {/* Header */}
-        <div
-          className="grid items-center bg-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3"
-          style={{
-            gridTemplateColumns:
-              "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
-          }}
-        >
-          <div>SN#</div>
-          <div>Name</div>
-          <div>Status</div>
-          <div>Restrictions</div>
-          <div>Event</div>
-          <div>Location</div>
-          <div>Class</div>
-          <div>Start Time</div>
-          <div>Comments</div>
-          <div>Action</div>
-        </div>
-
-        {/* Rows */}
-        {schedules.map((appointment, index) => (
-          <div
-            key={appointment.id}
-            className="grid items-center border-t text-sm border-gray-200 px-4 py-4 hover:bg-gray-50 gap-1.5"
-            style={{
-              gridTemplateColumns:
-                "0.3fr 1.7fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr",
-            }}
-          >
-            {/* SN# */}
-            <div>{index + 1}</div>
-
-            {/* Name with avatar */}
-            <div className="flex items-center space-x-3 overflow-hidden">
-              <div
-                className={`w-8 h-8 rounded-full ${getAvatarColor(
-                  index,
-                )} flex items-center justify-center text-white text-sm font-medium shrink-0`}
-              >
-                {appointment.first_name.charAt(0)}
-              </div>
-              <div className="min-w-0">
-                <div className="font-medium text-gray-900 truncate">
-                  {appointment.first_name} {appointment.last_name}
+        <thead className="bg-gray-100 text-[#4D4E50] font-bold uppercase tracking-wider">
+          <tr>
+            <th className="px-3.5 py-3.5 ">
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="peer hidden"
+                  checked={allSelected}
+                  onChange={handleToggleSelectAll}
+                />
+                <div className="h-4 w-4 border-2 border-gray-400 rounded-sm flex items-center justify-center peer-checked:bg-[#008cc8] peer-checked:border-[#008cc8]">
+                  {allSelected && <FaCheck className="text-white text-xs" />}
                 </div>
-                <div className="text-gray-500 text-xs truncate">
-                  {appointment.phone}
-                </div>
-              </div>
-            </div>
+              </label>
+            </th>
+            <th className="">SN#</th>
+            <th className="px-2 text-left">Name</th>
+            <th className="px-2">Status</th>
+            <th className="text-left px-2">Restrictions</th>
+            <th className="px-2">Event</th>
+            <th className="px-2">Location</th>
+            <th className="px-2">Class</th>
+            <th className="px-2 text-center">Start Time</th>
+            <th className="px-2">Comments</th>
+            <th className="px-2">Action</th>
+          </tr>
+        </thead>
 
-            {/* Capacity */}
-            <div className="">
-              <span
-                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                  appointment.status,
-                )}`}
+        {/* Body */}
+        <tbody>
+          {schedules.map((appointment, index) => (
+            <Fragment key={appointment.id}>
+              <tr
+                key={appointment.id}
+                className="border-t text-sm border-gray-200 hover:bg-gray-50"
               >
-                {capitalizeFirst(appointment.status)}
-              </span>
-            </div>
+                <td className="px-4">
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!rowSelections[appointment.id]?.checked}
+                      onChange={() => handleCheckboxToggle(appointment.id)}
+                      className="peer hidden"
+                    />
+                    <div className="h-4 w-4 border-2 border-gray-400 rounded-sm flex items-center justify-center peer-checked:bg-[#008cc8] peer-checked:border-[#008cc8]">
+                      {!!rowSelections[appointment.id]?.checked && (
+                        <FaCheck className="text-white text-xs" />
+                      )}
+                    </div>
+                  </label>
+                </td>
+                {/* SN# */}
+                <td className="px-2 py-2 text-center">{appointment?.snf}</td>
 
-            {/* Restrictions */}
-            <div>
-              <span
-                className={`inline-flex py-1 text-xs font-semibold rounded-full `}
-              >
-                {appointment.employee_restrictions
-                  .map((r) => r.description)
-                  .join(", ")}
-              </span>
-            </div>
+                {/* Name with avatar */}
+                <td className="px-2 py-2">
+                  <div className="flex items-center space-x-3 overflow-hidden">
+                    <div
+                      className={`w-8 h-8 rounded-full ${getAvatarColor(
+                        index,
+                      )} flex items-center justify-center text-white text-sm font-medium shrink-0`}
+                    >
+                      {appointment.first_name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900 truncate">
+                        {appointment.first_name} {appointment.last_name}
+                      </div>
+                      <div className="text-gray-500 text-sm truncate">
+                        {appointment.phone}
+                      </div>
+                    </div>
+                  </div>
+                </td>
 
-            {/* Event */}
-            <div>
-              {editingRowId === appointment.id ? (
-                <select
-                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                  onChange={(e) =>
-                    setEditedData((prev) => ({
-                      ...prev,
-                      [appointment.id]: {
-                        ...prev[appointment.id],
-                        event_id: e.target.value,
-                        event_location_contractor_id: "",
-                      },
-                    }))
-                  }
-                  value={
-                    editedData[appointment.id]?.event_id ||
-                    appointment?.event?.event_id
-                  }
-                >
-                  <option value="" className="bg-gray-200 font-semibold">
-                    Select Event
-                  </option>
-                  {eventList.map((event) => (
-                    <option key={event.id} value={event.id}>
-                      {event.event_name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <span
-                  className={`inline-flex py-1 text-xs font-medium rounded-full `}
-                >
-                  {appointment?.event?.eventName}
-                </span>
-              )}
-            </div>
+                {/* Status */}
+                <td className="px-2 py-2 text-center">
+                  <span
+                    className={`inline-flex px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(
+                      appointment.status,
+                    )}`}
+                  >
+                    {capitalizeFirst(appointment.status)}
+                  </span>
+                </td>
 
-            {/* Location */}
-            <div>
-              {editingRowId === appointment.id ? (
-                <select
-                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                  onChange={(e) =>
-                    setEditedData((prev) => ({
-                      ...prev,
-                      [appointment.id]: {
-                        ...prev[appointment.id],
-                        event_location_contractor_id: e.target.value,
-                      },
-                    }))
-                  }
-                  value={
-                    editedData[appointment.id]?.event_location_contractor_id ||
-                    appointment?.location_contractor?.id
-                  }
-                >
-                  {(() => {
-                    const selectedEventId =
-                      editedData[appointment.id]?.event_id ??
-                      appointment?.event?.event_id;
+                {/* Restrictions */}
+                <td className="px-2 py-4">
+                  <span className="block text-sm rounded-full">
+                    {/* {appointment.employee_restrictions
+                      .map((r) => r.description)
+                      .join(", ")} */}
+                    {appointment?.employee_restrictions?.map((r, i) => (
+                      <span key={i} className="block text-[13px]">
+                        {r.description}
+                      </span>
+                    ))}
+                  </span>
+                </td>
 
-                    // console.log(
-                    //   "🔍 Selected Event ID:",
-                    //   typeof selectedEventId,
-                    // );
+                {/* Event */}
+                <td className="px-2 py-2">
+                  {editingRowId === appointment.id ? (
+                    <select
+                      className="w-full text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                      onChange={(e) =>
+                        setEditedData((prev) => ({
+                          ...prev,
+                          [appointment.id]: {
+                            ...prev[appointment.id],
+                            event_id: e.target.value,
+                            event_location_contractor_id: "",
+                          },
+                        }))
+                      }
+                      value={
+                        editedData[appointment.id]?.event_id ||
+                        appointment?.event?.event_id
+                      }
+                    >
+                      <option value="" className="bg-gray-200 font-semibold">
+                        Select Event
+                      </option>
+                      {eventList.map((event) => (
+                        <option key={event.id} value={event.id}>
+                          {event.event_name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="inline-flex py-1 text-sm font-medium rounded-full">
+                      {appointment?.event?.eventName}
+                    </span>
+                  )}
+                </td>
 
-                    const selectedEvent = eventList.find(
-                      (e) => e.id == selectedEventId,
-                    );
-                    // console.log(
-                    //   "🔍 Selected Event Object:",
-                    //   selectedEvent,
-                    //   eventList,
-                    // );
+                {/* Location */}
+                <td className="px-2 py-2 text-center">
+                  {editingRowId === appointment.id ? (
+                    <select
+                      className="w-full text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                      onChange={(e) =>
+                        setEditedData((prev) => ({
+                          ...prev,
+                          [appointment.id]: {
+                            ...prev[appointment.id],
+                            event_location_contractor_id: e.target.value,
+                          },
+                        }))
+                      }
+                      value={
+                        editedData[appointment.id]
+                          ?.event_location_contractor_id ||
+                        appointment?.location_contractor?.id
+                      }
+                    >
+                      {(() => {
+                        const selectedEventId =
+                          editedData[appointment.id]?.event_id ??
+                          appointment?.event?.event_id;
 
-                    if (!selectedEvent) {
-                      //   console.warn("⚠️ No matching event found in eventList");
-                      return null;
-                    }
+                        const selectedEvent = eventList.find(
+                          (e) => e.id == selectedEventId,
+                        );
 
-                    const locations = selectedEvent.locations || [];
-                    // console.log("📍 Event Locations:", locations);
+                        if (!selectedEvent) return null;
 
-                    const allOptions = locations.flatMap((loc) => {
-                      //   console.log("➡️ Current Location:", loc);
+                        return selectedEvent.locations?.flatMap((loc) =>
+                          loc.contractors.map((contractor) => (
+                            <option
+                              key={contractor.event_location_contractor_id}
+                              value={contractor.event_location_contractor_id}
+                            >
+                              {`${loc.name} - ${
+                                contractor.name || contractor.company_name
+                              }`}
+                            </option>
+                          )),
+                        );
+                      })()}
+                    </select>
+                  ) : (
+                    <span className="inline-flex py-1 text-sm font-medium rounded-full">
+                      {appointment.location_contractor.name}
+                    </span>
+                  )}
+                </td>
 
-                      return loc.contractors.map((contractor) => {
-                        // console.log("👷 Contractor:", contractor);
+                {/* Class */}
+                <td className="px-2 py-2 text-center">
+                  {editingRowId === appointment.id ? (
+                    <select
+                      className="w-full text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                      value={
+                        editedData[appointment.id]?.classification_id ||
+                        appointment?.class?.id
+                      }
+                      onChange={(e) =>
+                        setEditedData((prev) => ({
+                          ...prev,
+                          [appointment.id]: {
+                            ...prev[appointment.id],
+                            classification_id: e.target.value,
+                          },
+                        }))
+                      }
+                    >
+                      <option>None</option>
+                      {classifications?.map((classification) => (
+                        <option
+                          key={classification.id}
+                          value={classification.id}
+                        >
+                          {classification.abbreviation}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="inline-flex py-1 text-sm font-medium rounded-full">
+                      {appointment.class.abbreviation}
+                    </span>
+                  )}
+                </td>
 
+                {/* Start Time */}
+                <td className="px-2 py-2 text-center">
+                  {editingRowId === appointment.id ? (
+                    <select
+                      className="w-full text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                      value={
+                        editedData[appointment.id]?.start_time ||
+                        format(new Date(appointment.start_time), "HH:mm")
+                      }
+                      onChange={(e) =>
+                        setEditedData((prev) => ({
+                          ...prev,
+                          [appointment.id]: {
+                            ...prev[appointment.id],
+                            start_time: e.target.value,
+                          },
+                        }))
+                      }
+                    >
+                      <option>None</option>
+                      {[...Array(48)].map((_, i) => {
+                        const hour = String(Math.floor(i / 2)).padStart(2, "0");
+                        const minute = i % 2 === 0 ? "00" : "30";
                         return (
-                          <option
-                            key={contractor.event_location_contractor_id}
-                            value={contractor.event_location_contractor_id}
-                          >
-                            {`${loc.name} - ${
-                              contractor.name || contractor.company_name
-                            }`}
+                          <option key={i} value={`${hour}:${minute}`}>
+                            {`${hour}:${minute}`}
                           </option>
                         );
-                      });
-                    });
+                      })}
+                    </select>
+                  ) : (
+                    <span className="inline-flex py-1 text-sm font-medium rounded-full">
+                      {format(new Date(appointment.start_time), "h:mm a")}
+                    </span>
+                  )}
+                </td>
 
-                    return allOptions;
-                  })()}
-                </select>
-              ) : (
-                <span
-                  className={`inline-flex py-1 text-xs font-medium rounded-full `}
-                >
-                  {appointment.location_contractor.name}
-                </span>
+                {/* Comments */}
+                <td className="px-2 py-2 text-center">
+                  {editingRowId === appointment.id ? (
+                    <input
+                      type="text"
+                      placeholder="Enter comments..."
+                      className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
+                      value={
+                        editedData[appointment.id]?.comments ||
+                        appointment.comments
+                      }
+                      onChange={(e) =>
+                        setEditedData((prev) => ({
+                          ...prev,
+                          [appointment.id]: {
+                            ...prev[appointment.id],
+                            comments: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                  ) : (
+                    <span className="inline-flex py-1 text-sm font-medium rounded-full">
+                      {appointment.comments || "No comments"}
+                    </span>
+                  )}
+                </td>
+
+                {/* Action */}
+                <td className="px-2 py-2 text-center">
+                  {editingRowId === appointment.id ? (
+                    <button
+                      onClick={() => handleSave(appointment.id)}
+                      className="p-2 text-gray-400 hover:text-gray-600"
+                    >
+                      <SiTicktick className="w-4 h-4 text-[#00AD3A] cursor-pointer" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleEditClick(appointment)}
+                      className="p-2 text-gray-400 hover:text-gray-600"
+                    >
+                      <TbEdit className="w-4 h-4" />
+                    </button>
+                  )}
+                </td>
+              </tr>
+              {/* Previous Assignment */}
+              {previousAssignments?.[appointment.id] !== undefined && (
+                <tr className="border border-[#E6E6E6] border-dashed bg-[#008CC80D] text-gray-700 text-sm">
+                  {/* Checkbox column */}
+                  <td></td>
+
+                  {/* SN# */}
+                  <td className="">
+                    {previousAssignments[appointment.id] ? "" : "-"}
+                  </td>
+
+                  {/* Name column - "Previous Assignment" label */}
+                  <td className=" text-[#848484]">Previous Assignment</td>
+
+                  {/* Capacity */}
+                  <td></td>
+
+                  {/* Restrictions */}
+                  <td></td>
+
+                  {/* Event */}
+                  <td className="px-2">
+                    {previousAssignments[appointment.id]?.event_name ||
+                      "No assignments found"}
+                  </td>
+
+                  {/* Location */}
+                  <td className="px-2 py-4">
+                    {previousAssignments[appointment.id]
+                      ? `${
+                          previousAssignments[appointment.id].location || "N/A"
+                        } - ${
+                          previousAssignments[appointment.id].contractor ||
+                          "N/A"
+                        }`
+                      : "-"}
+                  </td>
+
+                  {/* Class */}
+                  <td className="px-2">
+                    {previousAssignments[appointment.id]?.classification_name ||
+                      "-"}
+                  </td>
+
+                  {/* Start Time */}
+                  <td className="text-[#FF8000]">
+                    {previousAssignments[appointment.id]?.start_time
+                      ? format(
+                          new Date(
+                            previousAssignments[appointment.id].start_time,
+                          ),
+                          "HH:mm a",
+                        )
+                      : "-"}
+                  </td>
+
+                  {/* Comments */}
+                  <td></td>
+
+                  {/* Action */}
+                  <td></td>
+                </tr>
               )}
-            </div>
+            </Fragment>
+          ))}
 
-            {/* Class */}
-            <div className="ml-3">
-              {editingRowId === appointment.id ? (
-                <select
-                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                  value={
-                    editedData[appointment.id]?.classification_id ||
-                    appointment?.class?.id
-                  }
-                  onChange={(e) =>
-                    setEditedData((prev) => ({
-                      ...prev,
-                      [appointment.id]: {
-                        ...prev[appointment.id],
-                        classification_id: e.target.value,
-                      },
-                    }))
-                  }
-                >
-                  <option>None</option>
-                  {classifications?.map((classification) => (
-                    <option key={classification.id} value={classification.id}>
-                      {classification.abbreviation} -{" "}
-                      {classification.description}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <span
-                  className={`inline-flex py-1 text-xs font-medium rounded-full `}
-                >
-                  {appointment.class.abbreviation}
-                </span>
-              )}
-            </div>
-
-            {/* Start Time */}
-            <div>
-              {editingRowId === appointment.id ? (
-                <select
-                  className="w-3/4 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                  value={
-                    editedData[appointment.id]?.start_time ||
-                    format(new Date(appointment.start_time), "HH:mm")
-                  }
-                  onChange={(e) =>
-                    setEditedData((prev) => ({
-                      ...prev,
-                      [appointment.id]: {
-                        ...prev[appointment.id],
-                        start_time: e.target.value,
-                      },
-                    }))
-                  }
-                >
-                  <option>None</option>
-                  <option value="00:00">0:00</option>
-                  <option value="00:30">00:30</option>
-                  <option value="01:00">01:00</option>
-                  <option value="01:30">01:30</option>
-                  <option value="02:00">02:00</option>
-                  <option value="02:30">02:30</option>
-                  <option value="03:00">03:00</option>
-                  <option value="03:30">03:30</option>
-                  <option value="04:00">04:00</option>
-                  <option value="04:30">04:30</option>
-                  <option value="05:00">05:00</option>
-                  <option value="05:30">05:30</option>
-                  <option value="06:00">06:00</option>
-                  <option value="06:30">06:30</option>
-                  <option value="07:00">07:00</option>
-                  <option value="07:30">07:30</option>
-                  <option value="08:00">08:00</option>
-                  <option value="08:30">08:30</option>
-                  <option value="09:00">09:00</option>
-                  <option value="09:30">09:30</option>
-                  <option value="10:00">10:00</option>
-                  <option value="10:30">10:30</option>
-                  <option value="11:00">11:00</option>
-                  <option value="11:30">11:30</option>
-                  <option value="12:00">12:00</option>
-                  <option value="12:30">12:30</option>
-                  <option value="13:00">13:00</option>
-                  <option value="13:30">13:30</option>
-                  <option value="14:00">14:00</option>
-                  <option value="14:30">14:30</option>
-                  <option value="15:00">15:00</option>
-                  <option value="15:30">15:30</option>
-                  <option value="16:00">16:00</option>
-                  <option value="16:30">16:30</option>
-                  <option value="17:00">17:00</option>
-                  <option value="17:30">17:30</option>
-                  <option value="18:00">18:00</option>
-                  <option value="18:30">18:30</option>
-                  <option value="19:00">19:00</option>
-                  <option value="19:30">19:30</option>
-                  <option value="20:00">20:00</option>
-                  <option value="20:30">20:30</option>
-                  <option value="21:00">21:00</option>
-                  <option value="21:30">21:30</option>
-                  <option value="22:00">22:00</option>
-                  <option value="22:30">22:30</option>
-                  <option value="23:00">23:00</option>
-                  <option value="23:30">23:30</option>
-                  <option value="23:59">23:59</option>
-                </select>
-              ) : (
-                <span
-                  className={`inline-flex py-1 text-xs font-medium rounded-full `}
-                >
-                  {format(new Date(appointment.start_time), "h:mm a")}
-                  {/* {appointment.start_time} */}
-                </span>
-              )}
-            </div>
-
-            {/* Comments */}
-            <div>
-              {editingRowId === appointment.id ? (
-                <input
-                  type="text"
-                  placeholder="Enter comments..."
-                  className="text-sm border border-gray-300 rounded px-2 py-1 w-full"
-                  value={
-                    editedData[appointment.id]?.comments || appointment.comments
-                  }
-                  onChange={(e) =>
-                    setEditedData((prev) => ({
-                      ...prev,
-                      [appointment.id]: {
-                        ...prev[appointment.id],
-                        comments: e.target.value,
-                      },
-                    }))
-                  }
-                />
-              ) : (
-                <span
-                  className={`inline-flex py-1 text-xs font-medium rounded-full `}
-                >
-                  {appointment.comments || "No comments"}
-                </span>
-              )}
-            </div>
-
-            {/* Action */}
-            <div className="flex justify-center">
-              {editingRowId == appointment.id ? (
-                <button
-                  onClick={() => handleSave(appointment.id)}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <SiTicktick className="w-4 h-4 text-[#00AD3A] cursor-pointer" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleEditClick(appointment)}
-                  className="p-2 text-gray-400 cursor-pointer hover:text-gray-600"
-                >
-                  <TbEdit className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {/* Empty State */}
-        {schedules.length === 0 && (
-          <div className="text-center py-6 text-gray-500 text-sm border-t border-gray-200">
-            No schedules found.
-          </div>
-        )}
-      </div>
+          {/* Empty State */}
+          {schedules.length === 0 && (
+            <tr>
+              <td colSpan="10" className="text-center py-6 text-gray-500">
+                No schedules found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };

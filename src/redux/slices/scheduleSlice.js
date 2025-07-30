@@ -54,7 +54,7 @@ export const updateSchedule = createAsyncThunk(
 export const fetchSchedule = createAsyncThunk(
   "schedules/fetchSchedule",
   async (
-    { date, status, event_id, location_id, search },
+    { date, status, event_id, location_id, search, capacity },
     { rejectWithValue },
   ) => {
     try {
@@ -63,7 +63,8 @@ export const fetchSchedule = createAsyncThunk(
       if (status) queryParams.append("status", status);
       if (event_id) queryParams.append("task_event_id", event_id);
       if (location_id) queryParams.append("location_id", location_id);
-      if (search) queryParams.append("search", search); // <-- added
+      if (search) queryParams.append("search", search);
+      if (capacity) queryParams.append("capacity", capacity);
 
       const query = queryParams.toString();
 
@@ -82,6 +83,23 @@ export const fetchSchedule = createAsyncThunk(
 
 export const fetchPreviousAssignments = createAsyncThunk(
   "schedules/fetchPreviousAssignments",
+  async (employeeIds, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/schedules/previous-assignments`,
+        { employeeIds },
+        { withCredentials: true },
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || "Error fetching previous data",
+      );
+    }
+  },
+);
+export const setPreviousAssignments = createAsyncThunk(
+  "schedules/setPreviousAssignments",
   async (employeeIds, { rejectWithValue }) => {
     try {
       const res = await axios.post(
@@ -159,12 +177,12 @@ export const fetchEmployeeSchedules = createAsyncThunk(
 
 export const fetchNotScheduledEmployees = createAsyncThunk(
   "schedules/fetchNotScheduledEmployees",
-  async (date, { rejectWithValue }) => {
+  async ({ date, search }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/employees/not-scheduled`,
         {
-          params: { date }, // ✅ append ?date=YYYY-MM-DD
+          params: { date, search }, // ✅ append ?date=YYYY-MM-DD
           withCredentials: true,
         },
       );
@@ -243,6 +261,8 @@ const scheduleSlice = createSlice({
     eventListError: null,
 
     previousAssignments: null,
+
+    populateFromPrevious: {},
   },
   reducers: {
     clearSchedule: (state) => {
@@ -364,10 +384,13 @@ const scheduleSlice = createSlice({
       .addCase(fetchEventlist.rejected, (state, action) => {
         state.eventListLoading = false;
         state.eventListError = action.payload;
+      })
+      .addCase(fetchPreviousAssignments.fulfilled, (state, action) => {
+        state.previousAssignments = action.payload;
+      })
+      .addCase(setPreviousAssignments.fulfilled, (state, action) => {
+        state.populateFromPrevious = action.payload;
       });
-    builder.addCase(fetchPreviousAssignments.fulfilled, (state, action) => {
-      state.previousAssignments = action.payload;
-    });
   },
 });
 

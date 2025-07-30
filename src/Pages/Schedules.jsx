@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import WeeklySchedule from "../Components/WeeklySchedule";
 import DailySchedule from "../Components/DailySchedule";
 import MonthlySchedule from "../Components/MonthlySchedule";
@@ -42,6 +42,11 @@ const Schedules = () => {
   const [showCalendar, setShowCalendar] = useState(false);
 
   const dispatch = useDispatch();
+  const searchRef = useRef();
+
+  const handleSearch = () => {
+    setSearchTerm(searchRef.current.value);
+  };
 
   const formattedDate = format(date, "EEEE, MMMM d, yyyy"); // Tuesday, May 20, 2025
   const handleTabClick = (tab) => {
@@ -64,47 +69,47 @@ const Schedules = () => {
                 className={`${
                   activeTab == "Not Scheduled"
                     ? "text-[#008CC8] bg-[#e6f3f9]"
-                    : `text-gray-600 hover:text-gray-900`
-                } p-2 rounded-lg cursor-pointer font-semibold `}
+                    : `text-gray-600`
+                } p-2 rounded-lg cursor-pointer font-semibold hover:text-[#008CC8] hover:bg-[#e6f3f9] `}
                 onClick={() => handleTabClick("Not Scheduled")}
               >
                 Not Scheduled
               </button>
               <button
-                className={` p-2 rounded-lg font-semibold cursor-pointer ${
+                className={` p-2 rounded-lg font-semibold cursor-pointer hover:text-[#008CC8] hover:bg-[#e6f3f9] ${
                   activeTab == "Scheduled"
                     ? "text-[#008CC8] bg-[#e6f3f9]"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600"
                 }`}
                 onClick={() => handleTabClick("Scheduled")}
               >
                 Scheduled
               </button>
               <button
-                className={` cursor-pointer font-semibold rounded-lg p-2 ${
+                className={` cursor-pointer font-semibold rounded-lg p-2 hover:text-[#FF8000] hover:bg-[#FF80001A] ${
                   activeTab == "Pending"
                     ? "text-[#FF8000] bg-[#FF80001A]"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600"
                 }`}
                 onClick={() => handleTabClick("Pending")}
               >
                 Pending
               </button>
               <button
-                className={`font-semibold cursor-pointer rounded-lg p-2 ${
+                className={`font-semibold cursor-pointer rounded-lg p-2 hover:text-[#00AD3A] hover:bg-[#00AD3A1A] ${
                   activeTab == "Confirmed"
                     ? "text-[#00AD3A] bg-[#00AD3A1A]"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600"
                 }`}
                 onClick={() => handleTabClick("Confirmed")}
               >
                 Confirmed
               </button>
               <button
-                className={`font-semibold cursor-pointer rounded-lg p-2 ${
+                className={`font-semibold cursor-pointer rounded-lg p-2 hover:text-[#E73F3F] hover:bg-[#E73F3F1A] ${
                   activeTab == "Declined"
                     ? "text-[#E73F3F] bg-[#E73F3F1A]"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600"
                 }`}
                 onClick={() => handleTabClick("Declined")}
               >
@@ -148,8 +153,12 @@ const Schedules = () => {
               <input
                 type="text"
                 placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                ref={searchRef}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
                 className="pl-10 pr-4 py-3 border bg-white border-gray-300 rounded-xl placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#008CC8] focus:border-transparent"
               />
             </div>
@@ -181,6 +190,7 @@ const Schedules = () => {
           activeTab={activeTab}
           formattedDate={formattedDate}
           setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
         />
       )}
 
@@ -189,6 +199,7 @@ const Schedules = () => {
           activeTab={activeTab}
           formattedDate={formattedDate}
           setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
         />
       )}
 
@@ -197,6 +208,7 @@ const Schedules = () => {
           activeTab={activeTab}
           formattedDate={formattedDate}
           setActiveTab={setActiveTab}
+          searchTerm={searchTerm}
         />
       )}
     </div>

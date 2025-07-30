@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CustomDropdown from "../Components/CustomDropdown";
 import LocationIcon from "../assets/filter.svg";
 import { GoPlus } from "react-icons/go";
+import EditIcon from "../assets/editIcon.svg";
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
 const Employees = () => {
@@ -255,7 +256,7 @@ const Employees = () => {
         </div>
       </div>
 
-      <div className=" text-gray-800 bg-white w-[80vw] rounded-xl">
+      <div className=" text-gray-800 bg-white rounded-xl ">
         {/* Header */}
         <div className="flex items-center justify-between p-4">
           <div className="flex flex-col font-bold">
@@ -360,97 +361,237 @@ const Employees = () => {
           )}
         </div>
 
-        <div className="">
-          {/* Columns Header */}
-          <div
-            className="grid font-semibold text-sm text-gray-600 bg-gray-100 py-2 rounded-t-md"
-            style={{
-              gridTemplateColumns:
-                "1fr 1.5fr 1.5fr 1fr 2fr 1.7fr 1.5fr 1fr 2fr 3fr 1fr",
-            }}
-          >
-            <div className="ml-4">SN#</div>
-            <div className="">FIRST NAME</div>
-            <div>LAST NAME</div>
-            <div>TYPE</div>
-            <div>ADDRESS</div>
-            <div>CITY</div>
-            <div>STATE</div>
-            <div>ZIP</div>
-            <div>PHONE #</div>
-            <div>EMAIL</div>
-            {/* <div>SSN</div> */}
-            {/* <div>COMMENTS</div>
-            <div>MEMBER ID</div> */}
-            <div>STATUS</div>
-          </div>
-
-          {/* Rows */}
-          <div className="rounded-b-md border border-gray-200">
-            {employees?.length === 0 ? (
-              <div className="text-center p-4 text-gray-500">No data found</div>
-            ) : (
-              employees?.map((row, index) => (
-                <div
-                  key={row?.id}
-                  className="grid text-sm border-t border-gray-100 px-2 py-3 items-center hover:bg-gray-50"
-                  style={{
-                    gridTemplateColumns:
-                      "1fr 1.5fr 1.5fr 1fr 2fr 1.7fr 1.5fr 1fr 2fr 3fr 1fr",
-                  }}
+        <div className=" rounded-md border border-gray-200">
+          <table className="w-full text-left text-gray-600">
+            {/* Table Head */}
+            <thead className="bg-gray-100 font-semibold uppercase text-gray-600 text-sm">
+              <tr>
+                <th
+                  className="py-2 px-4 rounded-tl-md cursor-pointer select-none"
+                  onClick={() => handleSort("snf")}
                 >
-                  <div className="ml-4">{index + 1}</div>
                   <div className="flex items-center gap-2">
-                    {row?.User?.image_url && (
-                      <img
-                        src={`${IMAGE_BASE_URL}${row?.User?.image_url}`}
-                        alt={row?.User?.first_name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    )}
-                    <span className="font-medium text-gray-900">
-                      {row?.User?.first_name}
-                    </span>
-                  </div>
-                  <div>{row?.User?.last_name}</div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      {row?.type && (
-                        <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold">
-                          {/* {row.first_name[0]} */}
-                          {/* {row.last_name[0]} */}
-                          <span>{row.type}</span>
-                        </div>
-                      )}
+                    <span>SN#</span>
+                    <div className="flex flex-col text-xs leading-[0.8rem]">
+                      <span
+                        className={`${
+                          sortField === "snf" && sortOrder === "asc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▲
+                      </span>
+                      <span
+                        className={`${
+                          sortField === "snf" && sortOrder === "desc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▼
+                      </span>
                     </div>
                   </div>
-                  <div className="text-sm">{`${row?.address_1} ${row?.address_2}`}</div>
-                  <div>{row.city}</div>
-                  <div>{row.state}</div>
-                  <div>{row.postal_code}</div>
-                  <div className="flex flex-col text-sm text-gray-900 leading-relaxed">
-                    {row?.mobile_phone && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#F67C1A] font-semibold">M</span>
-                        <span>{row.mobile_phone}</span>
-                      </div>
-                    )}
-                    {row?.phone && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#23AA4D] font-semibold">H</span>
-                        <span>{row.phone}</span>
-                      </div>
-                    )}
+                </th>
+                {/* <th className="py-2 px-4 whitespace-nowrap">First Name</th> */}
+                <th
+                  className="py-2 px-4 whitespace-nowrap cursor-pointer select-none"
+                  onClick={() => handleSort("first_name")}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>First Name</span>
+                    <div className="flex flex-col text-xs leading-[0.8rem]">
+                      <span
+                        className={`${
+                          sortField === "first_name" && sortOrder === "asc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▲
+                      </span>
+                      <span
+                        className={`${
+                          sortField === "first_name" && sortOrder === "desc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▼
+                      </span>
+                    </div>
                   </div>
-                  <div>{row?.User?.email}</div>
-                  {/* <div>{row.ssn}</div> */}
-                  {/* <div>{row.comments}</div>
-                  <div>{row.number_id}</div> */}
-                  <div>{getStatusStyle(row?.status)}</div>
-                </div>
-              ))
-            )}
-          </div>
+                </th>
+                {/* <th className="py-2 px-4 whitespace-nowrap">Last Name</th> */}
+                <th
+                  className="py-2 px-4 whitespace-nowrap cursor-pointer select-none"
+                  onClick={() => handleSort("last_name")}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Last Name</span>
+                    <div className="flex flex-col text-xs leading-[0.8rem]">
+                      <span
+                        className={`${
+                          sortField === "last_name" && sortOrder === "asc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▲
+                      </span>
+                      <span
+                        className={`${
+                          sortField === "last_name" && sortOrder === "desc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▼
+                      </span>
+                    </div>
+                  </div>
+                </th>
+                <th className="py-2 px-2">Type</th>
+                {/* <th className="py-2 px-4">Address</th> */}
+                <th className="py-2 px-4">City</th>
+                <th className="py-2 px-4">State</th>
+                <th className="py-2 px-4">ZIP</th>
+                <th className="py-2 px-4">Phone #</th>
+                {/* <th className="py-2 px-4 w-32 truncate">Email</th> */}
+                <th
+                  className="py-2 px-4 whitespace-nowrap select-none"
+                  // onClick={() => handleSort("email")}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Email</span>
+                    {/* <div className="flex flex-col text-xs leading-[0.8rem]">
+                      <span
+                        className={`${
+                          sortField === "email" && sortOrder === "asc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▲
+                      </span>
+                      <span
+                        className={`${
+                          sortField === "email" && sortOrder === "desc"
+                            ? "text-[#1A2D43]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        ▼
+                      </span>
+                    </div> */}
+                  </div>
+                </th>
+                <th className="py-2 px-1">Status</th>
+                <th className="py-2 px-2 rounded-tr-md">Actions</th>
+              </tr>
+            </thead>
+
+            {/* Table Body */}
+            <tbody>
+              {employees?.length === 0 ? (
+                <tr className="">
+                  <td colSpan="12" className="text-center p-4 text-gray-500">
+                    No data found
+                  </td>
+                </tr>
+              ) : (
+                employees?.map((row, index) => (
+                  <tr
+                    key={row?.id}
+                    className="hover:bg-gray-50 border-t border-gray-100 text-sm"
+                  >
+                    <td className="px-4 py-3">{row?.snf}</td>
+
+                    {/* First Name with Avatar */}
+                    <td className=" py-3">
+                      <div className="flex items-center gap-2">
+                        {row?.User?.image_url && (
+                          <img
+                            src={`${IMAGE_BASE_URL}${row?.User?.image_url}`}
+                            alt={row?.User?.first_name}
+                            className="w-10 h-10 rounded-full"
+                          />
+                        )}
+                        {!row?.User?.image_url && (
+                          <div
+                            className={`w-9 h-9 rounded-full bg-[#008CC8] flex items-center justify-center text-white text-sm font-medium`}
+                          >
+                            {row.User.first_name.charAt(0).toUpperCase()}
+                            {row?.User?.last_name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="font-medium text-gray-900">
+                          {row?.User?.first_name}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">{row?.User?.last_name}</td>
+
+                    <td className="px-2 py-3">
+                      {row?.type && (
+                        <div
+                          className={`w-7 h-7 rounded-full text-white ${
+                            row?.type == "A" ? "bg-[#008CC8]" : "bg-[#1A2D43]"
+                          } flex items-center justify-center text-xs font-semibold`}
+                        >
+                          {row.type}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* <td className="px-4 py-3 text-sm">
+                      {`${row?.address_1 || ""} ${row?.address_2 || ""}`}
+                    </td> */}
+
+                    <td className="px-4 py-3">{row.city}</td>
+                    <td className="px-4 py-3">{row.state}</td>
+                    <td className="px-4 py-3">{row.postal_code}</td>
+
+                    {/* Phone numbers */}
+                    <td className="px-4 py-3 text-gray-900 text-sm leading-relaxed">
+                      {row?.mobile_phone && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#F67C1A] font-semibold">
+                            M
+                          </span>
+                          <span>{row.mobile_phone}</span>
+                        </div>
+                      )}
+                      {row?.phone && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#23AA4D] font-semibold">
+                            H
+                          </span>
+                          <span>{row.phone}</span>
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 w-2 truncate">
+                      {row?.User?.email}
+                    </td>
+
+                    <td className="px-1 py-3">{getStatusStyle(row?.status)}</td>
+                    <td className="px-2 py-3 text-center">
+                      <button
+                        onClick={() => navigate(`/employees/add/${row.id}`)}
+                        className="p-1 rounded-md text-xs cursor-pointer border border-[#E6E6E6]"
+                      >
+                        <img src={EditIcon} alt="" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
